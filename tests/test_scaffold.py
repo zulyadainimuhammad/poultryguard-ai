@@ -42,4 +42,3 @@ def test_runtime_entry_point_is_placeholder(capsys) -> None:
 
     captured = capsys.readouterr()
     assert "not implemented yet" in captured.out
-

@@ -5,7 +5,6 @@ This helper is intentionally lightweight and does not validate AI functionality.
 
 from pathlib import Path
 
-
 REQUIRED_DIRECTORIES = [
     "app",
     "knowledge_base",
@@ -32,4 +31,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-

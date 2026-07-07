@@ -1,2 +1,1 @@
 """Indexing package placeholder."""
-

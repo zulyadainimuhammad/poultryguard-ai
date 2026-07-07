@@ -1,2 +1,1 @@
 """Embedding pipeline package placeholder."""
-
