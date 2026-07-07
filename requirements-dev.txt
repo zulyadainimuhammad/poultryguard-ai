@@ -1,0 +1,8 @@
+# Development dependencies used by local checks and GitHub Actions.
+
+-r requirements.txt
+
+black>=24.4,<25.0
+pytest>=8.2,<9.0
+ruff>=0.5,<1.0
+

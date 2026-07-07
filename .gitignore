@@ -1,0 +1,87 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Packaging and build outputs
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs and runtime output
+logs/
+*.log
+*.out
+*.err
+
+# Jupyter
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# Editors and IDEs
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# llama.cpp build and runtime artifacts
+llama.cpp/
+build-llama/
+*.bin
+*.gguf
+*.ggml
+
+# Local model artifacts
+models/gguf/*
+!models/gguf/README.md
+
+# FAISS and vector database artifacts
+vector_store/*
+!vector_store/README.md
+*.faiss
+*.index
+*.ivf
+
+# Dataset artifacts that may be large or sensitive
+datasets/raw/*
+datasets/processed/*
+datasets/synthetic/*
+!datasets/raw/README.md
+!datasets/processed/README.md
+!datasets/synthetic/README.md
+
+# Benchmark and profiler generated outputs
+benchmarks/results/
+profiler/results/
+
+# Streamlit local state
+.streamlit/secrets.toml
+
+# Docker and local volumes
+.docker/
+docker-data/
+

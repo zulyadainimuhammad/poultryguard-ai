@@ -1,0 +1,12 @@
+# Runtime dependency placeholders for the future MVP.
+# Keep this file lightweight until the AI functionality is implemented.
+
+streamlit>=1.36,<2.0
+pydantic>=2.7,<3.0
+python-dotenv>=1.0,<2.0
+
+# Planned local AI dependencies. Enable after inference and RAG modules are implemented.
+# llama-cpp-python>=0.2
+# faiss-cpu>=1.8
+# sentence-transformers>=3.0
+
