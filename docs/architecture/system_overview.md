@@ -25,6 +25,7 @@ PoultryGuard AI addresses this gap by delivering an intelligent, offline-capable
 | Markdown knowledge base | Human-readable, version-controllable, easy to extend by domain experts without programming knowledge. |
 | Streamlit desktop UI | Rapid development, Python-native, suitable for MVP; can be replaced with a richer framework in later sprints. |
 | Rule-based emergency module | Deterministic, zero-latency triage for critical disease alerts that must not depend on LLM availability. |
+| Query Classification Layer | Classifies every incoming query before routing so the orchestrator can apply the correct pipeline (emergency, RAG+LLM, or FAQ direct-lookup) without coupling routing logic to individual services. |
 
 ---
 
@@ -45,6 +46,7 @@ graph TD
 
     subgraph Backend["Backend — Application Services"]
         O[Query Orchestrator]
+        QC[Query Classifier]
         EM[Emergency Advisory Module]
         LOG[Logger & Monitor]
         CFG[Configuration Manager]
@@ -77,8 +79,10 @@ graph TD
 
     U --> Q
     Q --> O
-    O --> EM
-    O --> EMB
+    O --> QC
+    QC -- emergency --> EM
+    QC -- rag --> EMB
+    QC -- faq --> RET
     EMB --> RET
     RET --> FAISS
     FAISS --> RET
@@ -104,8 +108,9 @@ graph TD
 | Component | Responsibility |
 |---|---|
 | Streamlit Frontend | Render farmer-facing UI, capture queries, display responses and alerts |
-| Query Orchestrator | Route queries through emergency check, RAG pipeline, and LLM inference |
-| Emergency Advisory Module | Rule-based triage for high-priority disease symptoms; deterministic, no LLM dependency |
+| Query Orchestrator | Coordinate the full query lifecycle; delegate routing decisions to the Query Classifier |
+| Query Classifier | Classify each query as `emergency`, `rag`, or `faq`; return a typed routing decision to the orchestrator |
+| Emergency Advisory Module | Rule-based triage for high-priority disease symptoms; deterministic, no LLM dependency; triggered only when Query Classifier returns `emergency` |
 | Embedding Service | Convert text chunks to dense vectors using a local embedding model |
 | FAISS Retrieval | Approximate nearest-neighbour search over the indexed knowledge base |
 | Prompt Builder | Assemble system prompt, retrieved context, and user query into a structured LLM prompt |

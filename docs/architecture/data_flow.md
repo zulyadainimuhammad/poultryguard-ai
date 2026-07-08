@@ -26,6 +26,7 @@ Both pipelines are entirely local. No data leaves the device at any point.
 | Embedding reuse between indexing and query | The same embedding model is used for both document chunks and query vectors to ensure cosine similarity is meaningful. |
 | Context window budget management | Retrieved chunks are trimmed to fit within the LLM context window alongside the system prompt and query. |
 | Emergency check before RAG | Avoids latency of retrieval and inference for critical alerts that need immediate deterministic response. |
+| Query Classification Layer before all routing | Centralises routing logic; the orchestrator delegates the routing decision rather than containing conditional logic itself. |
 
 ---
 
@@ -76,29 +77,35 @@ This pipeline executes on every farmer query at runtime.
 
 ```mermaid
 flowchart TD
-    A[Farmer question\nplain text] --> B{Emergency\ncheck}
-    B -- Critical keywords detected --> C[Emergency Advisory Module\nrule-based response]
+    A[Farmer question\nplain text] --> B[Query Classifier\nclassify query]
+    B -- emergency --> C[Emergency Advisory Module\nrule-based response]
     C --> D[Alert displayed\nto farmer]
-    B -- No emergency --> E[Embedder\nall-MiniLM-L6-v2]
+    B -- faq --> E[Embedder\nall-MiniLM-L6-v2]
     E --> F[Query vector\n384-dim float32]
     F --> G[FAISS Retriever\ntop-k nearest neighbours]
     G --> H[Retrieved chunks\nwith metadata]
-    H --> I[Prompt Builder\nsystem prompt + context + query]
+    H --> L[Response displayed\nto farmer]
+    B -- rag --> E2[Embedder\nall-MiniLM-L6-v2]
+    E2 --> F2[Query vector\n384-dim float32]
+    F2 --> G2[FAISS Retriever\ntop-k nearest neighbours]
+    G2 --> H2[Retrieved chunks\nwith metadata]
+    H2 --> I[Prompt Builder\nsystem prompt + context + query]
     I --> J[llama.cpp Runtime\nQwen2.5-1.5B-Instruct Q4_K_M]
     J --> K[Generated response text]
-    K --> L[Response displayed\nto farmer]
+    K --> L
 ```
 
 ### Query Pipeline Steps
 
 | Step | Module | Input | Output |
 |---|---|---|---|
-| 1. Emergency check | `app/services/emergency_service.py` | Query text | `EmergencyResult(triggered, severity, message)` or `None` |
-| 2. Embed query | `rag/embeddings/embedder.py` | Query text | NumPy vector `(1, 384)` |
-| 3. Retrieve chunks | `rag/retrieval/retriever.py` | Query vector, `top_k` | List of `Chunk` objects ranked by similarity |
-| 4. Build prompt | `rag/prompts/prompt_builder.py` | Query text, chunks, system prompt template | Formatted prompt string |
-| 5. Run inference | `models/inference/llm_runner.py` | Prompt string, generation config | Response text |
-| 6. Return response | `app/services/query_service.py` | Response text | `QueryResult(response, sources, latency_ms)` |
+| 1. Classify query | `app/backend/classifier.py` | Query text | `QueryClass` enum: `emergency`, `faq`, or `rag` |
+| 2. Emergency response | `app/services/emergency_service.py` | Query text (emergency path only) | `EmergencyResult(triggered, severity, message)` |
+| 3. Embed query | `rag/embeddings/embedder.py` | Query text | NumPy vector `(1, 384)` |
+| 4. Retrieve chunks | `rag/retrieval/retriever.py` | Query vector, `top_k` | List of `Chunk` objects ranked by similarity |
+| 5. Build prompt | `rag/prompts/prompt_builder.py` | Query text, chunks, system prompt template | Formatted prompt string (RAG path only) |
+| 6. Run inference | `models/inference/llm_runner.py` | Prompt string, generation config | Response text (RAG path only) |
+| 7. Return response | `app/services/query_service.py` | Response text | `QueryResult(response, sources, latency_ms)` |
 
 ---
 

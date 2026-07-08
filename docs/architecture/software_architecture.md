@@ -24,6 +24,7 @@ The architecture is inspired by Clean Architecture and Hexagonal Architecture pr
 | Configuration isolated in `app/config` | All tuneable parameters (model path, chunk size, top-k, temperature) live in one place. |
 | No ORM or database | Offline constraint and small data volume make a file-based approach (Markdown + FAISS) sufficient. |
 | Emergency module as a pure function module | Deterministic rule evaluation must never depend on LLM state or retrieval availability. |
+| Query Classification Layer before routing | Separates the routing decision from the orchestrator; each classifier output maps to exactly one pipeline path, making the orchestrator a thin coordinator. |
 
 ---
 
@@ -37,6 +38,7 @@ graph TD
 
     subgraph L2["Layer 2 — Application"]
         BE[app/backend — Query orchestrator and entry points]
+        QC[app/backend/classifier — Query Classification Layer]
         SVC[app/services — Use-case services]
     end
 
@@ -70,7 +72,8 @@ poultryguard-ai/
 ├── app/
 │   ├── backend/
 │   │   ├── main.py               # Application entry point
-│   │   └── orchestrator.py       # Query routing and pipeline coordination
+│   │   ├── orchestrator.py       # Query routing and pipeline coordination
+│   │   └── classifier.py         # Query Classification Layer
 │   ├── frontend/
 │   │   ├── pages/                # Streamlit multi-page app pages
 │   │   │   ├── home.py
@@ -144,10 +147,17 @@ sequenceDiagram
 
     Farmer->>UI: Submit question
     UI->>Orch: dispatch_query(question)
-    Orch->>EM: check_emergency(question)
-    alt Emergency detected
+    Orch->>QC: classify(question)
+    Note over QC: Returns QueryClass:\nemergency | rag | faq
+    alt QueryClass == emergency
+        Orch->>EM: check_emergency(question)
         EM-->>UI: Return emergency alert
-    else Normal query
+    else QueryClass == faq
+        Orch->>QS: handle_faq(question)
+        QS->>RET: retrieve(query_vector, top_k)
+        RET-->>QS: context_chunks[]
+        QS-->>UI: Return direct answer
+    else QueryClass == rag
         Orch->>QS: handle_query(question)
         QS->>EMB: embed(question)
         EMB-->>QS: query_vector
@@ -161,6 +171,31 @@ sequenceDiagram
     end
     UI-->>Farmer: Display answer
 ```
+
+---
+
+## Query Classification Layer
+
+The Query Classification Layer sits between the orchestrator and all downstream services. It receives the raw query text and returns a typed `QueryClass` enum value that the orchestrator uses to select the correct pipeline path.
+
+```python
+class QueryClass(str, Enum):
+    EMERGENCY = "emergency"   # Route to Emergency Advisory Module
+    FAQ       = "faq"         # Route to direct retrieval (no LLM)
+    RAG       = "rag"         # Route to full RAG + LLM pipeline
+```
+
+Classification logic (in priority order):
+
+1. **Emergency** — query text matches one or more keywords in the emergency symptom dictionary (e.g., "twisted neck", "sudden death", "mass mortality"). Checked first; sub-millisecond.
+2. **FAQ** — query text matches a high-confidence FAQ pattern (short, factual, single-topic). Routes to retrieval-only path without LLM inference.
+3. **RAG** — all other queries. Full RAG + LLM pipeline.
+
+Design properties:
+- Pure function — `classify(query: str) -> QueryClass`
+- No I/O, no side effects
+- Fully unit-testable without any ML dependencies
+- Keyword dictionary and FAQ patterns are loaded from configuration, not hardcoded
 
 ---
 

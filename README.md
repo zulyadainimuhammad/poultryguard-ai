@@ -4,7 +4,7 @@ Offline AI-powered poultry health, vaccination, climate, biosecurity, and farm m
 
 PoultryGuard AI runs entirely on the ADTC Standard Laptop without cloud APIs, internet access, or dedicated GPU hardware. It combines a curated Markdown knowledge base, a local FAISS vector store, and a quantised GGUF language model to deliver accurate, grounded advisory responses to poultry farmers across Africa.
 
-> **Status:** Sprint 1 complete — full system architecture designed and documented. Application implementation begins in Sprint 2.
+> **Status:** Sprint 1.5 complete — architecture refined with Query Classification Layer and Emergency Advisory Module; knowledge base schema and validator implemented. Application implementation begins in Sprint 2.
 
 ---
 
@@ -33,6 +33,7 @@ graph TD
     end
 
     subgraph Backend["Backend — Application Services"]
+        QC[Query Classifier]
         O[Query Orchestrator]
         EM[Emergency Advisory Module]
     end
@@ -62,7 +63,7 @@ graph TD
 | Layer | Path | Responsibility |
 |---|---|---|
 | Frontend | `app/frontend/` | Streamlit pages and UI components |
-| Backend | `app/backend/` | Query orchestration and entry point |
+| Backend | `app/backend/` | Query orchestration, entry point, and Query Classifier |
 | Services | `app/services/` | Use-case services and emergency advisory |
 | RAG | `rag/` | Chunking, embedding, retrieval, prompt building |
 | Inference | `models/` | llama.cpp integration and model configuration |
@@ -161,6 +162,7 @@ poultryguard-ai/
 
 | Document | Description |
 |---|---|
+| [docs/knowledge_base_schema.md](docs/knowledge_base_schema.md) | Knowledge base document schema and validator reference |
 | [docs/architecture/system_overview.md](docs/architecture/system_overview.md) | System overview and component map |
 | [docs/architecture/software_architecture.md](docs/architecture/software_architecture.md) | Layered architecture and module map |
 | [docs/architecture/data_flow.md](docs/architecture/data_flow.md) | Data flow through indexing and query pipelines |
@@ -191,7 +193,7 @@ make benchmark   # run performance benchmarks
 
 See [`docs/project_plan.md`](docs/project_plan.md) for the full sprint plan and [`ROADMAP.md`](ROADMAP.md) for the high-level phase overview.
 
-Current sprint: **Sprint 1 — System Design** ✅
+Current sprint: **Sprint 1.5 — Architecture Refinement** ✅
 
 Next sprint: **Sprint 2 — Knowledge Base**
 
