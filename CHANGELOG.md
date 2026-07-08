@@ -8,6 +8,53 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). Thi
 
 ## [Unreleased]
 
+### Added — Sprint 2: Knowledge Engineering (`feature/knowledge-base`)
+
+- `docs/knowledge_engineering.md` — authoritative knowledge engineering standards
+  covering writing style, Markdown conventions, metadata schema, citation
+  requirements, terminology standards, RAG chunking strategy, confidence levels,
+  review process, naming conventions, and Sprint 2 document inventory targets
+
+### Changed — Sprint 2
+
+- `knowledge_base/README.md` — added Standards section linking to
+  `docs/knowledge_engineering.md`; expanded Adding a Document workflow to 11
+  steps aligned with engineering standards; added Document Inventory Targets
+  table for Sprint 2
+
+---
+
+### Added — Sprint 1.5: Architecture Refinement (`feature/system-design`)
+
+- `docs/knowledge_base_schema.md` — authoritative schema for all knowledge base documents; defines required front matter fields, valid domain values, required sections per domain, filename conventions, and sources requirements
+- `knowledge_base/emergency/README.md` — emergency domain directory stub
+- `knowledge_base/faq/README.md` — FAQ domain directory stub
+- `knowledge_base/hausa/README.md` — Hausa-language domain directory stub (Sprint 6 target)
+- `knowledge_base/references/README.md` — bibliographic references directory stub
+- `scripts/validate_knowledge_base.py` — stdlib-only knowledge base validator; checks metadata, domain, sections, sources, duplicate titles, and filename conventions
+- `tests/unit/__init__.py` — unit test package
+- `tests/unit/test_validate_knowledge_base.py` — 30+ unit tests covering all validator rules across all domain types
+
+### Changed — Sprint 1.5
+
+- `docs/architecture/system_overview.md` — added Query Classification Layer to design decisions, architecture diagram, and component responsibilities table
+- `docs/architecture/software_architecture.md` — added Query Classification Layer section with `QueryClass` enum design, classification priority order, and pure-function design properties; updated layer diagram, module map, and sequence diagram
+- `docs/architecture/data_flow.md` — updated query pipeline flowchart to show three routing paths (emergency, faq, rag); updated query pipeline steps table to include classifier step
+- `knowledge_base/README.md` — full replacement with domain index, contribution guide, validation instructions, and content status table
+- `.github/workflows/ci.yml` — added `Validate knowledge base` step; replaced `black --check` with `ruff format --check`
+- `README.md` — updated status, architecture diagram, layer table, documentation index, and sprint status
+- `ROADMAP.md` — added Sprint 1.5 entry
+
+### Architecture Decisions Made in Sprint 1.5
+
+- Introduced `QueryClass` enum (`emergency`, `faq`, `rag`) as the typed output of the Query Classification Layer
+- Defined classification priority: emergency keywords checked first (sub-ms), then FAQ patterns, then full RAG
+- Defined knowledge base schema with 10 valid domains including `emergency`, `faq`, `hausa`, and `references`
+- Defined domain-specific required section sets (diseases, emergency, faq, default)
+- Implemented validator using Python stdlib only — no additional runtime dependencies
+
+---
+
 ### Added — Sprint 1: System Design (`feature/system-design`)
 
 - `docs/architecture/system_overview.md` — high-level system description, component map, Mermaid architecture diagram, and key constraints

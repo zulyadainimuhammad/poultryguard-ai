@@ -4,6 +4,36 @@ This roadmap tracks the planned development lifecycle for PoultryGuard AI throug
 
 ---
 
+## Sprint 2 — Knowledge Engineering (in progress)
+
+**Branch:** `feature/knowledge-base`
+
+- Created `docs/knowledge_engineering.md` — writing style, Markdown conventions,
+  citation requirements, terminology standards, RAG chunking strategy, confidence
+  levels, review process, naming conventions, and document inventory targets
+- Updated `knowledge_base/README.md` with Standards section and expanded
+  contribution workflow
+- Disease documents, vaccination schedules, and all other domain content to follow
+
+---
+
+## Sprint 1.5 — Architecture Refinement ✅
+
+**Branch:** `feature/system-design`
+
+- Introduced Query Classification Layer (`app/backend/classifier.py`) with three routing paths: `emergency`, `faq`, `rag`
+- Formalised Rule-Based Emergency Advisory Module design with `CRITICAL`/`WARNING`/`INFO` severity levels
+- Updated `system_overview.md`, `software_architecture.md`, and `data_flow.md` to reflect revised architecture
+- Created `docs/knowledge_base_schema.md` — authoritative schema for all KB documents
+- Expanded knowledge base structure: added `emergency/`, `faq/`, `hausa/`, `references/` directories
+- Replaced `knowledge_base/README.md` with full domain index and contribution guide
+- Implemented `scripts/validate_knowledge_base.py` — stdlib-only validator (no extra dependencies)
+- Added `tests/unit/test_validate_knowledge_base.py` — 30+ unit tests covering all validation rules
+- Updated CI workflow to run `python scripts/validate_knowledge_base.py` on every PR
+- Replaced Black format check with `ruff format --check` in CI
+
+---
+
 ## Sprint 1 — System Design ✅
 
 **Branch:** `feature/system-design`
