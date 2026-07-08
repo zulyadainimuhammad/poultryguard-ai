@@ -1,62 +1,128 @@
 # Roadmap
 
-This roadmap tracks the planned development lifecycle for PoultryGuard AI through the Africa Deep Tech Challenge 2026.
+This roadmap tracks the planned development lifecycle for PoultryGuard AI through the Africa Deep Tech Challenge 2026. The detailed sprint plan with deliverables and acceptance criteria is in [`docs/project_plan.md`](docs/project_plan.md).
 
-## Phase 1 Repository Setup
+---
 
-- Create scalable repository structure.
-- Add open-source governance files.
-- Configure Python 3.11 project metadata.
-- Add CI placeholders for linting, formatting, and unit tests.
-- Establish documentation folders.
+## Sprint 1 — System Design ✅
 
-## Phase 2 Knowledge Base
+**Branch:** `feature/system-design`
 
-- Define Markdown schema for knowledge entries.
-- Curate poultry disease, vaccination, climate, biosecurity, feeding, management, and market content.
-- Add source attribution and review metadata.
-- Establish knowledge-base quality checks.
+- Designed complete software architecture
+- Created seven architecture documents under `docs/architecture/`
+- Defined layered module structure across `app/`, `rag/`, `models/`
+- Documented RAG pipeline design, model selection, data flow, and deployment
+- Mapped all ADTC 2026 requirements to design decisions
+- Created sprint roadmap in `docs/project_plan.md`
+- Updated `README.md`, `ROADMAP.md`, `CHANGELOG.md`
 
-## Phase 3 Local LLM
+---
 
-- Select and document GGUF model variant.
-- Add llama.cpp integration boundary.
-- Define inference configuration profiles for 8 GB RAM.
-- Validate offline CPU-only inference.
+## Sprint 2 — Knowledge Base
 
-## Phase 4 RAG
+**Branch:** `feature/knowledge-base`
 
-- Implement document chunking and indexing.
-- Add local embeddings pipeline.
-- Build FAISS retrieval layer.
-- Add prompt templates grounded in retrieved context.
-- Add tests for retrieval correctness.
+- Define Markdown schema for knowledge base documents
+- Curate minimum 35 documents across 7 domains:
+  - Diseases (Newcastle, Avian Influenza, Gumboro, Marek's, Coccidiosis, Fowl Pox, Fowl Typhoid, Infectious Bronchitis)
+  - Vaccination (broiler schedule, layer schedule, vaccine storage, administration)
+  - Climate (housing ventilation, heat stress, cold stress, humidity)
+  - Biosecurity (farm checklist, visitor protocols, disinfection)
+  - Feeding (broiler nutrition, layer nutrition, feed storage, water quality)
+  - Management (flock records, mortality tracking, production records)
+  - Market (pricing guidance, cost management)
+- Add source attribution and review metadata
+- Implement `scripts/validate_knowledge_base.py`
 
-## Phase 5 Desktop UI
+---
 
-- Build Streamlit MVP.
-- Add workflows for symptoms, vaccination, climate, and farm records.
-- Add accessible offline user experience.
-- Add screenshots and demo documentation.
+## Sprint 3 — Dataset Preparation
 
-## Phase 6 Optimization
+**Branch:** `feature/datasets`
 
-- Profile startup time, latency, memory, and retrieval performance.
-- Optimize model settings for integrated graphics and CPU-only operation.
-- Reduce memory pressure on 8 GB RAM devices.
-- Add reproducible benchmark reports.
+- Collect reference Q&A pairs from agricultural extension sources
+- Build evaluation set of 100 labelled question-answer pairs
+- Generate 200 synthetic Q&A pairs from knowledge base documents
+- Implement evaluation metrics (BLEU, ROUGE, semantic similarity)
+- Document dataset provenance
 
-## Phase 7 ADTC Benchmarking
+---
 
-- Validate on Ubuntu 22.04 LTS.
-- Run offline compatibility tests.
-- Record latency, RAM usage, and answer-quality benchmarks.
-- Prepare competition evidence and review material.
+## Sprint 4 — RAG Pipeline
 
-## Phase 8 Final Submission
+**Branch:** `feature/rag`
 
-- Finalize report, demo, screenshots, and documentation.
-- Freeze model and knowledge-base versions.
-- Tag release candidate.
-- Package local deployment instructions.
+- Implement `rag/chunking/markdown_chunker.py`
+- Implement `rag/embeddings/embedder.py` with `all-MiniLM-L6-v2`
+- Implement `rag/indexing/index_builder.py` with FAISS `IndexFlatIP`
+- Implement `rag/retrieval/retriever.py`
+- Implement `rag/prompts/prompt_builder.py`
+- Build `scripts/build_index.py`
+- Write unit and integration tests for all RAG modules
+- Achieve retrieval latency < 500 ms on ADTC laptop
 
+---
+
+## Sprint 5 — Local LLM Integration
+
+**Branch:** `feature/local-llm`
+
+- Implement `models/inference/llm_runner.py` with `llama-cpp-python`
+- Implement `app/backend/orchestrator.py`
+- Implement `app/services/query_service.py`
+- Implement `app/services/emergency_service.py` (rule-based triage)
+- Implement `app/config/settings.py` with Pydantic settings
+- Implement `app/utils/logger.py`, `timer.py`, `memory.py`
+- Validate end-to-end pipeline with Qwen2.5-1.5B-Instruct Q4_K_M
+- Achieve inference latency < 60 seconds on ADTC laptop
+
+---
+
+## Sprint 6 — Desktop Application
+
+**Branch:** `feature/frontend`
+
+- Build Streamlit multi-page application
+- Implement all 7 domain pages (disease, vaccination, climate, biosecurity, feeding, records, home)
+- Implement emergency alert banner component
+- Implement chat widget and session history
+- Achieve application startup < 30 seconds
+- Produce demo screenshots for ADTC submission
+
+---
+
+## Sprint 7 — Benchmarking and Optimisation
+
+**Branch:** `feature/benchmarking`
+
+- Run full benchmark suite on ADTC Standard Laptop
+- Profile startup time, inference latency, RAM usage, retrieval latency
+- Run answer quality evaluation against evaluation dataset
+- Optimise bottlenecks to meet all ADTC performance targets
+- Produce reproducible benchmark report for competition submission
+
+---
+
+## Sprint 8 — ADTC Submission
+
+**Branch:** `feature/documentation`
+
+- Write ADTC competition submission report
+- Finalise all documentation
+- Freeze model and knowledge base versions
+- Tag `v1.0.0-adtc` release
+- Package offline distribution bundle
+- Complete ADTC submission checklist
+
+---
+
+## Performance Targets
+
+| Metric | Target |
+|---|---|
+| Application startup | < 30 seconds |
+| First query latency | < 60 seconds |
+| Subsequent query latency | < 30 seconds |
+| Peak RAM usage | < 6 GB |
+| Answer relevance score | > 0.7 |
+| Retrieval latency | < 500 ms |

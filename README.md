@@ -2,13 +2,15 @@
 
 Offline AI-powered poultry health, vaccination, climate, biosecurity, and farm management assistant for the Africa Deep Tech Challenge (ADTC) 2026.
 
-PoultryGuard AI is designed to run entirely on the ADTC Standard Laptop without cloud APIs, internet access, or dedicated GPU hardware. This repository currently contains the production-grade project structure, documentation skeleton, and development tooling needed to grow the system safely through the competition lifecycle.
+PoultryGuard AI runs entirely on the ADTC Standard Laptop without cloud APIs, internet access, or dedicated GPU hardware. It combines a curated Markdown knowledge base, a local FAISS vector store, and a quantised GGUF language model to deliver accurate, grounded advisory responses to poultry farmers across Africa.
 
-> Status: repository scaffold only. The AI assistant, RAG pipeline, model inference, and application features are intentionally not implemented yet.
+> **Status:** Sprint 1 complete — full system architecture designed and documented. Application implementation begins in Sprint 2.
+
+---
 
 ## Project Overview
 
-PoultryGuard AI will support poultry farmers, extension officers, students, and farm managers with local-first guidance across:
+PoultryGuard AI supports poultry farmers, extension officers, students, and farm managers with local-first guidance across:
 
 - Poultry disease awareness and early symptom triage
 - Vaccination schedule assistance
@@ -17,60 +19,97 @@ PoultryGuard AI will support poultry farmers, extension officers, students, and 
 - Feeding and flock management guidance
 - Market and operational record support
 
-The system is planned around a small local instruction model, a curated Markdown knowledge base, and retrieval-augmented generation that can operate offline on modest laptop hardware.
+---
 
-## Features
+## Architecture
 
-Planned capabilities include:
+PoultryGuard AI follows a clean layered architecture with strict offline-first constraints.
 
-- Offline Streamlit MVP for farmer-facing workflows
-- Local llama.cpp inference using Qwen2.5-1.5B-Instruct in GGUF format
-- Retrieval-Augmented Generation over a Markdown knowledge base
-- FAISS-backed local vector search
-- Poultry health, vaccination, climate, biosecurity, feeding, and management modules
-- Benchmarking for CPU latency, RAM usage, startup time, and answer quality
-- Reproducible developer tooling with tests, linting, formatting, and CI
-- Documentation suitable for open-source collaboration and ADTC submission review
+```mermaid
+graph TD
+    subgraph UI["Frontend — Streamlit Desktop App"]
+        Q[Question Input] --> R[Response Display]
+        E[Emergency Alert Panel]
+    end
 
-## Architecture Overview
+    subgraph Backend["Backend — Application Services"]
+        O[Query Orchestrator]
+        EM[Emergency Advisory Module]
+    end
 
-The intended architecture follows clean architecture principles:
+    subgraph RAG["RAG Pipeline"]
+        EMB[Embedder] --> RET[FAISS Retrieval] --> PB[Prompt Builder]
+    end
 
-```text
-User Interface
-  -> Application Services
-  -> Domain/Workflow Logic
-  -> RAG Retrieval Layer
-  -> Local Knowledge Base + Vector Store
-  -> Local LLM Inference Runtime
+    subgraph Inference["Local Inference"]
+        LC[llama.cpp] --> GGUF[Qwen2.5-1.5B Q4_K_M]
+    end
+
+    subgraph Storage["Local Storage"]
+        KB[Markdown Knowledge Base]
+        VS[(FAISS Index)]
+    end
+
+    UI --> Backend
+    Backend --> RAG
+    RAG --> VS
+    RAG --> Inference
+    KB --> VS
 ```
 
-Key boundaries:
+**Key boundaries:**
 
-- `app/frontend`: Streamlit UI and presentation-layer components.
-- `app/backend`: request orchestration and application entry points.
-- `app/services`: use-case services that coordinate business workflows.
-- `rag`: indexing, embedding, retrieval, and prompt assembly.
-- `models`: local model configuration and llama.cpp integration boundaries.
-- `knowledge_base`: versioned Markdown source material for offline retrieval.
-- `evaluation`, `benchmarks`, and `profiler`: quality, performance, and hardware compatibility checks.
+| Layer | Path | Responsibility |
+|---|---|---|
+| Frontend | `app/frontend/` | Streamlit pages and UI components |
+| Backend | `app/backend/` | Query orchestration and entry point |
+| Services | `app/services/` | Use-case services and emergency advisory |
+| RAG | `rag/` | Chunking, embedding, retrieval, prompt building |
+| Inference | `models/` | llama.cpp integration and model configuration |
+| Knowledge Base | `knowledge_base/` | Curated Markdown domain documents |
+| Vector Store | `vector_store/` | Generated FAISS index (git-ignored) |
+| Config | `app/config/` | Pydantic settings and defaults |
+| Utils | `app/utils/` | Logging, timing, and memory monitoring |
+
+Full architecture documentation: [`docs/architecture/`](docs/architecture/)
+
+---
 
 ## Technology Stack
 
-- Language: Python 3.11
-- Local inference: llama.cpp via `llama-cpp-python` planned
-- Model target: Qwen2.5-1.5B-Instruct GGUF
-- Retrieval: FAISS planned
-- Knowledge base: Markdown files
-- MVP UI: Streamlit
-- Testing: pytest
-- Linting and formatting: Ruff and Black
-- CI: GitHub Actions
-- Deployment: local Ubuntu 22.04 LTS, optional Docker Compose
+| Component | Technology |
+|---|---|
+| Language | Python 3.11 |
+| Local inference | llama.cpp via `llama-cpp-python` |
+| Model | Qwen2.5-1.5B-Instruct Q4_K_M GGUF |
+| Embeddings | `sentence-transformers/all-MiniLM-L6-v2` |
+| Vector store | FAISS (`faiss-cpu`) |
+| Knowledge base | Markdown files |
+| Desktop UI | Streamlit |
+| Testing | pytest |
+| Linting and formatting | Ruff |
+| CI | GitHub Actions (ubuntu-22.04) |
+| Containerisation | Docker Compose |
 
-## Installation
+---
 
-Installation commands are placeholders until the MVP is implemented.
+## ADTC Hardware Target
+
+| Specification | Value |
+|---|---|
+| CPU | Intel Core i5 10th–12th Gen or AMD Ryzen 5 |
+| RAM | 8 GB |
+| GPU | None (CPU-only inference) |
+| OS | Ubuntu 22.04 LTS |
+| Network | Not required at runtime |
+| Model RAM usage | ~1.5 GB (Q4_K_M) |
+| Total RAM budget | < 6 GB peak |
+
+---
+
+## Quick Start
+
+> Application code is not yet implemented. These commands will work after Sprint 5.
 
 ```bash
 git clone https://github.com/your-org/poultryguard-ai.git
@@ -78,63 +117,100 @@ cd poultryguard-ai
 python3.11 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements-dev.txt
-make test
+python scripts/download_model.py
+python scripts/build_index.py
+streamlit run app/backend/main.py
 ```
 
-Model files are intentionally excluded from Git. Future setup documentation will explain how to place GGUF files under `models/gguf/` for offline use.
+For offline deployment, see [`docs/architecture/deployment.md`](docs/architecture/deployment.md).
+
+---
 
 ## Repository Structure
 
 ```text
 poultryguard-ai/
-├── app/                 # Application UI, backend orchestration, services, utilities, and config
-├── knowledge_base/      # Curated offline Markdown knowledge base
-├── rag/                 # Embeddings, retrieval, indexing, and prompt assets
-├── models/              # Local model configs, GGUF storage path, and inference boundaries
-├── vector_store/        # Generated FAISS/vector indexes excluded from Git
-├── datasets/            # Raw, processed, and synthetic datasets
-├── benchmarks/          # Benchmark scripts and results documentation
-├── evaluation/          # Answer quality and safety evaluation assets
-├── profiler/            # Runtime profiling helpers
-├── scripts/             # Developer and maintenance scripts
-├── notebooks/           # Research notebooks and experiments
-├── tests/               # Unit and structure tests
-├── docs/                # Architecture, API, design, deployment, and benchmark documentation
-├── report/              # ADTC reports, writeups, and final submission material
-├── demo/                # Demo scripts, walkthroughs, and presentation assets
-└── assets/              # Branding, images, icons, and static assets
+├── app/                    # Frontend, backend, services, config, utils
+│   ├── backend/            # Entry point and query orchestrator
+│   ├── frontend/           # Streamlit pages and components
+│   ├── services/           # Use-case services and emergency advisory
+│   ├── config/             # Pydantic settings and defaults
+│   └── utils/              # Logging, timing, memory monitoring
+├── rag/                    # Chunking, embeddings, indexing, retrieval, prompts
+├── models/                 # llama.cpp inference boundary and model configs
+├── knowledge_base/         # Curated Markdown knowledge base (7 domains)
+├── vector_store/           # Generated FAISS index (git-ignored)
+├── datasets/               # Raw, processed, and synthetic evaluation datasets
+├── evaluation/             # Answer quality evaluation scripts and results
+├── benchmarks/             # Performance benchmark scripts and results
+├── profiler/               # Runtime profiling helpers
+├── scripts/                # Developer utility scripts
+├── notebooks/              # Research notebooks
+├── tests/                  # pytest test suite (unit, integration, smoke)
+├── docs/                   # Architecture, API, deployment, and benchmark docs
+│   ├── architecture/       # System design documents (Sprint 1)
+│   └── project_plan.md     # Sprint roadmap
+├── report/                 # ADTC submission report and writeups
+├── demo/                   # Demo scripts and walkthrough
+└── assets/                 # Branding and static assets
 ```
+
+---
+
+## Documentation
+
+| Document | Description |
+|---|---|
+| [docs/architecture/system_overview.md](docs/architecture/system_overview.md) | System overview and component map |
+| [docs/architecture/software_architecture.md](docs/architecture/software_architecture.md) | Layered architecture and module map |
+| [docs/architecture/data_flow.md](docs/architecture/data_flow.md) | Data flow through indexing and query pipelines |
+| [docs/architecture/model_selection.md](docs/architecture/model_selection.md) | LLM and embedding model selection |
+| [docs/architecture/rag_design.md](docs/architecture/rag_design.md) | RAG pipeline design |
+| [docs/architecture/deployment.md](docs/architecture/deployment.md) | Deployment guide |
+| [docs/architecture/adtc_alignment.md](docs/architecture/adtc_alignment.md) | ADTC 2026 compliance |
+| [docs/project_plan.md](docs/project_plan.md) | Sprint roadmap |
+| [ROADMAP.md](ROADMAP.md) | High-level phase overview |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contribution guidelines |
+
+---
+
+## Development
+
+```bash
+make lint        # ruff check .
+make format      # ruff format .
+make test        # pytest
+make index       # build FAISS index from knowledge base
+make run         # streamlit run app/backend/main.py
+make benchmark   # run performance benchmarks
+```
+
+---
 
 ## Roadmap
 
-The project roadmap is tracked in [ROADMAP.md](ROADMAP.md).
+See [`docs/project_plan.md`](docs/project_plan.md) for the full sprint plan and [`ROADMAP.md`](ROADMAP.md) for the high-level phase overview.
 
-High-level phases:
+Current sprint: **Sprint 1 — System Design** ✅
 
-1. Repository setup
-2. Knowledge base curation
-3. Local LLM integration
-4. RAG pipeline
-5. Desktop UI
-6. Optimization
-7. ADTC benchmarking
-8. Final submission
+Next sprint: **Sprint 2 — Knowledge Base**
 
-## ADTC Compatibility
+---
 
-PoultryGuard AI is designed for the ADTC Standard Laptop target:
+## ADTC Compliance
 
-- Intel Core i5 10th-12th Gen or AMD Ryzen 5
-- 8 GB RAM
-- Integrated graphics only
-- Ubuntu 22.04 LTS
-- Fully offline operation
-- No cloud APIs
-- No internet dependency at runtime
+PoultryGuard AI is designed for the ADTC Standard Laptop:
 
-All future implementation decisions should preserve this compatibility target.
+- CPU-only inference (`n_gpu_layers=0`)
+- 8 GB RAM compatible (peak usage < 6 GB)
+- Fully offline at runtime (zero network calls)
+- Ubuntu 22.04 LTS and Windows 10/11 compatible
+- Open-source MIT licence
 
-## License
+Full compliance mapping: [`docs/architecture/adtc_alignment.md`](docs/architecture/adtc_alignment.md)
 
-This project is released under the MIT License. See [LICENSE](LICENSE) for details.
+---
 
+## Licence
+
+This project is released under the MIT Licence. See [LICENSE](LICENSE) for details.
