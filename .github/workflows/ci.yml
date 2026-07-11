@@ -35,3 +35,15 @@ jobs:
 
       - name: Validate knowledge base
         run: python scripts/validate_knowledge_base.py
+
+      - name: Validate knowledge base metadata
+        run: python scripts/validate_metadata.py
+
+      - name: Validate knowledge base references
+        run: python scripts/validate_references.py
+
+      - name: Validate knowledge base links
+        run: python scripts/validate_links.py
+
+      - name: Build knowledge base index preview
+        run: python scripts/build_index_preview.py
