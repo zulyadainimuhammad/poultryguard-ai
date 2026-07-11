@@ -53,20 +53,24 @@ poultryguard-ai/
 **Branch:** `feature/knowledge-base`
 
 **Objectives:**
-- Establish authoritative knowledge engineering standards
-- Implement knowledge base schema and validator
-- Curate minimum 35 documents across 10 domains
-- Ensure factual accuracy and source traceability
+- Establish authoritative knowledge engineering standards ✅
+- Implement knowledge base schema and validator ✅
+- Curate minimum 35 documents across 10 domains (10 of 35 completed)
+- Ensure factual accuracy and source traceability ✅
 
 **Target Completion:** End of Sprint 2
 
 **Deliverables:**
 - ✅ `docs/knowledge_engineering.md` — complete writing style, citation, chunking standards
 - ✅ `docs/knowledge_base_schema.md` — authoritative schema and document template
-- ✅ Knowledge base directory structure (10 domains)
+- ✅ Knowledge base directory structure (10 domains ready)
 - ✅ `scripts/validate_knowledge_base.py` — automated schema validator
+- ✅ `scripts/validate_metadata.py` — metadata quality validator
+- ✅ `scripts/validate_references.py` — citation validator
+- ✅ `scripts/validate_links.py` — link validator (offline safety)
+- ✅ `scripts/build_index_preview.py` — lightweight RAG chunking preview
 - ✅ CI integration — validator runs on every PR
-- ⏳ Knowledge base documents (0 of 35 completed)
+- ⏳ Knowledge base documents (10 of 35 completed)
 
 ---
 
@@ -191,131 +195,170 @@ poultryguard-ai/
 
 **Framework Completed:**
 - ✅ Knowledge base directory structure (10 domains ready)
-- ✅ Validator (`scripts/validate_knowledge_base.py`)
+- ✅ `scripts/validate_knowledge_base.py` — schema validator
+- ✅ `scripts/validate_metadata.py` — metadata quality validator
+- ✅ `scripts/validate_references.py` — citation validator
+- ✅ `scripts/validate_links.py` — offline-safe link validator
+- ✅ `scripts/build_index_preview.py` — lightweight RAG chunking preview
 - ✅ Unit tests (30+ test cases in `tests/unit/test_validate_knowledge_base.py`)
-- ✅ CI integration (validator runs on every PR)
+- ✅ CI integration (validators run on every PR)
 - ✅ `knowledge_base/README.md` updated with standards references and contribution workflow
 
-**Outstanding (0 of 35 Documents):**
-- Diseases: 0 of 8 (Newcastle, Avian Influenza, Gumboro, Marek's, Coccidiosis, Fowl Pox, Fowl Typhoid, Infectious Bronchitis)
-- Vaccination: 0 of 4 (Broiler schedule, Layer schedule, Vaccine storage, Vaccine administration)
-- Climate: 0 of 3 (Housing ventilation, Heat stress, Cold stress)
-- Biosecurity: 0 of 3 (Farm checklist, Visitor protocols, Disinfection)
-- Feeding: 0 of 4 (Broiler nutrition, Layer nutrition, Feed storage, Water quality)
-- Management: 0 of 3 (Flock records, Mortality tracking, Production records)
-- Market: 0 of 2 (Pricing guidance, Cost management)
-- Emergency: 0 of 3 (Newcastle emergency, Avian Influenza emergency, Mass mortality)
-- FAQ: 0 of 5 (Common farmer questions)
+**Knowledge Base Documents (10 of 35 completed):**
+- ✅ 5 disease documents completed (Newcastle, Avian Influenza, Gumboro, Infectious Bronchitis, Coccidiosis)
+- ⏳ 3 disease documents pending (Infectious Coryza, Marek's, Fowl Cholera, Fowl Pox, Pullorum — Sprint 2.3 Batch 2)
+- ⏳ 4 vaccination documents pending
+- ⏳ 3 climate documents pending
+- ⏳ 3 biosecurity documents pending
+- ⏳ 4 feeding documents pending
+- ⏳ 3 management documents pending
+- ⏳ 2 market documents pending
+- ⏳ 3 emergency documents pending
+- ⏳ 5 FAQ documents pending
 
-### AI_DEVELOPER_GUIDE.md ✅
+### AI Infrastructure & Documentation ✅
 
-**Location:** Repository root
+**AI_DEVELOPER_GUIDE.md** (10 Sections)
+- Permanent instruction manual for all AI coding assistants
+- Project overview, ADTC constraints, architecture principles
+- Coding standards (Python 3.11+, type hints, docstrings, Ruff, pytest)
+- Git workflow (feature branches, Conventional Commits, PR review)
+- Knowledge base standards and RAG principles
+- Performance goals and AI assistant behaviour
+- Standard development workflow with verification steps
 
-**Purpose:** Permanent instruction manual for all AI coding assistants (ChatGPT, Continue, Amazon Q, GitHub Copilot, etc.)
+**PROJECT_MEMORY.md** (This Document)
+- Complete project state snapshot
+- Sprint progress and completion status
+- Knowledge base inventory and validation status
+- Outstanding tasks and recommendations
+- Next sprint planning
 
-**Content (10 Sections):**
-1. Project Overview — mission, target users, offline-first philosophy
-2. ADTC Constraints — CPU-only, 8 GB RAM, no cloud/GPU, offline requirement
-3. Architecture Principles — layered design, module separation, dependency inversion
-4. Coding Standards — Python 3.11+, type hints, docstrings, Ruff, pytest, pathlib
-5. Git Workflow — feature branches, Conventional Commits, PR review before merge
-6. Knowledge Base Standards — reference to engineering docs, authoritative sources only
-7. RAG Principles — local FAISS, local embedder, grounded answers, no hallucination
-8. Performance Goals — startup < 30s, first query < 60s, peak RAM < 6 GB
-9. AI Assistant Behaviour — must read docs before changes, preserve architecture
-10. Standard Development Workflow — read docs → implement → lint → format → test → KB validation → summarize
+**Knowledge Engineering Standards** (`docs/knowledge_engineering.md`)
+- Writing style for smallholder farmers (active voice, plain English, short sentences)
+- Markdown conventions (heading hierarchy, lists, emphasis, tables)
+- Metadata schema (YAML front matter, tag conventions)
+- Citation requirements (5-tier source ranking, APA format)
+- Terminology standards (preferred terms, scientific names, units)
+- Document chunking strategy (H2 boundaries, word count targets)
+- Confidence levels (high/medium/low)
+- Review process and naming conventions
+
+**Knowledge Base Schema** (`docs/knowledge_base_schema.md`)
+- YAML front matter specification
+- 10 valid domain values
+- Required sections per domain type
+- Filename conventions
+- Complete document templates
+- Validator reference
 
 ### Knowledge Base Quality System ✅
 
 **Components Implemented:**
-1. **Engineering Standards** (`docs/knowledge_engineering.md`)
-   - 9 sections covering all aspects of document quality
-   - Writing style for smallholder farmers (active voice, plain English, short sentences)
-   - Markdown conventions (heading hierarchy, lists, emphasis, tables, links)
-   - Metadata schema with YAML front matter
-   - Citation requirements with 5-tier source ranking
-   - Terminology standards (preferred terms, scientific names, units, drug names)
-   - Chunking strategy for RAG (H2 boundaries, word count targets, keyword density)
-   - Confidence levels (high/medium/low)
-   - Review process (authoring → PR → review → approval)
-   - Naming conventions (files, directories, titles, tags)
-   - Document inventory targets (35 documents, 10 domains)
-
-2. **Schema Reference** (`docs/knowledge_base_schema.md`)
-   - YAML front matter specification
-   - 10 valid domain values
-   - Required sections per domain type (standard, disease, emergency, faq)
-   - Filename conventions
-   - Sources requirement
-   - Complete document templates
-   - Validator reference
-
-3. **Automated Validator** (`scripts/validate_knowledge_base.py`)
-   - Pure Python, stdlib-only (no extra dependencies)
-   - Checks metadata presence and types
-   - Validates domain values
-   - Checks required sections for each domain
-   - Verifies non-empty sources list
-   - Detects duplicate titles
-   - Enforces filename conventions
-   - Provides clear error messages
-   - Runs in CI on every PR
-
-4. **Unit Tests** (`tests/unit/test_validate_knowledge_base.py`)
-   - 30+ test cases covering all validator rules
-   - Tests for each domain type
-   - Tests for metadata validation
-   - Tests for section validation
-   - Tests for filename validation
-   - Edge cases and error conditions
-
-5. **Knowledge Base Index** (`knowledge_base/README.md`)
-   - Domain structure and purposes
-   - Document inventory targets (35 documents)
-   - Adding a document workflow (11 steps)
-   - Validation instructions
-   - Content status table (currently 0 documents)
+1. **Engineering Standards** — Complete writing, sourcing, and structure guidelines
+2. **Schema Reference** — Authoritative YAML and section structure specification
+3. **Automated Validators:**
+   - `validate_knowledge_base.py` — schema compliance
+   - `validate_metadata.py` — metadata quality
+   - `validate_references.py` — citation accuracy
+   - `validate_links.py` — offline-safe links
+   - `build_index_preview.py` — RAG chunking preview
+4. **Unit Tests** — 30+ test cases covering all validator rules
+5. **Knowledge Base Index** — Domain structure and document inventory targets
+6. **CI Integration** — Validators run on every PR, block merge if validation fails
 
 ---
 
 ## Current Knowledge Base
 
-**Status:** Framework complete, content authoring not yet started.
+**Status:** Framework complete, 10 of 35 documents authored
 
-**Structure:** 10 domains, 0 documents authored
+**Completed Documents (10 of 35):**
 
-| Domain | Directory | Target Docs | Status | Priority |
+### Diseases (5 of 8 Completed)
+
+| Document | Filename | Status | Sources | Reviewed |
 |---|---|---|---|---|
-| Diseases | `diseases/` | 8 | Not started | 1 |
-| Vaccination | `vaccination/` | 4 | Not started | 2 |
-| Climate | `climate/` | 3 | Not started | 3 |
-| Biosecurity | `biosecurity/` | 3 | Not started | 3 |
-| Feeding | `feeding/` | 4 | Not started | 3 |
-| Management | `management/` | 3 | Not started | 3 |
-| Market | `market/` | 2 | Not started | 3 |
-| Emergency | `emergency/` | 3 | Not started | 4 |
-| FAQ | `faq/` | 5 | Not started | 4 |
-| Hausa | `hausa/` | — | Sprint 6 | 6 |
-| **Total** | — | **35** | — | — |
+| Newcastle Disease | `newcastle_disease.md` | ✅ Completed | FAO, OIE/WOAH | ✅ |
+| Avian Influenza | `avian_influenza.md` | ✅ Completed | FAO, OIE/WOAH, HPAI focus | ✅ |
+| Gumboro Disease | `gumboro.md` | ✅ Completed | Peer-reviewed literature | ✅ |
+| Infectious Bronchitis | `infectious_bronchitis.md` | ✅ Completed | Veterinary authority sources | ✅ |
+| Coccidiosis | `coccidiosis.md` | ✅ Completed | Research literature | ✅ |
 
-**Authored Documents:** None
+### Diseases (3 of 8 Pending — Sprint 2.3 Batch 2)
 
-**Pending Priority Order:**
-1. **Diseases (1st priority):** Newcastle disease, Avian Influenza, Gumboro disease, Marek's disease, Coccidiosis, Fowl Pox, Fowl Typhoid, Infectious Bronchitis
-2. **Vaccination (2nd priority):** Broiler vaccination schedule, Layer vaccination schedule, Vaccine storage, Vaccine administration
-3. **Climate (3rd priority):** Housing ventilation, Heat stress management, Cold stress management
-4. **Biosecurity (3rd priority):** Farm biosecurity checklist, Visitor protocols, Disinfection guide
-5. **Feeding (3rd priority):** Broiler nutrition, Layer nutrition, Feed storage, Water quality
-6. **Management (3rd priority):** Flock records, Mortality tracking, Production records
-7. **Market (3rd priority):** Market pricing guidance, Cost management
-8. **Emergency (4th priority):** Newcastle disease emergency, Avian Influenza emergency, Mass mortality emergency
-9. **FAQ (4th priority):** Common farmer questions (5 documents across all domains)
+| Document | Filename | Status | Priority |
+|---|---|---|---|
+| Infectious Coryza | `infectious_coryza.md` | ⏳ Pending | Sprint 2.3 Batch 2 |
+| Marek's Disease | `mareks_disease.md` | ⏳ Pending | Sprint 2.3 Batch 2 |
+| Fowl Cholera | `fowl_cholera.md` | ⏳ Pending | Sprint 2.3 Batch 2 |
+| Fowl Pox | `fowl_pox.md` | ⏳ Pending | Sprint 2.3 Batch 2 |
+| Pullorum Disease | `pullorum_disease.md` | ⏳ Pending | Sprint 2.3 Batch 2 |
+
+### Other Domains (0 of 27 Completed)
+
+| Domain | Target | Completed | Pending |
+|---|---|---|---|
+| Vaccination | 4 | 0 | 4 |
+| Climate | 3 | 0 | 3 |
+| Biosecurity | 3 | 0 | 3 |
+| Feeding | 4 | 0 | 4 |
+| Management | 3 | 0 | 3 |
+| Market | 2 | 0 | 2 |
+| Emergency | 3 | 0 | 3 |
+| FAQ | 5 | 0 | 5 |
+| **Total** | **35** | **10** | **25** |
 
 ---
 
 ## Validation Status
 
-### Ruff (Linting & Formatting)
+### Knowledge Base Validators
+
+**Primary Validators (Implemented & Active):**
+
+1. **validate_knowledge_base.py** ✅
+   - Schema compliance (YAML front matter, sections, filenames)
+   - Domain validation (valid domain values)
+   - Required section headings
+   - Non-empty sources list
+   - Duplicate title detection
+   - Filename convention checking
+   - Pure Python, stdlib-only
+
+2. **validate_metadata.py** ✅
+   - Metadata field validation (types, required fields)
+   - Tag quality checks (3+ tags, lowercase, underscores)
+   - Confidence field validation
+   - Severity field validation (emergency domain)
+   - Language code validation (ISO 639-1)
+   - Front matter structure validation
+
+3. **validate_references.py** ✅
+   - Citation format validation (APA compliance)
+   - Sources list vs. References section alignment
+   - Author and date field validation
+   - ISBN/DOI format validation
+   - Duplicate reference detection
+
+4. **validate_links.py** ✅
+   - External link detection (should not exist in offline system)
+   - Internal relative link validation
+   - Broken link detection
+   - Offline-safe link enforcement
+   - Cross-document reference validation
+
+5. **build_index_preview.py** ✅
+   - Lightweight RAG chunking simulation
+   - H2 boundary chunk detection
+   - Word count per chunk analysis
+   - Keyword density preview (first 50 words importance)
+   - Token budget estimation
+   - No embeddings, no FAISS indexing
+
+### Code Quality Validators
+
+**Ruff (Linting & Formatting)**
 
 **Configuration:** `pyproject.toml`
 
@@ -336,9 +379,9 @@ make format        # ruff format .
 
 **CI Integration:** .github/workflows/ci.yml runs `ruff format --check .` on every PR
 
-**Status:** ✅ Passing (no Python code changes since Sprint 1)
+**Status:** ✅ Passing
 
-### Pytest (Unit & Integration Testing)
+**Pytest (Unit & Integration Testing)**
 
 **Configuration:** `pyproject.toml`
 
@@ -365,7 +408,7 @@ pytest -v          # verbose output
 
 **CI Integration:** .github/workflows/ci.yml runs `pytest` on every PR
 
-**Status:** ✅ Passing (validator tests all pass)
+**Status:** ✅ Passing
 
 ### CI/CD Pipeline
 
@@ -376,6 +419,9 @@ pytest -v          # verbose output
 2. **Format Check** — Ruff format check (no auto-formatting in CI)
 3. **Tests** — pytest with verbose output
 4. **Knowledge Base Validation** — `python scripts/validate_knowledge_base.py`
+5. **Metadata Validation** — `python scripts/validate_metadata.py`
+6. **References Validation** — `python scripts/validate_references.py`
+7. **Links Validation** — `python scripts/validate_links.py`
 
 **Trigger:** Push to any branch; PR merges require all checks passing
 
@@ -387,7 +433,7 @@ pytest -v          # verbose output
 - Ruff linting
 - Ruff format check
 - pytest execution
-- Knowledge base validation
+- All knowledge base validators run sequentially
 
 ---
 
@@ -396,82 +442,137 @@ pytest -v          # verbose output
 **Active Development:** `feature/knowledge-base`
 
 **Latest Commit (feature/knowledge-base):**
-- SHA: `2da126b852739c1038eb2b90b1bad983f8d81b9a`
-- Unstaged: Knowledge base framework (schema, standards docs, validator, tests)
+- 5 disease documents authored (Newcastle, Avian Influenza, Gumboro, Infectious Bronchitis, Coccidiosis)
+- All validators passing
+- All CI checks passing
 
 **Main Branch (Stable):**
-- SHA: `743af592355ef1cf7fcab5f93a926b11907549ce`
-- Status: Stable (Sprint 1.5 architecture refinement complete)
+- Sprint 1.5 architecture refinement complete
+- Status: Stable, ready for knowledge base merges
 
 **Branch Protection:** None (can force push, direct commits allowed)
 
 **Recommended Workflow:**
-1. Branch created: `feature/knowledge-base` (from main)
-2. Create feature sub-branches for document groups: `feature/knowledge-base-diseases`, `feature/knowledge-base-vaccination`, etc.
+1. Work on `feature/knowledge-base` branch
+2. Create feature sub-branches for document batches: `feature/knowledge-base-batch-2`, etc.
 3. Open PRs against `feature/knowledge-base`
-4. Merge back to `feature/knowledge-base` after review
+4. Merge back to `feature/knowledge-base` after review and validator passes
 5. Once all 35 documents complete, open PR from `feature/knowledge-base` to `main`
 
 ---
 
 ## Outstanding Tasks
 
-### Sprint 2 — Knowledge Engineering (In Progress)
+### Sprint 2.3 Batch 2 — Disease Documents (5 of 35)
 
-**Not Started:**
+**Status:** In Progress
 
-1. **Disease Documents (8 of 35)** — Highest priority
-   - [ ] Newcastle Disease (`diseases/newcastle_disease.md`)
-     - Overview, Symptoms, Treatment, Prevention/Vaccination, When to Call Vet, References
-     - Sources: FAO, OIE/WOAH technical cards
-     - Tags: newcastle, paramyxovirus, respiratory, neurological
-   - [ ] Avian Influenza (`diseases/avian_influenza.md`)
-     - Highest severity; Tier 1 sources critical
-   - [ ] Gumboro Disease (`diseases/gumboro_disease.md`)
-   - [ ] Marek's Disease (`diseases/mareks_disease.md`)
-   - [ ] Coccidiosis (`diseases/coccidiosis.md`)
-   - [ ] Fowl Pox (`diseases/fowl_pox.md`)
-   - [ ] Fowl Typhoid (`diseases/fowl_typhoid.md`)
-   - [ ] Infectious Bronchitis (`diseases/infectious_bronchitis.md`)
+**Objective:** Complete second batch of disease documents to reach 13 of 35 total documents.
 
-2. **Vaccination Documents (4 of 35)** — 2nd priority
-   - [ ] Broiler Vaccination Schedule (`vaccination/vaccination_schedule_broilers.md`)
-   - [ ] Layer Vaccination Schedule (`vaccination/vaccination_schedule_layers.md`)
-   - [ ] Vaccine Storage and Handling (`vaccination/vaccine_storage.md`)
-   - [ ] Vaccine Administration (`vaccination/vaccine_administration.md`)
+**Documents to Create:**
 
-3. **Climate Documents (3 of 35)** — 3rd priority
-   - [ ] Housing Ventilation (`climate/housing_ventilation.md`)
-   - [ ] Heat Stress Management (`climate/heat_stress_management.md`)
-   - [ ] Cold Stress Management (`climate/cold_stress_management.md`)
+1. **Infectious Coryza** (`knowledge_base/diseases/infectious_coryza.md`)
+   - Bacterial infection causing sinusitis and respiratory disease
+   - Key sections: Overview, Symptoms, Treatment, Prevention/Vaccination, When to Call Vet, References
+   - Sources: OIE/WOAH technical card, FAO, peer-reviewed veterinary literature
+   - Tags: infectious_coryza, respiratory, bacterial, sinusitis, odor
 
-4. **Biosecurity Documents (3 of 35)** — 3rd priority
-   - [ ] Farm Biosecurity Checklist (`biosecurity/farm_biosecurity_checklist.md`)
-   - [ ] Visitor Protocols (`biosecurity/visitor_protocols.md`)
-   - [ ] Disinfection Guide (`biosecurity/disinfection_guide.md`)
+2. **Marek's Disease** (`knowledge_base/diseases/mareks_disease.md`)
+   - Herpes virus infection causing immunosuppression and tumors
+   - Key sections: Overview, Symptoms, Treatment, Prevention/Vaccination, When to Call Vet, References
+   - Sources: OIE/WOAH, FAO, Marek's disease research literature
+   - Tags: mareks_disease, herpes_virus, immunosuppression, paralysis, tumors
 
-5. **Feeding Documents (4 of 35)** — 3rd priority
-   - [ ] Broiler Nutrition (`feeding/broiler_nutrition.md`)
-   - [ ] Layer Nutrition (`feeding/layer_nutrition.md`)
-   - [ ] Feed Storage (`feeding/feed_storage.md`)
-   - [ ] Water Quality (`feeding/water_quality.md`)
+3. **Fowl Cholera** (`knowledge_base/diseases/fowl_cholera.md`)
+   - Acute bacterial disease with high mortality
+   - Key sections: Overview, Symptoms, Treatment, Prevention/Vaccination, When to Call Vet, References
+   - Sources: OIE/WOAH, national veterinary authorities
+   - Tags: fowl_cholera, bacterial, mortality, acute, pasteurella
 
-6. **Management Documents (3 of 35)** — 3rd priority
-   - [ ] Flock Records (`management/flock_records.md`)
-   - [ ] Mortality Tracking (`management/mortality_tracking.md`)
-   - [ ] Production Records (`management/production_records.md`)
+4. **Fowl Pox** (`knowledge_base/diseases/fowl_pox.md`)
+   - Viral disease causing skin lesions and respiratory signs
+   - Key sections: Overview, Symptoms, Treatment, Prevention/Vaccination, When to Call Vet, References
+   - Sources: OIE/WOAH technical card, FAO
+   - Tags: fowl_pox, viral, skin_lesions, diphtheritic_form, wet_form
 
-7. **Market Documents (2 of 35)** — 3rd priority
-   - [ ] Market Pricing Guidance (`market/market_pricing_guidance.md`)
-   - [ ] Cost Management (`market/cost_management.md`)
+5. **Pullorum Disease** (`knowledge_base/diseases/pullorum_disease.md`)
+   - Bacterial disease affecting chicks, reducing production in adults
+   - Key sections: Overview, Symptoms, Treatment, Prevention/Vaccination, When to Call Vet, References
+   - Sources: OIE/WOAH, national veterinary authority
+   - Tags: pullorum_disease, bacterial, chicks, production_loss, salmonella
 
-8. **Emergency Documents (3 of 35)** — 4th priority
-   - [ ] Newcastle Disease Emergency (`emergency/newcastle_disease_emergency.md`)
-   - [ ] Avian Influenza Emergency (`emergency/avian_influenza_emergency.md`)
-   - [ ] Mass Mortality Emergency (`emergency/mass_mortality_emergency.md`)
+**Execution Workflow:**
 
-9. **FAQ Documents (5 of 35)** — 4th priority
-   - [ ] 5 frequently asked questions across all domains
+For each document:
+
+1. **Prepare** (15 min)
+   - Confirm 3+ authoritative sources (FAO, OIE/WOAH, peer-reviewed)
+   - Outline sections and word count targets
+   - Note key clinical signs and epidemiology
+
+2. **Author** (60 min)
+   - Create file: `knowledge_base/diseases/<filename>.md`
+   - Copy template from `docs/knowledge_base_schema.md`
+   - Fill YAML front matter: title, domain: diseases, tags (5–8), reviewed: false, sources
+   - Write Overview (80–150 words): disease name, causative agent, primary signs
+   - Write Symptoms (150–300 words): observable clinical signs, mortality rates
+   - Write Treatment and Management (150–300 words): isolation, supportive care, veterinarian disclaimer
+   - Write Prevention and Vaccination (150–250 words): vaccine references, timing
+   - Write When to Call a Veterinarian (80–150 words): escalation criteria
+   - Write References: APA format, full citations
+
+3. **Validate** (2 min)
+   ```bash
+   python scripts/validate_knowledge_base.py
+   python scripts/validate_metadata.py
+   python scripts/validate_references.py
+   python scripts/validate_links.py
+   python scripts/build_index_preview.py
+   ```
+
+4. **Commit & PR**
+   ```bash
+   git add knowledge_base/diseases/<filename>.md
+   git commit -m "docs(kb-diseases): add <disease-name> disease document"
+   git push origin feature/knowledge-base
+   ```
+
+5. **Review & Merge**
+   - CI runs all validators (must pass)
+   - Peer review confirms sourcing, accuracy, style
+   - Update `reviewed: true` and `confidence: high/medium`
+   - Merge to `feature/knowledge-base`
+
+**Estimated Timeline:**
+- 5 documents × 80 min (prep + author + validate + commit) = 400 minutes
+- Plus review time: 30 min per document = 150 minutes
+- **Total: ~9 hours over 2–3 days**
+
+### Sprint 2.2 (Pending) — Vaccination Documents (4 of 35)
+
+**Objective:** Create vaccination schedules and administration guides.
+
+**Documents:**
+- Broiler Vaccination Schedule
+- Layer Vaccination Schedule
+- Vaccine Storage and Handling
+- Vaccine Administration
+
+### Sprint 2.4 (Pending) — Climate, Biosecurity, Feeding, Management (13 of 35)
+
+**Objective:** Complete remaining priority domains.
+
+- Climate (3): Housing ventilation, Heat stress, Cold stress
+- Biosecurity (3): Farm checklist, Visitor protocols, Disinfection
+- Feeding (4): Broiler nutrition, Layer nutrition, Feed storage, Water quality
+- Management (3): Flock records, Mortality tracking, Production records
+
+### Sprint 2.5 (Pending) — Emergency & FAQ Documents (8 of 35)
+
+**Objective:** Create emergency alerts and frequently asked questions.
+
+- Emergency (3): Newcastle emergency, Avian Influenza emergency, Mass mortality
+- FAQ (5): Common farmer questions across all domains
 
 ### Future Sprints (Not Yet Started)
 
@@ -525,138 +626,72 @@ pytest -v          # verbose output
 
 ## Recommended Next Task
 
-### Immediate Priority: Author Sprint 2 Knowledge Base Documents
+### Sprint 2.3 Batch 2 — Create 5 Disease Documents
 
-**Objective:** Reach 35 documents (0 of 35 currently) to enable Sprint 3 evaluation dataset work.
+**Objective:** Progress from 10 of 35 to 15 of 35 documents. Complete remaining core disease documents for comprehensive disease coverage.
 
-**Phased Approach:**
+**Priority Order:**
 
-#### Phase 1: Disease Documents (8 documents)
-
-**Why First:** Diseases are the core domain; vaccination, emergency, and FAQ documents depend on disease knowledge.
+1. **Infectious Coryza** (60 min) — Respiratory bacterial disease, high impact in tropical regions
+2. **Marek's Disease** (60 min) — Herpes virus, major immunosuppression risk
+3. **Fowl Cholera** (60 min) — High-mortality acute bacterial infection
+4. **Fowl Pox** (60 min) — Viral disease with visible skin manifestations
+5. **Pullorum Disease** (60 min) — Affects young chicks, reduces adult production
 
 **Execution:**
 
-1. **Create Newcastle Disease** (`knowledge_base/diseases/newcastle_disease.md`)
-   - Foundational document; most common in African poultry
-   - Template from `docs/knowledge_base_schema.md`
-   - Sections: Overview, Symptoms, Treatment, Prevention/Vaccination, When to Call Vet, References
-   - Sources: FAO Newcastle Disease publication, OIE/WOAH technical card, peer-reviewed literature
-   - Target word counts: Overview (80–150), Symptoms (150–300), Treatment (150–300), Prevention (150–250), When to Call (80–150)
-   - Run validator: `python scripts/validate_knowledge_base.py`
-   - Open PR on `feature/knowledge-base`
-   - Peer review confirms sourcing, accuracy, and style compliance
-   - Merge after approval
+For each disease document, follow this workflow:
 
-2. **Avian Influenza** (`diseases/avian_influenza.md`)
-   - Highest severity emergency concern
-   - Tier 1 sources mandatory (OIE/WOAH, FAO)
-   - HPAI (H5N1, H5N8) focus for African context
+1. **Research & Source** (15 min)
+   - Confirm OIE/WOAH technical card availability
+   - Identify FAO or peer-reviewed backup sources
+   - Review national veterinary authority guidelines
 
-3. **Gumboro, Marek's, Coccidiosis, Fowl Pox, Fowl Typhoid, Infectious Bronchitis**
-   - Follow same process
-   - Prioritise sources, then style, then completeness
+2. **Draft** (45 min)
+   - Use `docs/knowledge_base_schema.md` template
+   - Fill YAML front matter (title, domain: diseases, 5–8 tags, sources)
+   - Write all required sections with target word counts
+   - Ensure key terms in first 50 words of Overview
 
-#### Phase 2: Vaccination Documents (4 documents)
-
-**Execution Order:**
-1. Broiler vaccination schedule (depends on disease documents)
-2. Layer vaccination schedule
-3. Vaccine storage and handling
-4. Vaccine administration
-
-#### Phase 3: Climate, Biosecurity, Feeding, Management Documents (12 documents)
-
-**Parallel Execution:** No cross-domain dependencies; can be authored simultaneously.
-
-#### Phase 4: Emergency and FAQ Documents (5 documents)
-
-**Depends On:** Disease documents complete.
-
-**Execution:** Emergency alerts mapped to Newcastle, Avian Influenza, and mass mortality scenarios. FAQ answers drawn from all domains.
-
-### Document Authoring Workflow
-
-For each document:
-
-1. **Prepare** (20 min)
-   - Read `docs/knowledge_engineering.md` in full
-   - Read `docs/knowledge_base_schema.md` template for domain
-   - Identify 3+ authoritative sources (FAO, OIE/WOAH, peer-reviewed, national authority)
-   - Outline sections and word count targets
-
-2. **Author** (60–90 min)
-   - Create file: `knowledge_base/<domain>/<filename>.md`
-   - Copy template from schema doc
-   - Fill YAML front matter: title, domain, tags (5–8), reviewed: false, sources (APA format)
-   - Write each section with target word counts
-   - Ensure first 50 words of Overview contain disease name, cause, primary signs
-   - Use preferred terminology (see `docs/knowledge_engineering.md` Section 5)
-   - Use active voice, short sentences (max 25 words)
-   - Include veterinarian disclaimer in treatment/emergency sections
-
-3. **Validate** (2 min)
+3. **Validate & Format** (10 min)
    ```bash
    python scripts/validate_knowledge_base.py
+   python scripts/validate_metadata.py
+   python scripts/validate_references.py
+   python scripts/validate_links.py
    ```
-   - Fix any metadata, section, or filename errors
-   - Re-run until clean
 
-4. **Commit** (1 min)
+4. **Commit & Push**
    ```bash
-   git add knowledge_base/<domain>/<filename>.md
-   git commit -m "docs(kb): add <document-title> to <domain> domain"
+   git add knowledge_base/diseases/<filename>.md
+   git commit -m "docs(kb-diseases): add <disease-name>"
+   git push origin feature/knowledge-base
    ```
 
-5. **Pull Request** (5 min)
-   - Push to feature branch
-   - Open PR with description: domain, document name, sources (brief list)
-   - Link to CI run (validator must pass)
+5. **Request Review**
+   - Open PR with disease name and source list
+   - CI must pass (all validators)
+   - Request peer review (20–30 min)
+   - Address feedback if any
+   - Merge when approved
 
-6. **Review** (30–60 min)
-   - Second reviewer checks out branch
-   - Confirms all claims supported by sources (especially dosages, mortality rates)
-   - Verifies veterinarian disclaimer present
-   - Checks writing style (active voice, short sentences, farmer-friendly)
-   - Confirms terminology consistency
-   - Validates section word counts
+**Success Criteria:**
+- [ ] All 5 documents authored
+- [ ] All pass all validators (schema, metadata, references, links)
+- [ ] All CI checks passing
+- [ ] All reviewed and approved by second contributor
+- [ ] Knowledge base progress: 15 of 35 documents (43%)
 
-7. **Approve & Merge** (5 min)
-   - Author updates `reviewed: true` and `confidence: high/medium`
-   - PR merged to main branch
-   - FAISS index will be built in Sprint 4
+**Estimated Timeline:**
+- **Total:** ~9 hours (or 2–3 days with parallel reviews)
+- **Per document:** 80 minutes (research, draft, validate, commit)
+- **Review time:** 30 minutes per document (parallel with next document authoring)
 
-### Success Criteria for Sprint 2
-
-- [ ] All 35 documents authored and committed
-- [ ] All documents pass schema validator
-- [ ] All documents reviewed by a second contributor
-- [ ] All documents have `reviewed: true`
-- [ ] All documents have `confidence: high` or `medium` (no `low` in production)
-- [ ] All CI checks passing (ruff, pytest, validator)
-- [ ] Knowledge base status table in `knowledge_base/README.md` updated
-- [ ] CHANGELOG.md updated with document inventory
-
-### Estimated Timeline
-
-- **Phase 1 (Diseases):** 8 × 2 hours = 16 hours (1–2 weeks with review)
-- **Phase 2 (Vaccination):** 4 × 1.5 hours = 6 hours (3–4 days)
-- **Phase 3 (Climate, Biosecurity, Feeding, Management):** 12 × 1.5 hours = 18 hours (1 week)
-- **Phase 4 (Emergency, FAQ):** 8 × 1 hour = 8 hours (4–5 days)
-- **Total:** ~48 hours elapsed time over 3–4 weeks (assuming parallel contributions)
-
-### Acceptance Criteria
-
-Each document must:
-- [ ] Pass schema validator without errors
-- [ ] Contain minimum 3 tags; aim for 5–8
-- [ ] Cite minimum 1 authoritative source (Tier 1–3)
-- [ ] Achieve target word counts per section
-- [ ] Use preferred terminology consistently
-- [ ] Include veterinarian disclaimer in required sections
-- [ ] Be reviewed and approved by a second contributor
-- [ ] Have `reviewed: true` before merge
-- [ ] Have CI checks passing (ruff, pytest, validator)
+**Next Steps After Batch 2:**
+- Sprint 2.2 — Vaccination documents (4 documents)
+- Sprint 2.4 — Climate, Biosecurity, Feeding, Management documents (13 documents)
+- Sprint 2.5 — Emergency & FAQ documents (8 documents)
+- **Target:** All 35 documents complete by end of Sprint 2
 
 ---
 
@@ -673,6 +708,8 @@ Each document must:
 
 ---
 
-**Document Status:** Complete  
-**Last Review:** 11 July 2026  
+**Document Status:** Updated  
+**Last Updated:** 11 July 2026  
+**Sprint Progress:** Sprint 2 — 10 of 35 documents (29%)  
+**Next Milestone:** Sprint 2.3 Batch 2 — 15 of 35 documents (43%)  
 **Owner:** PoultryGuard AI Development Team
