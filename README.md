@@ -162,6 +162,7 @@ poultryguard-ai/
 
 | Document | Description |
 |---|---|
+| [AI_DEVELOPER_GUIDE.md](AI_DEVELOPER_GUIDE.md) | Permanent instructions for AI coding assistants working on this repository |
 | [docs/knowledge_base_schema.md](docs/knowledge_base_schema.md) | Knowledge base document schema and validator reference |
 | [docs/architecture/system_overview.md](docs/architecture/system_overview.md) | System overview and component map |
 | [docs/architecture/software_architecture.md](docs/architecture/software_architecture.md) | Layered architecture and module map |
@@ -186,6 +187,24 @@ make index       # build FAISS index from knowledge base
 make run         # streamlit run app/backend/main.py
 make benchmark   # run performance benchmarks
 ```
+
+### Knowledge Base Validation
+
+Sprint 2.2 focuses on automated quality gates before broader knowledge base
+expansion. Run these checks before adding or reviewing knowledge base documents:
+
+```bash
+python scripts/validate_knowledge_base.py
+python scripts/validate_metadata.py
+python scripts/validate_references.py
+python scripts/validate_links.py
+python scripts/build_index_preview.py
+```
+
+These utilities validate schema compliance, metadata quality, reference
+alignment, offline-safe links, and a lightweight preview of future RAG index
+chunks. They do not implement embeddings, FAISS indexing, model inference, or
+application features.
 
 ---
 
