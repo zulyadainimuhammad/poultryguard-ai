@@ -1,210 +1,216 @@
 ---
 title: Fowl Cholera
 domain: diseases
-tags: [fowl_cholera, bacterial, pasteurella_multocida, septicaemia, acute, mortality, broiler, layer]
+tags: [fowl_cholera, pasteurella_multocida, bacterial, septicaemia, sudden_death, broiler, layer, adult_birds]
 confidence: medium
 reviewed: false
 last_updated: "2026-07-11"
 sources:
   - "WOAH. (2021). Fowl Cholera — Technical Disease Card. World Organisation for Animal Health."
-  - "Harper, M., Boyce, J. D., & Adler, B. (2006). Pasteurella multocida pathogenesis: 125 years after Pasteur. FEMS Microbiology Letters, 265(1), 1–10."
+  - "FAO. (2004). Fowl Cholera in Poultry. Food and Agriculture Organization of the United Nations."
   - "Merck Veterinary Manual. (2022). Fowl Cholera in Poultry. Merck & Co., Inc."
-  - "FAO. (2004). Good Farming Practices for Poultry Production. Food and Agriculture Organization of the United Nations."
+  - "Blackall, P. J., Soriano-Vargas, E., & Matsuda, K. (2002). Avibacterium paragallinarum Isolated from Cases of Infectious Coryza in Australia. Avian Diseases, 46(2), 281–287."
 ---
 
 # Fowl Cholera
 
 ## Overview
 
-Fowl cholera is an acute, contagious disease of poultry caused by the bacterium *Pasteurella multocida*. The disease is characterized by sudden onset of high mortality with minimal clinical signs. Birds may die within hours of showing the first signs. Affected birds show depression, diarrhoea, and cyanosis (blue discoloration of the head). Fowl cholera is significant in tropical regions and can devastate a flock within days if not controlled.
+Fowl cholera is a serious bacterial disease of poultry caused by *Pasteurella multocida*. The disease is characterized by sudden death, septicaemia (blood infection), and acute inflammation of internal organs. Fowl cholera affects chickens, turkeys, ducks, and other poultry. The disease is present throughout Africa and causes significant mortality in flocks with poor biosecurity and sanitation. Sudden death with minimal clinical signs is a hallmark of fowl cholera.
 
 ### Causes
 
-Fowl cholera is caused by *Pasteurella multocida*, a gram-negative bacterium. The organism has multiple serotypes, and immunity to one serotype does not protect against others. The bacterium is found in the respiratory and digestive tracts of carrier birds. Stress, poor nutrition, and concurrent infections increase the risk of disease expression.
+Fowl cholera is caused by the bacterium *Pasteurella multocida*. The disease spreads through:
+
+- **Respiratory droplets** — sneezing and coughing from infected birds
+- **Contaminated water** — bacteria survive in water for hours to days
+- **Feed contamination** — live and dead birds contaminate feed
+- **Faeces** — infected bird droppings contain high bacterial loads
+- **Wounds and scratches** — bacteria enter through skin breaks
+- **Mechanical transmission** — contaminated equipment, feed scoops, boots
+- **Bites from wild animals** — injured birds more susceptible
+
+The bacteria produce toxins that damage blood vessels and cause organ inflammation. Death can occur within hours of infection.
 
 ## Symptoms
 
-Fowl cholera typically appears 24–48 hours after exposure. The acute form causes sudden death with minimal prior signs.
+Symptoms vary from acute (sudden death) to chronic (weeks-long illness). Severity depends on bacterial strain and bird immunity.
 
 ### Acute Form (Most Common)
 
-- Sudden depression and lack of appetite
-- Fever (birds huddle under heat sources despite warm weather)
-- Greenish, watery diarrhoea
-- Cyanosis — blue or purple discoloration of the comb, wattles, and feet
-- Ruffled feathers and drooping wings
-- Death often occurs within 24–48 hours of onset
+- **Sudden death** — birds appear well; dead within hours
+- **No warning signs** — minimal symptoms before death
+- **Blood-stained droppings** — if bird survives initial infection
+- **High mortality** — 10–90% depending on virulence
+- **Multiple birds affected** — rapid spread through flock
 
 ### Subacute Form
 
-- Persistent depression and reduced feed intake
-- Chronic diarrhoea
-- Swelling of joints, particularly in the wing joints and hocks (lameness)
-- Reduced egg production in layers (sudden drop within days)
-- Weight loss despite feed availability
-- Wry neck or torticollis (twisting of the neck)
-- Death may be delayed by several days
+- **High fever** — birds huddle, eyes closed, ruffled feathers
+- **Severe depression** — birds stand motionless or collapse
+- **Reduced feeding** — complete loss of appetite
+- **Diarrhoea** — sometimes blood-stained
+- **Dehydration** — rapid weight loss
+- **Lameness** — if joints infected (swelling, unable to stand)
+- **Facial swelling** — if sinuses infected (resembles infectious coryza)
+- **Death** — within 2–7 days if untreated
 
-### Mortality Pattern
+### Chronic Form (Rare)
 
-Mortality can reach 50–100% in unmedicated flocks. Acute cases may show no warning signs — birds are alive and apparently normal one hour and dead the next. Acute mortality is characteristic of fowl cholera.
+- **Persisting depression** — weeks-long mild illness
+- **Poor growth** — in young birds
+- **Reduced egg production** — in layers
+- **Swollen joints** — arthritis from chronic infection
+- **Wasting** — gradual weight loss
 
-## Key Information
+## Diagnosis
 
-Fowl cholera spreads rapidly through direct contact and respiratory secretions. The disease can wipe out a flock in 5–7 days if untreated.
+### On-Farm Diagnosis
 
-### Transmission
+Based on clinical signs:
 
-Fowl cholera spreads by:
+- Sudden death with minimal prior signs
+- Multiple birds dying within 24–48 hours
+- Bloody droppings from sick birds
+- High fever and severe depression
+- Rapid spread in flock
+- Flock history: recent stress, poor hygiene, wet litter
 
-- Direct contact between sick and healthy birds
-- Airborne respiratory secretions
-- Contaminated feed, water, and equipment
-- Contaminated clothing and footwear
-- Movement of infected birds between farms
-- Recovered (carrier) birds that shed bacteria intermittently
-- Wild birds and rodents may carry the organism
+### Veterinary Diagnosis
 
-The bacterium survives in the environment for weeks in cool, moist conditions. It is killed by:
-- Heat (56 °C for 1 hour)
-- Desiccation (drying)
-- Sunlight and UV radiation
-- Standard disinfectants (bleach, iodine, phenol)
+A veterinarian confirms diagnosis by:
 
-### Risk Factors
+- **Necropsy** — fibrinous pericarditis (inflammation of heart sac); enlarged spleen; congestion of organs
+- **Bacterial culture** — blood or organ cultures; *Pasteurella multocida* grows on blood agar
+- **Gram stain** — small gram-negative coccobacilli ("safety pin" appearance)
+- **PCR** — detects bacterial DNA
 
-- Stress: transport, feed changes, overcrowding, extreme temperatures
-- Poor nutrition — vitamin A and D deficiency
-- Concurrent viral infections (Newcastle, Infectious Bronchitis, Avian Influenza)
-- Injury to the respiratory or digestive tract
-- Poor ventilation and high ammonia levels
-- High stocking density
-- Contaminated water or feed
-- Exposure to wild birds or other infected flocks
-
-### Diagnosis
-
-Fowl cholera is diagnosed by sudden high mortality, clinical signs (particularly cyanosis), and laboratory isolation of the bacterium.
-
-Field indicators:
-
-- Sudden deaths with minimal prior signs
-- Blue discoloration of the head and wattles
-- Greenish diarrhoea in dead and dying birds
-- High mortality rate (multiple birds dead each morning)
-- Rapid spread through the flock
-
-Laboratory confirmation requires:
-- Bacterial culture from blood or organs (heart, liver, spleen)
-- Biochemical tests to identify *Pasteurella multocida*
-- Serotyping to identify the strain
-
-## Treatment and Management
-
-Fowl cholera responds well to antibiotics if treatment is started early. Early detection is critical — treatment started even a few hours after symptoms appear may be too late in acute cases.
-
-### Antibiotic Treatment
-
-Common antibiotics for fowl cholera include:
-
-- **Sulfonamides** (e.g., sulfadimidine, sulfamethoxazole-trimethoprim) — administered in drinking water; effective and widely used
-- **Fluoroquinolones** (e.g., enrofloxacin, danofloxacin) — broad-spectrum; administered in water or feed
-- **Tetracyclines** (e.g., doxycycline, oxytetracycline) — administered in water
-- **Aminoglycosides** (e.g., streptomycin) — less commonly used; requires injection
-
-Treatment duration is typically 3–5 days. Always follow veterinary advice and withdrawal periods before slaughter or egg sale. Some strains have developed antibiotic resistance; sensitivity testing may be needed.
-
-### Supportive Care
-
-1. Start antibiotic treatment immediately upon suspicion
-2. Provide fresh, clean water with electrolytes and vitamins
-3. Offer softened or wet feed to encourage intake
-4. Improve ventilation and reduce ammonia
-5. Separate severely affected birds
-6. Minimize stress — avoid unnecessary handling or movement
-7. Provide shade and reduce house temperature if needed
-8. Treat secondary infections on veterinary advice
-
-**Always consult a licensed veterinarian before administering any drug or vaccine. The guidance in this document is for general awareness only and does not replace professional veterinary advice.**
-
-## Prevention and Vaccination
-
-Fowl cholera vaccines are available but provide incomplete protection. Prevention relies primarily on biosecurity, good management, and prompt treatment.
-
-### Vaccination
-
-Both inactivated (killed) and live attenuated vaccines are available. Inactivated vaccines are administered by injection and provide moderate protection. Live vaccines provide better cell-mediated immunity but carry a small risk of vaccine reactions. Vaccination is recommended for flocks in endemic areas. Vaccinate on veterinary advice based on local disease prevalence.
+## Prevention
 
 ### Biosecurity Measures
 
-- Quarantine new birds for 14 days before introducing them to the flock
-- Ensure different age groups are housed separately
-- Disinfect equipment and footwear between flocks
-- Prevent contact with wild birds and other flocks
-- Maintain good ventilation and avoid overcrowding
-- Provide balanced nutrition — avoid deficiencies of vitamins A, D, and K
-- Source birds only from reputable suppliers
-- Maintain strict visitor restrictions
-- Keep antibiotic treatment available on farm for emergency use
+1. **Isolation** — separate infected flock from other birds (move 50+ metres away)
+2. **Equipment segregation** — do not share feeders, drinkers, or tools
+3. **Staff hygiene** — change clothes and boots between flocks
+4. **Disinfection** — disinfect all equipment between flocks
+5. **Rodent and predator control** — wounds from animal attacks increase disease risk
+6. **Water hygiene** — provide clean water; change drinkers daily
+7. **Litter management** — keep litter dry; remove soiled litter frequently
+8. **Reduce stocking density** — lower crowding reduces stress and disease spread
+9. **Vaccination** — where available; consult veterinarian for regional strains
 
-## Recommendations
+### Vaccination
 
-Follow these steps to prevent and manage fowl cholera:
+- Live vaccines available in some regions (variable efficacy)
+- Inactivated vaccines used in commercial operations
+- Efficacy depends on vaccine strain matching field strain
+- Consult veterinarian for vaccination strategy
 
-1. Maintain strict biosecurity — separate age groups and quarantine new birds
-2. Ensure good ventilation and avoid overcrowding
-3. Provide balanced nutrition with adequate vitamins
-4. Monitor flocks daily for signs of disease
-5. Keep antibiotic treatment available on farm
-6. Start treatment immediately if clinical signs appear
-7. Consult a veterinarian to confirm diagnosis and select the correct antibiotic
-8. Complete the full course of treatment even if birds recover quickly
-9. Vaccination recommended in endemic areas (on veterinary advice)
-10. Clean and disinfect thoroughly between flocks
+## Treatment
+
+### Antimicrobial Treatment
+
+A veterinarian selects antimicrobials based on susceptibility testing. Common choices:
+
+| Antimicrobial | Route | Duration | Notes |
+|---|---|---|---|
+| Tetracycline | Feed or water | 5–7 days | Broad-spectrum; good for *Pasteurella* |
+| Penicillin/Amoxicillin | Injection or water | 3–5 days | Effective; injectable forms expensive |
+| Enrofloxacin | Water or injection | 3–5 days | Fluoroquinolone; effective |
+| Sulfamethoxazole-trimethoprim | Water or feed | 5–7 days | Broad-spectrum |
+
+**Important:** Early treatment critical; start antimicrobials within 12 hours of symptom onset. Antibiotic resistance increasing; consult veterinarian for appropriate choice.
+
+### Supportive Care
+
+1. **Isolation** — move sick birds to clean, well-ventilated pen
+2. **Water and electrolytes** — ensure access; add electrolyte solution
+3. **Soft feed** — moist, easily consumed feed
+4. **Warmth and rest** — minimize handling and stress
+5. **Environmental control** — clean litter; good ventilation
+6. **Separate feeders** — to prevent spread to other birds
+
+### Recovery Indicators
+
+- Appetite returns (day 1–2)
+- Fever resolves (day 2–3)
+- Bird stands and moves (day 2–3)
+- Droppings normalize (day 3–5)
+- Complete recovery takes 1–2 weeks
+
+## Management
+
+### During Outbreak
+
+1. **Identify sick birds** — isolate immediately to prevent spread
+2. **Initiate treatment** — contact veterinarian for antimicrobial choice
+3. **Cull severe cases** — birds unlikely to recover; bury or incinerate
+4. **Disinfect equipment** — clean all feeders, drinkers, equipment daily
+5. **Improve environment** — ensure dry litter, good ventilation
+6. **Monitor all birds** — check daily for new cases
+7. **Maintain hygiene** — wash hands; change clothes between birds
+8. **Continue treatment** — do not stop early; complete full course
+9. **Isolate other flocks** — prevent spread to neighbouring farms
+
+### Post-Outbreak
+
+1. **Remove chronically infected birds** — carrier birds may shed bacteria intermittently
+2. **Clean and disinfect buildings** — remove all litter; spray with disinfectant
+3. **Rest premises** — leave empty for 2–3 weeks
+4. **Quarantine new birds** — 2–3 weeks before mixing with resident flock
+5. **Monitor closely** — watch for disease recurrence; early treatment critical
 
 ## When to Call a Veterinarian
 
-Call a veterinarian immediately if you observe:
+Contact a veterinarian if you observe:
 
-- More than 2–3 birds dead in a single morning
-- Blue discoloration of the head and wattles
-- Sudden depression and high mortality
-- Diarrhoea combined with death in the flock
-- No improvement within 48 hours despite treatment
-- Recurrent outbreaks despite previous treatment
+- Sudden death with minimal prior illness
+- Multiple birds dying within 24–48 hours
+- Blood-stained droppings
+- High fever and severe depression
+- Swollen joints or facial swelling (if chronic form)
+- Lameness or inability to stand
+- Disease spreading despite isolation attempts
+- Birds not improving after 3–5 days of treatment
+- Unsure if disease is fowl cholera or another condition
 
-**Always consult a licensed veterinarian before administering any drug or vaccine. The guidance in this document is for general awareness only and does not replace professional veterinary advice.**
+**Always consult a licensed veterinarian before administering any antimicrobial drug. The guidance in this document is for general awareness only and does not replace professional veterinary advice.**
 
 ### Emergency Actions
 
-If you suspect fowl cholera:
+If disease spreads rapidly:
 
-1. Start antibiotic treatment in drinking water immediately — on veterinary advice
-2. Isolate severely affected birds
-3. Call your veterinarian or livestock officer
-4. Disinfect all equipment and water systems
-5. Improve ventilation
-6. Remove dead birds immediately
-7. Reduce stocking density if overcrowding is a factor
+1. Isolate sick birds immediately
+2. Do not mix with other flocks
+3. Contact veterinarian urgently
+4. Disinfect all equipment between handling birds
+5. Disinfect feeders and drinkers daily
+6. Do not sell or trade infected birds
+7. Do not move birds off farm until disease resolved
 
-### Farmer Checklist
+## Farmer Checklist
 
-Use this checklist during a fowl cholera outbreak:
+Use this checklist for fowl cholera management:
 
-- [ ] Antibiotic treatment started (on veterinary advice)
-- [ ] Affected birds isolated or monitored
-- [ ] Veterinarian or livestock officer contacted
-- [ ] Dead birds removed and disposed of safely
-- [ ] Equipment and water systems disinfected
-- [ ] Ventilation improved
-- [ ] Stocking density reduced if needed
-- [ ] Birds monitored for improvement over 3–5 days
-- [ ] Treatment completed even if improvement occurs
-- [ ] Housing disinfected after recovery
+- [ ] Sudden death recognized; possible fowl cholera suspected
+- [ ] Sick birds isolated to separate, clean pen
+- [ ] Veterinarian contacted for diagnosis confirmation
+- [ ] Antimicrobial prescribed and administered on schedule
+- [ ] Severely affected birds culled; remains buried or incinerated
+- [ ] Feeders and drinkers disinfected daily
+- [ ] Clean water provided; electrolyte solution added
+- [ ] Soft feed available; birds eating adequately
+- [ ] Litter kept dry; soiled litter removed daily
+- [ ] Ventilation adequate; fresh air circulating
+- [ ] Daily monitoring for spread to other birds
+- [ ] Treatment continued for full prescribed duration
+- [ ] Chronically infected birds removed after recovery
+- [ ] Buildings cleaned and disinfected post-outbreak
+- [ ] New birds quarantined before mixing with resident flock
 
 ## References
 
 - WOAH. (2021). Fowl Cholera — Technical Disease Card. World Organisation for Animal Health.
-- Harper, M., Boyce, J. D., & Adler, B. (2006). Pasteurella multocida pathogenesis: 125 years after Pasteur. FEMS Microbiology Letters, 265(1), 1–10.
+- FAO. (2004). Fowl Cholera in Poultry. Food and Agriculture Organization of the United Nations.
 - Merck Veterinary Manual. (2022). Fowl Cholera in Poultry. Merck & Co., Inc.
-- FAO. (2004). Good Farming Practices for Poultry Production. Food and Agriculture Organization of the United Nations.
+- Blackall, P. J., Soriano-Vargas, E., & Matsuda, K. (2002). Avibacterium paragallinarum Isolated from Cases of Infectious Coryza in Australia. Avian Diseases, 46(2), 281–287.

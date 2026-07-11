@@ -1,220 +1,223 @@
 ---
 title: Marek's Disease
 domain: diseases
-tags: [mareks_disease, herpes_virus, immunosuppression, paralysis, tumors, broiler, layer, chick]
-confidence: medium
+tags: [marek, herpesvirus, neurological, paralysis, tumours, layer, broiler, chick, vaccination]
+confidence: high
 reviewed: false
 last_updated: "2026-07-11"
 sources:
   - "WOAH. (2021). Marek's Disease — Technical Disease Card. World Organisation for Animal Health."
-  - "Witter, R. L. (1997). Increased virulence of Marek's disease virus field isolates. Avian Diseases, 41(1), 149–163."
+  - "FAO. (2004). Marek's Disease. FAO Animal Health Manual No. 11. Food and Agriculture Organization of the United Nations."
   - "Merck Veterinary Manual. (2022). Marek's Disease in Poultry. Merck & Co., Inc."
-  - "FAO. (2010). Good Practices for Biosecurity of Poultry Production. Food and Agriculture Organization of the United Nations."
+  - "Witter, R. L. (1997). Increased Virulence of Marek's Disease Virus Field Isolates. Avian Diseases, 41(1), 149–163."
 ---
 
 # Marek's Disease
 
 ## Overview
 
-Marek's disease is a highly contagious viral disease caused by *Gallid herpesvirus 2* (GaHV-2). The virus causes severe immunosuppression, paralysis, and tumour formation in chickens and turkeys. The disease results in high losses due to mortality, condemnation of carcasses, and sudden death. Marek's disease vaccination is essential for all commercial and backyard flocks in endemic areas, as unvaccinated birds suffer near-total losses.
+Marek's disease is a highly contagious, economically devastating viral disease of chickens caused by a herpesvirus (*Gallid herpesvirus 2*). The disease causes paralysis, tumours in internal organs, and immunosuppression. Marek's disease is present worldwide, including sub-Saharan Africa. Infection is nearly universal in unvaccinated flocks; however, vaccination at hatch is highly effective and is a standard practice on all commercial and improved smallholder farms.
 
 ### Causes
 
-Marek's disease is caused by *Gallid herpesvirus 2* (formerly called Marek's disease virus). The virus has increased in virulence over decades; modern field strains are highly pathogenic and can break through vaccine immunity in inadequately vaccinated flocks. The virus causes latent infection in vaccinated birds, who shed virus but remain protected by cell-mediated immunity.
+Marek's disease is caused by *Gallid herpesvirus 2* (formerly *Marek's disease virus*, MDV). The virus:
+
+- **Spreads through respiratory droplets** — infected birds shed virus in dust and dander
+- **Persists in environment** — remains viable in contaminated litter for months
+- **Infects at young age** — most chicks exposed by 2–3 weeks of age
+- **Varies in virulence** — field strains range from mild to highly severe
+- **Replicates in feather follicles** — source of continuous virus shedding
+
+Infection with one strain provides no protection against other strains; reinfection possible.
 
 ## Symptoms
 
-Marek's disease produces three clinical forms that may occur simultaneously in a flock. Onset is typically at 8–12 weeks of age, but can occur at any age.
+Symptoms appear 2–4 weeks after infection; older birds more severely affected than chicks.
 
 ### Neurological Form (Most Common)
 
-- Paralysis or paresis (partial paralysis) of one or both legs
-- Wings paralysed and hanging loosely
-- Twisted neck (torticollis)
-- Loss of coordination and ataxia
-- Birds unable to stand or move; lying on their side
-- Incontinence (droppings everywhere)
-- Death from starvation and dehydration
+- **Leg paralysis** — inability to stand; legs splayed forward and backward ("splits")
+- **Wing paralysis** — drooping wings; bird unable to fly
+- **Neck paralysis** — bird unable to lift head or drink
+- **Twisted neck** — similar to Newcastle disease but more permanent
+- **Loss of coordination** — staggering, circling, inability to balance
+- **Paralysis progression** — can affect one leg initially, then spread
+- **Mortality** — 20–50% of affected birds die; others remain permanently paralysed
 
-### Visceral Form (Tumors)
+### Visceral Form (Tumours)
 
-- Internal tumors on organs — liver, spleen, kidneys, pancreas, gonadal tissues
-- External swelling may occur but is not visible initially
-- Depression, weight loss, and poor growth
-- Sudden death without prior signs
-- Pale, enlarged liver (post-mortem finding)
+- **Severe wasting** — rapid weight loss despite eating
+- **Abdominal swelling** — from large internal tumours
+- **Enlarged organs** — liver, spleen, kidney tumours visible at necropsy
+- **Death** — usually within 1–2 weeks of symptom onset
+- **Sudden death** — some birds die without showing signs
 
-### Ocular Form (Eye Lesions)
+### Ocular Form (Eye Tumours)
 
-- Iris becomes grey and loses normal pigmentation ("grey eye")
-- Iris becomes irregular and may stick to the lens
-- Partial or total blindness
-- Photophobia (light sensitivity)
-- Less common than neurological form; indicates severe infection
+- **Iris colour change** — from orange to white, yellow, or grey ("grey eye")
+- **Pupil distortion** — irregular shape; no longer round
+- **Blindness** — if tumours obstruct vision
+- **Less common** than neurological or visceral forms
 
-### Mortality Pattern
+### Acute Marek's (Uncommon but Severe)
 
-Mortality in unvaccinated flocks can reach 50–80%, with losses from:  
-- Euthanasia of paralysed birds  
-- Sudden death from visceral tumors  
-- Starvation from inability to reach feed  
-- Secondary infections  
+- **Sudden illness** — high fever, severe depression, ruffled feathers
+- **Rapid death** — within 24–48 hours
+- **High mortality** — 50–100% of affected birds
+- **Associated with highly virulent strains**
 
-Vaccinated flocks show mortality < 5%.
+## Diagnosis
 
-## Key Information
+### On-Farm Diagnosis
 
-Marek's disease spreads by airborne dust containing virus shed from infected feather follicles. The virus survives in the poultry house environment for long periods.
+Based on clinical signs:
 
-### Transmission
+- Leg or wing paralysis in young flock
+- Iris discoloration ("grey eye")
+- High mortality in 2–6 week period
+- Rapid wasting and death
+- Vaccination history (vaccinated birds rarely show signs)
 
-Marek's disease spreads by:
+### Veterinary Diagnosis
 
-- Airborne shedding of virus in dust and dander from feather follicles
-- Direct contact between infected and susceptible birds
-- Contaminated equipment, clothing, and footwear
-- Infected embryos in eggs (vertical transmission is rare)
-- Wild birds may carry the virus but do not develop disease
+A veterinarian confirms diagnosis by:
 
-The virus is fragile and inactivated by:  
-- Heat (56 °C for 1 hour)  
-- Sunlight and UV radiation  
-- Sodium hypochlorite (bleach) at 0.5% for 1 minute  
-- Formaldehyde and iodine-based disinfectants  
+- **Necropsy** — gross lesions: pale, enlarged nerves; internal tumours
+- **Histopathology** — characteristic lymphoid infiltration of nerves
+- **PCR** — detects viral DNA from tissue samples
+- **Viral isolation** — culture of virus (specialized laboratories)
 
-### Risk Factors
+## Prevention
 
-- Unvaccinated or inadequately vaccinated birds
-- Exposure to wild birds or other infected flocks
-- High virus load in the environment (chronic shedding from vaccinated carriers)
-- Poor ventilation and high stocking density
-- Young age (peak susceptibility 8–12 weeks)
-- Concurrent infections (Infectious Bursal Disease, Avian Leucosis)
-- Stress from transport, feed changes, or other causes
+### Vaccination (ONLY Effective Prevention)
 
-### Diagnosis
+Vaccination at hatch is the gold standard. Marek's vaccine is **mandatory** on all farms:
 
-Marek's disease is diagnosed by clinical signs (particularly paralysis in young birds) and laboratory confirmation.
+**Vaccine Types:**
+- **Herpesvirus of Turkey (HVT)** — most common; safe, effective
+- **Strain SB-1** — alternative; effective
+- **Strain CVI988** — used in some regions
 
-Field indicators:
-
-- Paralysis in 8–12 week old birds
-- One or both legs paralysed; wings drooping
-- High mortality and morbidity in unvaccinated birds
-- Iris depigmentation (grey eye)
-- Sudden death in older birds with no prior signs
-
-Laboratory confirmation requires:
-- Histopathology (microscopic examination of tissue) — shows pathognomonic lymphoid infiltration
-- PCR testing from feather follicles or blood
-- Virus isolation in cell culture
-
-Post-mortem examination may reveal visceral tumors and nerve enlargement.
-
-## Treatment and Management
-
-There is **no specific treatment** for Marek's disease. Management focuses on vaccination, supportive care, and preventing spread.
-
-### Management of Sick Birds
-
-1. Isolate paralysed birds in a separate pen with easy access to feed and water
-2. Provide soft feed and water in shallow containers within reach
-3. Ensure good ventilation to reduce ammonia buildup
-4. Euthanase severely paralysed birds humanely if they cannot reach feed and water
-5. Remove and safely dispose of dead birds immediately
-6. Thoroughly disinfect all equipment before moving to a new pen
-
-### Supportive Care
-
-- Provide vitamin and electrolyte supplements in drinking water
-- Maintain good ventilation to reduce stress
-- Minimize handling and transport
-- Ensure adequate space to prevent pressure ulcers in paralysed birds
-- Monitor for secondary bacterial infections
-
-**Always consult a licensed veterinarian before administering any drug or vaccine. The guidance in this document is for general awareness only and does not replace professional veterinary advice.**
-
-## Prevention and Vaccination
-
-Vaccination is **essential** for all flocks. Unvaccinated broilers will suffer near-total losses; unvaccinated layers cannot produce eggs profitably.
-
-### Vaccination (Mandatory)
-
-Marek's disease vaccines are live attenuated (weakened) vaccines derived from:
-
-- *Gallid herpesvirus 3* (GaHV-3) — turkey herpesvirus; does not cause disease in chickens
-- *Meleagrid herpesvirus 1* (MeHV-1) — another herpesvirus that is protective
-- Attenuated *Gallid herpesvirus 2* (GaHV-2) — less commonly used
-
-Vaccines are administered at the hatchery at one day of age via spray, in ovo, or by injection. Spray vaccination is most common. Vaccination must be done on the **first day of life** before birds are exposed to the virus.
-
-Vaccinated flocks may still show occasional Marek's disease due to vaccine breaks if virulent field strains are circulating. Revaccination of replacement pullets at 10 weeks is sometimes used in high-infection-pressure environments.
+**Vaccination Schedule:**
+- **Day 0 (hatch)** — vaccinate all chicks; spray or in ovo
+- **No booster required** — single dose at hatch provides lifetime immunity
+- **Verify documentation** — obtain proof from hatchery that vaccination performed
 
 ### Biosecurity Measures
 
-- Obtain all birds from reputable suppliers using Marek's vaccination programs
-- Ensure all chicks are vaccinated at the hatchery before arrival
-- Do not mix vaccinated and unvaccinated flocks
-- Prevent contact with wild birds
-- Disinfect equipment and clothing between flocks
-- Maintain strict visitor restrictions
-- House new flocks in thoroughly cleaned and disinfected buildings
-- Keep vaccination records for all birds
+1. **Isolation** — segregate flocks by age; do not mix young and old birds
+2. **New birds** — quarantine for 2 weeks before mixing with resident flock
+3. **Equipment segregation** — do not share feeders, drinkers, or tools
+4. **Staff hygiene** — change clothes and boots between flocks
+5. **Reduce crowding** — lower stocking density reduces transmission
+6. **Ventilation** — good airflow reduces airborne virus
+7. **Litter management** — regular removal reduces environmental contamination
+8. **Disinfection** — between flocks; use approved disinfectants
 
-## Recommendations
+### Management Practices
 
-Follow these steps to prevent Marek's disease:
+- **Vaccinate at hatchery** — do not attempt vaccination on farm
+- **Source only vaccinated birds** — never buy unvaccinated chicks
+- **Maintain flock records** — document vaccination status
+- **Avoid introducing infected birds** — source from reputable suppliers
 
-1. **Vaccination is mandatory** — Ensure all day-old chicks are vaccinated at the hatchery
-2. Keep vaccination records for every batch of birds
-3. Source birds only from hatcheries using Marek's vaccination programs
-4. Maintain strict biosecurity — separate flocks by age and time
-5. Do not allow contact between vaccinated and unvaccinated birds
-6. Clean and disinfect buildings thoroughly between flocks
-7. Monitor for signs of Marek's disease (paralysis, sudden death) weekly
-8. Report any suspected Marek's disease to a veterinarian or livestock officer
-9. Prevent wild bird contact — repair holes in housing and screens
+## Treatment
+
+**No specific antiviral treatment exists for Marek's disease.** Management is supportive only:
+
+### Supportive Care for Paralysed Birds
+
+1. **Isolation** — move paralysed bird to separate, clean pen
+2. **Access to water and feed** — place feeders and drinkers within reach
+3. **Bedding** — soft, dry litter to prevent pressure sores
+4. **Padding** — under paralysed legs to prevent injury
+5. **Assisted feeding** — hand-feed if bird unable to reach food
+6. **Monitoring** — watch for signs of pain or suffering
+7. **Euthanasia** — consider for severely affected birds unable to drink or eat
+
+### No Recovery Expected
+
+- Neurological damage is permanent
+- Paralysed birds may survive weeks but rarely return to normal function
+- Most affected birds should be culled to prevent continued virus shedding
+
+## Management
+
+### During Outbreak (Unvaccinated Flock)
+
+1. **Identify affected birds** — separate immediately
+2. **Cull sick birds** — remove birds showing neurological signs; bury or incinerate
+3. **Vaccinate survivors** — **Do not vaccinate birds already infected; vaccine cannot help**
+4. **Improve conditions** — ensure good ventilation, adequate feed/water
+5. **Increase monitoring** — check all birds daily for new cases
+6. **Contact veterinarian** — confirm diagnosis; plan flock management
+
+### Post-Outbreak
+
+1. **Cull remaining flock** — if heavily affected, depopulation may be necessary
+2. **Clean and disinfect** — remove all litter; spray buildings with disinfectant
+3. **Rest premises** — leave empty for 4–6 weeks to reduce virus load
+4. **Restock with vaccinated chicks** — order from hatchery with vaccination documentation
+5. **Maintain vaccination records** — for next 3–5 years
+
+### Prevention for Future Flocks
+
+- **Always vaccinate at hatch** — no exceptions
+- **Verify hatchery practices** — confirm vaccination performed and documented
+- **Source birds carefully** — buy only from suppliers with vaccination programs
+- **Maintain biosecurity** — prevent introduction of field virus
+- **Train staff** — ensure all understand importance of vaccination
 
 ## When to Call a Veterinarian
 
-Call a veterinarian immediately if you observe:
+Contact a veterinarian if you observe:
 
-- Paralysis (inability to stand or walk) in birds aged 8–12 weeks
-- Multiple birds with drooping wings or twisted neck
-- Sudden death in otherwise healthy young birds
-- High mortality in an unvaccinated flock
-- Any signs in birds that were supposed to be vaccinated
+- Leg or wing paralysis in young flock (< 8 weeks)
+- Iris discoloration (grey eye)
+- Multiple birds with neurological signs
+- Sudden death in young flock
+- Unsure if birds were vaccinated at hatch
+- Paralysed birds suffering; need euthanasia guidance
+- Outbreak in vaccinated flock (rare; unusual strain suspected)
 
-**Always consult a licensed veterinarian before administering any drug or vaccine. The guidance in this document is for general awareness only and does not replace professional veterinary advice.**
+**Always consult a licensed veterinarian before implementing any flock management decisions. The guidance in this document is for general awareness only and does not replace professional veterinary advice.**
 
 ### Emergency Actions
 
-If you suspect Marek's disease in an unvaccinated flock:
+If Marek's disease outbreak occurs:
 
-1. Isolate all affected birds
-2. Euthanase severely paralysed birds humanely
-3. Call your veterinarian or livestock officer
-4. Disinfect all equipment and housing
-5. Vaccinate any remaining unaffected birds immediately (if available)
-6. Do not move birds between farms
-7. Dispose of all dead birds by burial or incineration
+1. Isolate sick birds immediately
+2. Cull severely affected birds; bury or incinerate
+3. Contact veterinarian to confirm diagnosis
+4. Do not attempt vaccination of infected birds
+5. Improve ventilation and environmental conditions
+6. Disinfect equipment used in sick bird area
+7. Do not sell or trade affected birds
+8. Do not move birds off farm during outbreak
 
-### Farmer Checklist
+## Farmer Checklist
 
-Use this checklist to prevent and monitor Marek's disease:
+Use this checklist for Marek's disease prevention:
 
-- [ ] All chicks vaccinated at the hatchery (verify with hatchery documentation)
-- [ ] Vaccination records kept for every batch
-- [ ] No mixing of vaccinated and unvaccinated birds
-- [ ] Housing cleaned and disinfected before new flock arrival
-- [ ] Weekly monitoring for signs of paralysis or sudden death
-- [ ] Strict biosecurity maintained (no outside contacts, visitors)
-- [ ] Dead birds removed immediately and safely disposed of
-- [ ] Veterinarian contact number available
+- [ ] All chicks vaccinated at hatchery (Day 0)
+- [ ] Vaccination documentation received and filed
+- [ ] Chicks monitored daily for signs of paralysis
+- [ ] No unvaccinated birds introduced to flock
+- [ ] Flocks segregated by age; no mixing of young and old birds
+- [ ] New birds quarantined 2 weeks before mixing
+- [ ] Equipment not shared between flocks
+- [ ] Staff hygiene maintained: change clothes/boots between flocks
+- [ ] Stocking density kept at appropriate level
+- [ ] Ventilation adequate; fresh air circulating
+- [ ] Litter managed: cleaned regularly, replaced as needed
+- [ ] Feeders and drinkers cleaned and disinfected between flocks
+- [ ] If outbreak occurs: sick birds isolated and culled
+- [ ] Buildings cleaned and disinfected after flock removal
+- [ ] Next flock: vaccinated chicks ordered; documentation verified
 
 ## References
 
 - WOAH. (2021). Marek's Disease — Technical Disease Card. World Organisation for Animal Health.
-- Witter, R. L. (1997). Increased virulence of Marek's disease virus field isolates. Avian Diseases, 41(1), 149–163.
+- FAO. (2004). Marek's Disease. FAO Animal Health Manual No. 11. Food and Agriculture Organization of the United Nations.
 - Merck Veterinary Manual. (2022). Marek's Disease in Poultry. Merck & Co., Inc.
-- FAO. (2010). Good Practices for Biosecurity of Poultry Production. Food and Agriculture Organization of the United Nations.
+- Witter, R. L. (1997). Increased Virulence of Marek's Disease Virus Field Isolates. Avian Diseases, 41(1), 149–163.

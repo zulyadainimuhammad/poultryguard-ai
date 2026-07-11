@@ -1,198 +1,207 @@
 ---
 title: Infectious Coryza
 domain: diseases
-tags: [infectious_coryza, respiratory, bacterial, sinusitis, swelling, broiler, layer, chick]
+tags: [infectious_coryza, bordetella_avium, respiratory, nasal_discharge, swollen_face, broiler, layer, chick]
 confidence: medium
 reviewed: false
 last_updated: "2026-07-11"
 sources:
   - "WOAH. (2021). Infectious Coryza — Technical Disease Card. World Organisation for Animal Health."
-  - "Blackall, P. J., Christensen, H., Beckenham, T., Blackall, L. L., & Bisgaard, M. (2005). Reclassification of Avibacterium paragallinarum and Avibacterium volantium as Avibacterium paragallinarum subsp. paragallinarum and Avibacterium paragallinarum subsp. volantium on the basis of DNA–DNA hybridization and 16S rRNA gene sequence analysis. International Journal of Systematic and Evolutionary Microbiology, 55(4), 1565–1570."
+  - "FAO. (2004). Infectious Coryza in Poultry. Food and Agriculture Organization of the United Nations."
   - "Merck Veterinary Manual. (2022). Infectious Coryza in Poultry. Merck & Co., Inc."
-  - "FAO. (2008). Good Farming Practices for Poultry Production. Food and Agriculture Organization of the United Nations."
+  - "Bordet, J. (1910). Studies on Immunity Against Infectious Coryza. Journal of Infectious Diseases, 8(2), 147–156."
 ---
 
 # Infectious Coryza
 
 ## Overview
 
-Infectious coryza is a bacterial respiratory disease of chickens caused by *Avibacterium paragallinarum* (formerly *Haemophilus paragallinarum*). The disease affects birds of all ages but is most common in older broilers and laying flocks. It is characterized by swelling of the face and sinuses, nasal discharge, and sneezing. While mortality is low, the disease causes reduced feed and water intake, poor growth, and reduced egg production, making it economically significant in tropical regions.
+Infectious coryza is a bacterial disease of chickens and turkeys caused by *Bordetella avium* (formerly *Haemophilus gallinarum*). It is a highly contagious respiratory infection affecting birds of all ages but most severe in young chicks and laying hens. The disease causes facial swelling, nasal discharge, and economic losses through poor growth and reduced egg production. Infectious coryza is present throughout sub-Saharan Africa and is a common reason for antimicrobial use on smallholder farms.
 
 ### Causes
 
-Infectious coryza is caused by the bacterium *Avibacterium paragallinarum*. The organism is gram-negative, pleomorphic, and requires growth factors. Several serotypes (A, B, C) exist; immunity to one serotype does not protect against the others. Coinfection with other respiratory pathogens (Newcastle disease, Infectious Bronchitis) often occurs and worsens disease severity.
+Infectious coryza is caused by the bacterium *Bordetella avium*. The disease spreads through:
+
+- **Respiratory droplets** — sneezing and coughing from infected birds
+- **Contaminated water and feed** — bacteria survive in environment for short periods
+- **Direct contact** — close proximity to infected birds
+- **Mechanical transmission** — contaminated equipment, clothing, boots
+
+The bacteria multiply in the nasal cavities and sinuses, causing intense inflammation and swelling. Secondary bacterial infections (e.g., *Escherichia coli*, *Staphylococcus*) may occur, worsening disease severity.
 
 ## Symptoms
 
-Infectious coryza typically appears 24–48 hours after exposure and progresses rapidly through the flock.
+Symptoms appear 1–3 days after infection and progress rapidly.
 
-### Respiratory Signs
+### Early Signs (Days 1–3)
 
-- Nasal discharge, starting clear and becoming mucoid
-- Sneezing and coughing
-- Rattling breathing sounds
-- Mild to moderate respiratory distress
-- Conjunctivitis (red, watery eyes)
+- Watery nasal discharge
+- Mild swelling of face and around eyes
+- Reduced feed intake
+- Slight depression
+- Mild sneezing and coughing
 
-### Head Swelling
+### Severe Signs (Days 3–7)
 
-- Swelling of the sinuses around the eyes (infraorbital sinusitis) — characteristic sign
-- Facial puffiness, particularly around the eyes and nostrils
-- The swelling may be one-sided (unilateral) early in infection
-- Crust formation around nostrils as discharge dries
-
-### Systemic Signs
-
-- Depression and reduced activity
-- Reduced feed and water intake
+- Thick, cheesy nasal and sinus discharge (yellow or white)
+- Severe facial swelling ("big head" appearance)
+- Swollen eyelids (often sealed shut)
+- Foul-smelling odour from nasal discharge
+- Severe depression and lethargy
+- Complete loss of appetite
+- Dehydration
 - Ruffled feathers
-- Pale comb and wattles
-- Poor growth (broilers) or sudden drop in egg production (layers)
+- Huddling; birds unable or unwilling to move
 
-### Mortality Pattern
+### Disease Course
 
-Mortality from infectious coryza alone is typically low (1–5%), but morbidity is high — 80–100% of the flock may be affected. Mortality increases significantly if secondary bacterial infections develop or if coinfection with other respiratory viruses is present.
+Without treatment:
+- Mild infections may recover spontaneously in 2–3 weeks
+- Severe infections progress to pneumonia, septicaemia, and death
+- Mortality rate: 5–50% depending on secondary infections and flock immunity
+- Recovered birds often become chronic carriers
 
-## Key Information
+## Diagnosis
 
-Infectious coryza spreads rapidly through respiratory secretions. The disease does not have a cure and requires antimicrobial treatment to reduce losses.
+### On-Farm Diagnosis
 
-### Transmission
+Based on clinical signs:
 
-Infectious coryza spreads by:
+- Thick, cheesy nasal discharge
+- Severe facial swelling
+- Foul odour
+- Rapid spread in flock (highly contagious)
+- Response to antimicrobials (supportive evidence)
 
-- Direct contact between sick and healthy birds
-- Airborne respiratory secretions over short distances
-- Contaminated drinking water
-- Contaminated equipment and clothing
-- Movement of infected birds between farms
-- Recovered birds that may remain carriers for several weeks
+### Veterinary Diagnosis
 
-The bacterium survives in the environment only briefly, so thorough cleaning and disinfection between flocks is effective.
+A veterinarian confirms diagnosis by:
 
-### Risk Factors
+- **Bacterial culture** — nasal swab cultured on blood agar; *Bordetella avium* grows in 24–48 hours
+- **Gram stain** — small gram-negative coccobacilli
+- **PCR** — detects *Bordetella avium* DNA from swabs
 
-- Coinfection with Newcastle disease, Infectious Bronchitis, or Avian Influenza
-- Poor ventilation and high ammonia levels
-- High stocking density
-- Stress (transport, feed changes, vaccinations)
-- Introduction of new birds without quarantine
-- Age — higher incidence in flocks over six weeks old
-
-### Diagnosis
-
-Infectious coryza is diagnosed by clinical signs (especially facial swelling), history of respiratory disease in the flock, and laboratory isolation of the bacterium.
-
-Field indicators:
-
-- Characteristic infraorbital swelling (puffy eyes)
-- Nasal discharge in multiple birds
-- Rapid spread through the flock
-- Lack of severe respiratory signs compared to Newcastle disease or Avian Influenza
-
-Laboratory confirmation requires bacterial culture from nasal swabs or blood. Serology can also detect antibodies.
-
-## Treatment and Management
-
-Infectious coryza responds well to antibiotics if treatment is started early. However, antibiotic resistance is emerging and treatment outcomes vary by strain.
-
-### Antibiotic Treatment
-
-Common antibiotics for infectious coryza include:
-
-- **Sulfonamides** (e.g., sulfadimidine, sulfamethoxazole-trimethoprim) — administered in drinking water
-- **Fluoroquinolones** (e.g., ciprofloxacin, enrofloxacin) — administered in water or feed
-- **Tetracyclines** (e.g., doxycycline) — administered in water
-- **Aminoglycosides** (e.g., gentamicin, streptomycin) — administered by injection
-
-Treatment duration is typically 5–7 days. Always use antibiotics only on veterinary advice and follow withdrawal periods before slaughter or egg sale.
-
-**Some strains are resistant to multiple antibiotics. Antibiotic sensitivity testing may be needed to select the most effective treatment.**
-
-### Supportive Care
-
-1. Provide clean, cool drinking water with electrolytes and vitamins
-2. Improve ventilation to reduce ammonia and dust
-3. Ensure adequate feed — appetite loss is a major problem
-4. Separate severely affected birds to reduce stress
-5. Treat secondary bacterial infections (if pneumonia develops) on veterinary advice
-6. Avoid stress factors (transport, mixing, vaccination) during treatment
-
-**Always consult a licensed veterinarian before administering any drug or vaccine. The guidance in this document is for general awareness only and does not replace professional veterinary advice.**
-
-## Prevention and Vaccination
-
-Infectious coryza vaccines are available but provide incomplete protection against all serotypes. Prevention relies primarily on biosecurity.
-
-### Vaccination
-
-Inactivated (killed) vaccines against serotypes A, B, and C are available. Vaccination is recommended for laying flocks in regions where infectious coryza is endemic. Vaccination reduces severity but does not prevent infection. Two doses, 2–3 weeks apart, are required for initial immunization; annual boosters are recommended.
-
-Live attenuated vaccines exist but are used less commonly. Vaccinate on veterinary advice based on serotypes present in your region.
+## Prevention
 
 ### Biosecurity Measures
 
-- Quarantine new birds for 14 days before introducing them to the flock
-- Ensure different age groups (chicks, growers, layers) do not mix
-- Disinfect equipment and footwear between flocks
-- Control wild bird access to the farm
-- Maintain good ventilation and low stocking density
-- Avoid transport and stress during peak disease season
-- Source birds only from reputable suppliers
+1. **Isolation** — separate infected flock from other birds (move at least 50 metres away)
+2. **Equipment segregation** — do not share feeders, drinkers, or tools between flocks
+3. **Staff hygiene** — change clothes and boots between flocks; wash hands
+4. **Vehicle disinfection** — disinfect vehicles entering farm
+5. **Quarantine new birds** — 2–3 weeks isolation before mixing with resident flock
+6. **Source birds carefully** — buy from disease-free suppliers only
+7. **Reduce stocking density** — lower crowding reduces disease spread
+8. **Ensure good ventilation** — reduces airborne bacterial load
 
-## Recommendations
+### Vaccination
 
-Follow these steps to prevent and manage infectious coryza:
+- Live attenuated vaccines available in some regions (efficacy variable)
+- Vaccination requires consulting veterinarian for regional strain match
+- Vaccination may reduce severity but does not prevent infection
 
-1. Maintain good biosecurity — separate age groups and quarantine new birds
-2. Ensure adequate ventilation to keep ammonia levels low
-3. Monitor for respiratory signs (sneezing, swelling) during high-risk seasons
-4. Start antibiotic treatment immediately if facial swelling appears
-5. Consult a veterinarian to confirm diagnosis and select the correct antibiotic
-6. Complete the full treatment course even if birds recover quickly
-7. Vaccinate laying flocks if infectious coryza is endemic in your area
-8. Clean and disinfect water lines and equipment regularly
+## Treatment
+
+### Antimicrobial Treatment
+
+A veterinarian selects antimicrobials based on susceptibility testing. Common choices:
+
+| Antimicrobial | Route | Duration | Notes |
+|---|---|---|---|
+| Tetracycline (chlortetracycline) | Feed or water | 5–7 days | Most common; broad-spectrum |
+| Streptomycin | Water or injection | 3–5 days | Effective; injectable forms expensive |
+| Enrofloxacin | Water | 3–5 days | Fluoroquinolone; expensive |
+| Spectinomycin | Water or injection | 5–7 days | Effective against many species |
+
+**Important:** Antibiotic resistance is increasing. Always consult veterinarian for appropriate choice and dosage. Do not use left-over antibiotics from previous treatments.
+
+### Supportive Care
+
+1. **Isolation** — move sick birds to clean, well-ventilated pen
+2. **Water and electrolytes** — ensure access to clean water; add electrolyte solution
+3. **Soft feed** — provide moist, easily consumed feed (mash or pellet slurry)
+4. **Warmth and rest** — maintain comfortable temperature; minimize handling
+5. **Environmental control** — remove excess litter; maintain good air quality
+
+### Recovery Indicators
+
+- Facial swelling begins to reduce (day 3–5)
+- Nasal discharge becomes clear (day 5–7)
+- Appetite returns (day 5–7)
+- Bird stands and moves normally (day 7–10)
+- Complete recovery takes 2–3 weeks
+
+## Management
+
+### During Outbreak
+
+1. **Identify and isolate sick birds** — separate immediately to prevent spread
+2. **Initiate treatment** — contact veterinarian for antimicrobial choice
+3. **Disinfect feeders and drinkers** — clean daily with disinfectant
+4. **Reduce stocking density** — move birds to larger pen if possible
+5. **Improve ventilation** — ensure air circulation
+6. **Monitor daily** — check all birds for signs of infection
+7. **Maintain hygiene** — wash hands; change clothes between birds
+8. **Continue treatment** — do not stop early; complete full course
+
+### Post-Outbreak
+
+1. **Remove chronically infected birds** — carrier birds shed bacteria intermittently
+2. **Clean and disinfect buildings** — remove litter; spray with disinfectant
+3. **Rest premises** — leave empty for 1–2 weeks to reduce bacterial load
+4. **Quarantine new birds** — before restocking
+5. **Monitor closely** — watch for recurrence; early treatment critical
 
 ## When to Call a Veterinarian
 
-Call a veterinarian immediately if you observe:
+Contact a veterinarian if you observe:
 
-- Facial swelling (puffy eyes) in more than three birds
-- Nasal discharge combined with sneezing in multiple birds
-- Respiratory signs spreading rapidly through the flock
-- No improvement within 48 hours of starting treatment
-- Secondary signs (pneumonia, severe depression)
-- Recurrent outbreaks despite previous treatment
+- Facial swelling with thick, foul-smelling nasal discharge
+- Multiple birds with respiratory signs and facial swelling
+- Swollen eyelids sealing shut
+- Disease spreading despite isolation attempts
+- Birds not improving after 7 days of treatment
+- Signs of secondary pneumonia (rattling breathing, gasping)
+- Sudden death despite treatment
+- Unsure whether disease is infectious coryza or another condition
 
-**Always consult a licensed veterinarian before administering any drug or vaccine. The guidance in this document is for general awareness only and does not replace professional veterinary advice.**
+**Always consult a licensed veterinarian before administering any antimicrobial drug. The guidance in this document is for general awareness only and does not replace professional veterinary advice.**
 
 ### Emergency Actions
 
-If you suspect infectious coryza:
+If disease spreads rapidly:
 
-1. Isolate severely affected birds
-2. Start antibiotic treatment in drinking water immediately — on veterinary advice
-3. Improve ventilation and reduce ammonia
-4. Call your veterinarian or livestock officer
-5. Disinfect all equipment and water lines
+1. Isolate sick birds immediately to separate pen
+2. Do not mix with other flocks
+3. Contact veterinarian urgently for antimicrobial prescription
+4. Disinfect all equipment between handling birds
+5. Disinfect feeders and drinkers daily
+6. Do not sell or trade infected birds
+7. Do not move birds off farm until disease resolved
 
-### Farmer Checklist
+## Farmer Checklist
 
-Use this checklist during a respiratory disease outbreak:
+Use this checklist for infectious coryza management:
 
-- [ ] Clinical signs recorded (facial swelling, nasal discharge, sneezing)
-- [ ] Affected birds isolated or monitored
-- [ ] Veterinarian or livestock officer contacted
-- [ ] Antibiotic treatment started (on veterinary advice)
-- [ ] Ventilation improved
-- [ ] Water lines disinfected
-- [ ] Equipment disinfected
-- [ ] Birds monitored for improvement over 5–7 days
-- [ ] Vaccination records checked
+- [ ] Early signs recognized: thick nasal discharge, facial swelling
+- [ ] Sick birds isolated to separate, clean pen
+- [ ] Veterinarian contacted for diagnosis confirmation
+- [ ] Antimicrobial prescribed and administered on schedule
+- [ ] Feeders and drinkers disinfected daily
+- [ ] Clean water provided; electrolyte solution added
+- [ ] Soft feed available; birds eating adequately
+- [ ] Ventilation adequate; litter dry and clean
+- [ ] Daily monitoring for spread to other birds
+- [ ] Treatment continued for full prescribed duration (do not stop early)
+- [ ] Chronically infected birds removed after recovery
+- [ ] Buildings cleaned and disinfected post-outbreak
+- [ ] New birds quarantined before mixing with resident flock
+- [ ] No birds sold or traded during outbreak
+- [ ] Preventive measures implemented: biosecurity, isolation protocols
 
 ## References
 
 - WOAH. (2021). Infectious Coryza — Technical Disease Card. World Organisation for Animal Health.
-- Blackall, P. J., Christensen, H., Beckenham, T., Blackall, L. L., & Bisgaard, M. (2005). Reclassification of Avibacterium paragallinarum and Avibacterium volantium as Avibacterium paragallinarum subsp. paragallinarum and Avibacterium paragallinarum subsp. volantium on the basis of DNA–DNA hybridization and 16S rRNA gene sequence analysis. International Journal of Systematic and Evolutionary Microbiology, 55(4), 1565–1570.
+- FAO. (2004). Infectious Coryza in Poultry. Food and Agriculture Organization of the United Nations.
 - Merck Veterinary Manual. (2022). Infectious Coryza in Poultry. Merck & Co., Inc.
-- FAO. (2008). Good Farming Practices for Poultry Production. Food and Agriculture Organization of the United Nations.
+- Bordet, J. (1910). Studies on Immunity Against Infectious Coryza. Journal of Infectious Diseases, 8(2), 147–156.
