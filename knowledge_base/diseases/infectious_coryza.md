@@ -81,7 +81,7 @@ A veterinarian confirms diagnosis by:
 - **Gram stain** — small gram-negative coccobacilli
 - **PCR** — detects *Bordetella avium* DNA from swabs
 
-## Prevention
+## Prevention and Vaccination
 
 ### Biosecurity Measures
 
@@ -100,7 +100,7 @@ A veterinarian confirms diagnosis by:
 - Vaccination requires consulting veterinarian for regional strain match
 - Vaccination may reduce severity but does not prevent infection
 
-## Treatment
+## Treatment and Management
 
 ### Antimicrobial Treatment
 
@@ -131,7 +131,7 @@ A veterinarian selects antimicrobials based on susceptibility testing. Common ch
 - Bird stands and moves normally (day 7–10)
 - Complete recovery takes 2–3 weeks
 
-## Management
+### Management
 
 ### During Outbreak
 

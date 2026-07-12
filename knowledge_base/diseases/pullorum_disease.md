@@ -81,7 +81,7 @@ A veterinarian confirms diagnosis by:
 - **PCR** — detects bacterial DNA from swabs or tissue
 - **Necropsy** — chicks show septicaemia; enlarged spleen and liver; inflammation of intestines
 
-## Prevention
+## Prevention and Vaccination
 
 ### Source of Chicks
 
@@ -111,7 +111,7 @@ If keeping a breeding flock:
 5. **Remove soiled litter** — frequently; keep environment dry
 6. **Avoid cross-contamination** — do not move equipment between chick and adult flocks
 
-## Treatment
+## Treatment and Management
 
 ### Antimicrobial Treatment
 
@@ -143,7 +143,7 @@ A veterinarian selects antimicrobials based on susceptibility testing. Early tre
 - Mortality decreases significantly (day 1–2 of treatment)
 - Complete recovery takes 1–2 weeks
 
-## Management
+### Management
 
 ### If Pullorum Disease Occurs
 

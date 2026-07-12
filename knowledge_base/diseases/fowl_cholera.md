@@ -85,7 +85,7 @@ A veterinarian confirms diagnosis by:
 - **Gram stain** — small gram-negative coccobacilli ("safety pin" appearance)
 - **PCR** — detects bacterial DNA
 
-## Prevention
+## Prevention and Vaccination
 
 ### Biosecurity Measures
 
@@ -106,7 +106,7 @@ A veterinarian confirms diagnosis by:
 - Efficacy depends on vaccine strain matching field strain
 - Consult veterinarian for vaccination strategy
 
-## Treatment
+## Treatment and Management
 
 ### Antimicrobial Treatment
 
@@ -138,7 +138,7 @@ A veterinarian selects antimicrobials based on susceptibility testing. Common ch
 - Droppings normalize (day 3–5)
 - Complete recovery takes 1–2 weeks
 
-## Management
+### Management
 
 ### During Outbreak
 

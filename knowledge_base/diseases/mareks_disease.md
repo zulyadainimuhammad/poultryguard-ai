@@ -87,7 +87,7 @@ A veterinarian confirms diagnosis by:
 - **PCR** — detects viral DNA from tissue samples
 - **Viral isolation** — culture of virus (specialized laboratories)
 
-## Prevention
+## Prevention and Vaccination
 
 ### Vaccination (ONLY Effective Prevention)
 
@@ -121,7 +121,7 @@ Vaccination at hatch is the gold standard. Marek's vaccine is **mandatory** on a
 - **Maintain flock records** — document vaccination status
 - **Avoid introducing infected birds** — source from reputable suppliers
 
-## Treatment
+## Treatment and Management
 
 **No specific antiviral treatment exists for Marek's disease.** Management is supportive only:
 
@@ -141,7 +141,7 @@ Vaccination at hatch is the gold standard. Marek's vaccine is **mandatory** on a
 - Paralysed birds may survive weeks but rarely return to normal function
 - Most affected birds should be culled to prevent continued virus shedding
 
-## Management
+### Management
 
 ### During Outbreak (Unvaccinated Flock)
 
