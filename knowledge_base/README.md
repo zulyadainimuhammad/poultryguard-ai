@@ -57,13 +57,13 @@ knowledge_base/
 
 ---
 
-## Climate Documents (Sprint 2.3)
+## Climate Documents (Sprint 2)
 
 The following climate documents are now available under `knowledge_base/climate/`:
 
-- `housing_ventilation.md` — airflow, ammonia control, litter moisture, and ventilation response actions
-- `heat_stress.md` — heat stress prevention, monitoring, emergency signs, and practical farmer actions
-- `cold_stress.md` — brooding and cold-weather control, monitoring, emergency signs, and practical farmer actions
+- `housing_ventilation.md` — ventilation control, airflow risks, monitoring, and emergency warning signs
+- `heat_stress.md` — heat stress causes, prevention, monitoring, and farmer emergency actions
+- `cold_stress.md` — cold stress causes, brooding controls, monitoring, and emergency warning signs
 
 ---
 

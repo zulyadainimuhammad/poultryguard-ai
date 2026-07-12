@@ -24,7 +24,7 @@ Housing ventilation is the controlled movement of fresh air through a poultry ho
 
 Ventilation directly affects survival, growth rate, egg yield, and medicine costs. Birds perform best when house air stays fresh and litter stays dry. Good airflow reduces ammonia exposure, lowers pathogen pressure, and improves vaccine response by reducing chronic stress. Ventilation is also a core biosecurity support measure because cleaner air lowers respiratory infection pressure.
 
-### Causes of Poor Ventilation
+### Causes
 
 - Inlets or windows blocked by plastic, dust, or damaged curtains
 - Fan failure or weak fan capacity for flock size
