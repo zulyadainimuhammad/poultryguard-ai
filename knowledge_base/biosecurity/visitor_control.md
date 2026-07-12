@@ -20,17 +20,9 @@ Visitor control is the set of rules you use to manage who enters your poultry fa
 
 ## Key Information
 
-### Why It Matters
+### Importance of Biosecurity
 
 Many poultry disease outbreaks begin after avoidable contact with contaminated people, tools, or vehicles. Visitor control helps you reduce these risks by limiting unnecessary movement and enforcing entry hygiene. It also improves traceability because you can identify who visited and when, which supports faster response during disease investigations. Good entry control protects flock health, productivity, and farm income.
-
-### Causes of Poor Visitor Control
-
-- No farm gate policy or visitor approval process
-- Missing sign-in records for people and vehicles
-- No handwashing, boot change, or protective clothing requirement
-- Visitors moving between multiple poultry houses without disinfection
-- Unrestricted access to feed stores, water points, and bird handling areas
 
 ### Risk Factors
 
@@ -40,45 +32,37 @@ Many poultry disease outbreaks begin after avoidable contact with contaminated p
 - Emergency visits without prior hygiene preparation
 - No designated clean-to-dirty movement path on farm
 
-### Clinical or Production Impacts
+### Standard Operating Procedures
 
-- Introduction of respiratory and enteric pathogens into clean flocks
-- Sudden rise in morbidity and mortality after high-traffic farm days
-- Reduced feed intake and growth from disease stress
-- Egg production decline following introduced infection events
-- Increased treatment costs and production downtime
+- Allow only approved, essential visitors onto poultry premises.
+- Collect visitor history of recent poultry contact before entry.
+- Require hand hygiene, boot sanitation, and farm-provided protective clothing.
+- Restrict visitor movement to approved routes and designated zones.
+- Disinfect equipment and vehicle tyres at entry and exit control points.
 
-### Prevention
+### Step-by-step Implementation
 
-Allow only essential visitors and require prior approval before farm entry. Keep one designated entry point with mandatory hand hygiene, boot sanitation, and farm-provided protective clothing. Restrict visitor movement to approved areas and prevent direct contact with birds unless necessary. Schedule visits from lowest-risk to highest-risk zones and disinfect equipment before and after use.
+1. Place a written visitor policy at the farm gate and train gate staff.
+2. Start compulsory sign-in for all visitors and service vehicles.
+3. Install hygiene stations with water, soap, disinfectant, and protective gear.
+4. Escort visitors using a clean-to-dirty route and block unnecessary movement.
+5. Review logs weekly and enforce corrective action for repeated breaches.
 
-### Monitoring
+### Common Mistakes
 
-Use records and routine supervision to confirm compliance every day.
+- Allowing buyers or traders to enter bird areas without controls
+- Failing to record prior farm visits before granting entry
+- Using empty or weak disinfectant footbaths at entry points
+- Letting visitors move unsupervised across multiple poultry houses
+- Ignoring non-compliance because the visitor is a familiar partner
 
-- Maintain a visitor and vehicle log with date, purpose, and prior farm visits.
-- Check that all visitors complete hygiene steps at entry and exit.
-- Verify that visitor movement follows assigned routes.
-- Inspect disinfection points for adequate solution and cleanliness.
-- Review entries weekly for repeated non-compliance patterns.
+### Monitoring and Compliance
+
+Use records and routine supervision to confirm compliance every day. Keep complete logs for people and vehicles, including purpose and prior poultry contact. Audit hygiene station use and route compliance each week so recurring weaknesses are corrected before disease introduction occurs.
 
 ## Recommendations
 
-### Farmer Guidance
-
-1. Set a written visitor policy and display it at the farm entrance.
-2. Refuse non-essential visitors during high-risk disease periods.
-3. Require all visitors to sign in and report recent poultry contact.
-4. Provide farm-only boots, coveralls, and handwashing supplies.
-5. Escort visitors and limit movement to necessary locations.
-6. Disinfect equipment and vehicle tyres at entry and exit points.
-7. Keep all records available for veterinary review when needed.
-
-### Emergency Warning Signs
-
-Act immediately when unexplained disease appears soon after external visits, when entry logs are incomplete, or when hygiene rules are repeatedly ignored. Urgent action is also needed if visitors from affected farms entered poultry areas without proper disinfection. Rapid movement restriction can reduce wider flock exposure.
-
-### Practical Checklist
+### Farmer Checklist
 
 - [ ] Visitor policy is displayed and enforced
 - [ ] All visitors and vehicles are logged at entry
@@ -87,6 +71,14 @@ Act immediately when unexplained disease appears soon after external visits, whe
 - [ ] Visitor movement is supervised and area-restricted
 - [ ] Equipment and tyres are disinfected at gate points
 - [ ] Non-compliance incidents are recorded and corrected
+
+### Emergency Response
+
+1. Suspend non-essential visits when unexplained disease appears in the flock.
+2. Close external movement into poultry houses until risk is assessed.
+3. Review recent visitor and vehicle logs to identify high-risk contacts.
+4. Intensify disinfection at gate points and all shared contact surfaces.
+5. Notify veterinary services if disease signs follow a known entry breach.
 
 ## References
 

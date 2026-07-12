@@ -20,17 +20,9 @@ Cleaning and disinfection is the planned removal of organic dirt and microorgani
 
 ## Key Information
 
-### Why It Matters
+### Importance of Biosecurity
 
 Pathogens survive longer when houses remain dirty, wet, and poorly managed between flocks. Effective cleaning and disinfection breaks disease cycles and reduces carryover infections from one batch to the next. It also improves vaccine performance and lowers treatment costs by reducing baseline pathogen load. For both smallholder and commercial systems, sanitation quality strongly affects productivity.
-
-### Causes of Poor Sanitation
-
-- Skipping dry cleaning before washing and disinfection
-- Inadequate contact time for disinfectant action
-- Using wrong dilution rates or expired products
-- Reintroducing dirty equipment after house sanitation
-- Restocking birds before surfaces are fully dry
 
 ### Risk Factors
 
@@ -40,45 +32,37 @@ Pathogens survive longer when houses remain dirty, wet, and poorly managed betwe
 - Poor water quality for washing and mixing disinfectants
 - Incomplete worker training on sanitation protocols
 
-### Clinical or Production Impacts
+### Standard Operating Procedures
 
-- Persistent or recurrent disease outbreaks
-- Increased chick mortality in early placement period
-- Reduced growth and feed efficiency from chronic infection pressure
-- Lower egg output and poorer shell cleanliness
-- Higher medicine use and increased production losses
+- Remove birds and litter completely before starting sanitation.
+- Perform dry cleaning first, then detergent washing and rinsing.
+- Apply approved disinfectants at correct dilution and contact time.
+- Clean from high surfaces to floor level to prevent recontamination.
+- Keep cleaned equipment separate from dirty tools until reuse.
 
-### Prevention
+### Step-by-step Implementation
 
-Use a fixed sanitation sequence after each flock: remove birds, remove litter, dry clean, wet wash with detergent, rinse, disinfect, and dry before restocking. Clean from top surfaces to floor areas to avoid recontamination. Use approved disinfectants at correct dilution and contact time for target organisms. Keep sanitized equipment separate from dirty tools and verify downtime before chick placement.
+1. Empty the house, remove litter, and scrape visible organic residues.
+2. Dry clean dust and debris from fans, walls, drinkers, and feeders.
+3. Wash with detergent and water, then rinse all surfaces thoroughly.
+4. Apply disinfectant at label concentration and maintain full contact time.
+5. Allow complete drying before bird placement and record all steps.
 
-### Monitoring
+### Common Mistakes
 
-Track sanitation quality using checklists, records, and visual inspection before restocking.
+- Applying disinfectant before removing organic dirt
+- Using incorrect dilution, expired products, or poor-quality water
+- Reducing contact time to speed turnaround between flocks
+- Returning contaminated tools into cleaned poultry houses
+- Restocking birds before surfaces and equipment are fully dry
 
-- Confirm all manure, dust, and litter residues are removed.
-- Verify detergent and disinfectant concentration logs.
-- Record contact times and drying time for each cleaned house.
-- Inspect drinker lines, feeders, and hard-to-clean corners.
-- Review flock health trends after each sanitation cycle.
+### Monitoring and Compliance
+
+Track sanitation quality using checklists, concentration logs, and visual inspection before restocking. Verify detergent use, disinfectant dilution, and contact times for each house. Review chick health and early mortality after placement to detect sanitation failures quickly.
 
 ## Recommendations
 
-### Farmer Guidance
-
-1. Follow a written cleaning and disinfection sequence every cycle.
-2. Train workers on correct dilution, contact time, and safety steps.
-3. Use separate tools for dirty and clean stages.
-4. Clean water lines and feeders before bird placement.
-5. Allow houses to dry fully before introducing new birds.
-6. Keep sanitation logs for each house and production batch.
-7. Review repeated outbreak houses for protocol gaps.
-
-### Emergency Warning Signs
-
-Treat as urgent when new flocks develop disease signs soon after placement, when repeated outbreaks occur in the same house, or when cleaning logs show skipped steps. Immediate correction is also needed if disinfectant dilution or contact time cannot be verified. Fast sanitation review helps prevent another full-cycle loss.
-
-### Practical Checklist
+### Farmer Checklist
 
 - [ ] Old litter and manure are completely removed
 - [ ] Dry cleaning is completed before washing
@@ -87,6 +71,14 @@ Treat as urgent when new flocks develop disease signs soon after placement, when
 - [ ] Equipment is cleaned and disinfected before reuse
 - [ ] House is fully dry before restocking
 - [ ] Sanitation records are reviewed after each cycle
+
+### Emergency Response
+
+1. Stop new bird placement if sanitation records are incomplete or unreliable.
+2. Re-clean and disinfect affected houses when early disease signs appear.
+3. Isolate suspect houses and restrict worker and equipment movement.
+4. Verify disinfectant dilution and contact time before restarting operations.
+5. Consult veterinary services when outbreaks recur after sanitation cycles.
 
 ## References
 

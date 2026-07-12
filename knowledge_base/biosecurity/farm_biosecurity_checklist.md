@@ -20,17 +20,9 @@ Farm biosecurity is the routine system you use to stop disease agents from enter
 
 ## Key Information
 
-### Why It Matters
+### Importance of Biosecurity
 
 Most poultry infections spread through people, equipment, feed contamination, wild birds, or poor sanitation between flocks. A daily checklist creates discipline and helps detect weak points before disease losses occur. Strong farm biosecurity also supports safe marketing, protects nearby farms, and improves confidence in your flock health status. Better prevention reduces emergency treatment pressure and avoids avoidable mortality.
-
-### Causes of Biosecurity Failure
-
-- No written entry and hygiene rules for workers and visitors
-- Mixing birds of different ages without separation
-- Sharing equipment between houses without cleaning
-- Delayed removal of dead birds and wet litter
-- Uncontrolled rodent, insect, and wild bird access
 
 ### Risk Factors
 
@@ -40,45 +32,37 @@ Most poultry infections spread through people, equipment, feed contamination, wi
 - Lack of quarantine for new or returning birds
 - Weak record keeping for mortality, treatments, and flock movements
 
-### Clinical or Production Impacts
+### Standard Operating Procedures
 
-- Faster spread of respiratory and enteric diseases
-- Sudden increase in flock mortality and culling
-- Reduced feed conversion and slower growth in broilers
-- Egg production drop and shell quality problems in layers
-- Recurrent outbreaks that increase long-term farm costs
+- Keep one controlled farm entry point with visible hygiene rules.
+- Enforce farm-only boots, clothing, and hand hygiene before house entry.
+- Quarantine new or returning birds before mixing with resident flocks.
+- Remove carcasses daily and dispose of them using approved local methods.
+- Separate tools by house and disinfect shared equipment before reuse.
 
-### Prevention
+### Step-by-step Implementation
 
-Create one controlled farm entry point and enforce hand, boot, and equipment hygiene at that point. Separate clean and dirty zones and keep farm-only clothing for workers. Quarantine all new birds before flock mixing and avoid sharing tools across houses. Maintain strict carcass disposal, litter management, and pest control throughout the production cycle.
+1. Map clean and dirty zones and set one supervised gate for all entry.
+2. Train workers on entry, movement, and sanitation rules for each house.
+3. Place footbaths, handwashing stations, and protective clothing at the gate.
+4. Start daily checklist verification and record all non-compliance events.
+5. Review mortality and movement records weekly and correct repeated gaps.
 
-### Monitoring
+### Common Mistakes
 
-Review checklist compliance every day and record any missed steps immediately.
+- Allowing informal entry through side gates or broken fences
+- Reusing boots or tools across houses without disinfection
+- Mixing quarantined birds with production flocks too early
+- Treating checklist logs as paperwork instead of control tools
+- Skipping pest control during periods of low disease pressure
 
-- Verify footbaths, handwashing supplies, and protective clothing at entry points.
-- Track mortality, abnormal signs, and culls by house and age group.
-- Inspect fences, gates, and netting for gaps used by wild birds or rodents.
-- Confirm quarantine status of newly arrived birds.
-- Check cleaning logs for feeders, drinkers, and transport crates.
+### Monitoring and Compliance
+
+Review checklist compliance every day and record any missed steps immediately. Track mortality and abnormal signs by house to identify potential biosecurity breaches early. Use weekly audits to confirm that entry controls, quarantine, sanitation, and pest control are functioning as written.
 
 ## Recommendations
 
-### Farmer Guidance
-
-1. Assign one worker each day to verify all biosecurity checklist items.
-2. Restrict entry to essential staff and approved service personnel only.
-3. Keep separate boots and tools for each poultry house.
-4. Isolate and assess sick birds without delay.
-5. Remove carcasses daily and dispose of them safely.
-6. Keep written records for visitor entry, mortality, and sanitation.
-7. Review checklist performance weekly and correct repeated gaps.
-
-### Emergency Warning Signs
-
-Treat as urgent when mortality rises suddenly, when similar signs appear in multiple houses, or when movement and hygiene records show major breaches. Immediate response is also needed if quarantine birds are mixed with resident flocks by mistake. Fast containment can prevent farm-wide transmission and protect nearby producers.
-
-### Practical Checklist
+### Farmer Checklist
 
 - [ ] Farm entry is controlled and logged
 - [ ] Workers use farm-only footwear and clothing
@@ -88,6 +72,14 @@ Treat as urgent when mortality rises suddenly, when similar signs appear in mult
 - [ ] Carcasses are removed and disposed of safely each day
 - [ ] Rodent and wild bird control measures are active
 - [ ] Mortality and sanitation records are updated daily
+
+### Emergency Response
+
+1. Lock down farm entry when unusual mortality or rapid flock illness appears.
+2. Stop bird, equipment, and vehicle movement between houses immediately.
+3. Isolate affected birds and strengthen hygiene barriers for all workers.
+4. Notify veterinary authorities or a licensed veterinarian without delay.
+5. Preserve entry, mortality, and treatment logs to support rapid investigation.
 
 ## References
 

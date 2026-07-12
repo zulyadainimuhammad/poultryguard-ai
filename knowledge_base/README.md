@@ -67,6 +67,16 @@ The following climate documents are now available under `knowledge_base/climate/
 
 ---
 
+## Biosecurity Documents (Sprint 2)
+
+The following biosecurity documents are now available under `knowledge_base/biosecurity/`:
+
+- `farm_biosecurity_checklist.md` — farm entry controls, SOPs, implementation workflow, and emergency response actions
+- `visitor_control.md` — visitor access management, compliance monitoring, and outbreak-risk response steps
+- `cleaning_and_disinfection.md` — sanitation SOPs, implementation sequence, checklist controls, and emergency correction steps
+
+---
+
 ## Feeding Documents (Sprint 2.5)
 
 The following feeding documents are now available under `knowledge_base/feeding/`:
@@ -122,10 +132,10 @@ The validator checks:
 | climate | 3 | 0 | Sprint 2 |
 | biosecurity | 3 | 0 | Sprint 2 |
 | feeding | 4 | 0 | Sprint 2 |
-| management | 0 | 0 | Sprint 2 |
+| management | 3 | 0 | Sprint 2 |
 | market | 0 | 0 | Sprint 2 |
-| emergency | 0 | 0 | Sprint 2 |
-| faq | 0 | 0 | Sprint 2 |
+| emergency | 3 | 0 | Sprint 2 |
+| faq | 5 | 0 | Sprint 2 |
 | hausa | 0 | 0 | Sprint 6 |
 
 ---
