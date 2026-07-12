@@ -57,6 +57,37 @@ knowledge_base/
 
 ---
 
+## Climate Documents (Sprint 2)
+
+The following climate documents are now available under `knowledge_base/climate/`:
+
+- `housing_ventilation.md` — ventilation control, airflow risks, monitoring, and emergency warning signs
+- `heat_stress.md` — heat stress causes, prevention, monitoring, and farmer emergency actions
+- `cold_stress.md` — cold stress causes, brooding controls, monitoring, and emergency warning signs
+
+---
+
+## Biosecurity Documents (Sprint 2)
+
+The following biosecurity documents are now available under `knowledge_base/biosecurity/`:
+
+- `farm_biosecurity_checklist.md` — farm entry controls, SOPs, implementation workflow, and emergency response actions
+- `visitor_control.md` — visitor access management, compliance monitoring, and outbreak-risk response steps
+- `cleaning_and_disinfection.md` — sanitation SOPs, implementation sequence, checklist controls, and emergency correction steps
+
+---
+
+## Feeding Documents (Sprint 2.5)
+
+The following feeding documents are now available under `knowledge_base/feeding/`:
+
+- `broiler_nutrition.md` — broiler feed phase planning, monitoring, emergency signs, and practical feeding control
+- `layer_nutrition.md` — layer nutrient priorities, production-stage feeding, monitoring, and corrective actions
+- `feed_storage.md` — feed storage hygiene, contamination prevention, and practical quality checks
+- `water_quality.md` — drinking-water quality management, monitoring, and emergency response indicators
+
+---
+
 ## Adding a Document
 
 1. Read [`docs/knowledge_engineering.md`](../docs/knowledge_engineering.md) in full.
@@ -96,15 +127,15 @@ The validator checks:
 
 | Domain | Documents | Reviewed | Sprint Target |
 |---|---|---|---|
-| diseases | 0 | 0 | Sprint 2 |
-| vaccination | 0 | 0 | Sprint 2 |
-| climate | 0 | 0 | Sprint 2 |
-| biosecurity | 0 | 0 | Sprint 2 |
-| feeding | 0 | 0 | Sprint 2 |
-| management | 0 | 0 | Sprint 2 |
+| diseases | 10 | 0 | Sprint 2 |
+| vaccination | 5 | 0 | Sprint 2 |
+| climate | 3 | 0 | Sprint 2 |
+| biosecurity | 3 | 0 | Sprint 2 |
+| feeding | 4 | 0 | Sprint 2 |
+| management | 3 | 0 | Sprint 2 |
 | market | 0 | 0 | Sprint 2 |
-| emergency | 0 | 0 | Sprint 2 |
-| faq | 0 | 0 | Sprint 2 |
+| emergency | 3 | 0 | Sprint 2 |
+| faq | 5 | 0 | Sprint 2 |
 | hausa | 0 | 0 | Sprint 6 |
 
 ---
