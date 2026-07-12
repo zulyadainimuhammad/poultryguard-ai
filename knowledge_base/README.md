@@ -57,6 +57,16 @@ knowledge_base/
 
 ---
 
+## Climate Documents (Sprint 2.3)
+
+The following climate documents are now available under `knowledge_base/climate/`:
+
+- `housing_ventilation.md` — airflow, ammonia control, litter moisture, and ventilation response actions
+- `heat_stress.md` — heat stress prevention, monitoring, emergency signs, and practical farmer actions
+- `cold_stress.md` — brooding and cold-weather control, monitoring, emergency signs, and practical farmer actions
+
+---
+
 ## Adding a Document
 
 1. Read [`docs/knowledge_engineering.md`](../docs/knowledge_engineering.md) in full.
@@ -98,7 +108,7 @@ The validator checks:
 |---|---|---|---|
 | diseases | 0 | 0 | Sprint 2 |
 | vaccination | 0 | 0 | Sprint 2 |
-| climate | 0 | 0 | Sprint 2 |
+| climate | 3 | 0 | Sprint 2 |
 | biosecurity | 0 | 0 | Sprint 2 |
 | feeding | 0 | 0 | Sprint 2 |
 | management | 0 | 0 | Sprint 2 |

@@ -86,7 +86,7 @@ A veterinarian confirms diagnosis by:
 - **PCR** — detects viral DNA
 - **Electron microscopy** — demonstrates characteristic poxvirus morphology
 
-## Prevention
+## Prevention and Vaccination
 
 ### Biosecurity Measures
 
@@ -110,7 +110,7 @@ Live attenuated fowl pox vaccine is available:
 - **Contraindications** — do not vaccinate if birds already infected
 - **Vaccination take** — mild scab at vaccination site (normal; resolves in 2–3 weeks)
 
-## Treatment
+## Treatment and Management
 
 **No specific antiviral treatment exists.** Management is supportive:
 

@@ -85,7 +85,7 @@ A veterinarian confirms diagnosis by:
 - **Gram stain** — small gram-negative coccobacilli ("safety pin" appearance)
 - **PCR** — detects bacterial DNA
 
-## Prevention
+## Prevention and Vaccination
 
 ### Biosecurity Measures
 
@@ -106,7 +106,7 @@ A veterinarian confirms diagnosis by:
 - Efficacy depends on vaccine strain matching field strain
 - Consult veterinarian for vaccination strategy
 
-## Treatment
+## Treatment and Management
 
 ### Antimicrobial Treatment
 

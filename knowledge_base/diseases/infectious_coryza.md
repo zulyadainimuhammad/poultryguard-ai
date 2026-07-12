@@ -81,7 +81,7 @@ A veterinarian confirms diagnosis by:
 - **Gram stain** — small gram-negative coccobacilli
 - **PCR** — detects *Bordetella avium* DNA from swabs
 
-## Prevention
+## Prevention and Vaccination
 
 ### Biosecurity Measures
 
@@ -100,7 +100,7 @@ A veterinarian confirms diagnosis by:
 - Vaccination requires consulting veterinarian for regional strain match
 - Vaccination may reduce severity but does not prevent infection
 
-## Treatment
+## Treatment and Management
 
 ### Antimicrobial Treatment
 
