@@ -1,4 +1,3 @@
-
 from rag.retrieval import KnowledgeBaseRetriever
 
 retriever = KnowledgeBaseRetriever()

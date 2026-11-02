@@ -180,9 +180,9 @@ The Query Classification Layer sits between the orchestrator and all downstream 
 
 ```python
 class QueryClass(str, Enum):
-    EMERGENCY = "emergency"   # Route to Emergency Advisory Module
-    FAQ       = "faq"         # Route to direct retrieval (no LLM)
-    RAG       = "rag"         # Route to full RAG + LLM pipeline
+    EMERGENCY = "emergency"  # Route to Emergency Advisory Module
+    FAQ = "faq"  # Route to direct retrieval (no LLM)
+    RAG = "rag"  # Route to full RAG + LLM pipeline
 ```
 
 Classification logic (in priority order):

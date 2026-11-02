@@ -1,4 +1,3 @@
-
 """Build and persist a local FAISS index for PoultryGuard AI."""
 
 from __future__ import annotations
@@ -35,10 +34,7 @@ class KnowledgeBaseIndexer:
             )
 
         documents = sorted(self.knowledge_base_dir.rglob("*.md"))
-        documents = [
-            path for path in documents
-            if path.name.lower() != "readme.md"
-        ]
+        documents = [path for path in documents if path.name.lower() != "readme.md"]
 
         if not documents:
             raise ValueError(

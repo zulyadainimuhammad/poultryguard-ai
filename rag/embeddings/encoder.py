@@ -1,4 +1,3 @@
-
 """Local text embedding utilities for the PoultryGuard AI RAG pipeline."""
 
 from __future__ import annotations
@@ -46,9 +45,7 @@ class SentenceTransformerEncoder:
             )
         return self._model
 
-    def encode_chunks(
-        self, chunks: list[MarkdownChunk]
-    ) -> EmbeddingBatch:
+    def encode_chunks(self, chunks: list[MarkdownChunk]) -> EmbeddingBatch:
         """Embed chunks and preserve their IDs and source metadata."""
         if not chunks:
             raise ValueError("chunks cannot be empty.")

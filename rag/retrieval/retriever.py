@@ -1,4 +1,3 @@
-
 """Semantic retrieval from the local PoultryGuard AI knowledge base."""
 
 from __future__ import annotations
@@ -37,17 +36,13 @@ class KnowledgeBaseRetriever:
             )
 
         if not self.metadata_path.is_file():
-            raise FileNotFoundError(
-                f"Metadata file not found: {self.metadata_path}."
-            )
+            raise FileNotFoundError(f"Metadata file not found: {self.metadata_path}.")
 
         if self._index is None:
             self._index = faiss.read_index(str(self.index_path))
 
         if self._records is None:
-            self._records = json.loads(
-                self.metadata_path.read_text(encoding="utf-8")
-            )
+            self._records = json.loads(self.metadata_path.read_text(encoding="utf-8"))
 
         if self._index.ntotal != len(self._records):
             raise ValueError(
@@ -79,9 +74,7 @@ class KnowledgeBaseRetriever:
             normalize_embeddings=True,
             show_progress_bar=False,
         )
-        query_vector = np.ascontiguousarray(
-            query_vectors, dtype=np.float32
-        )
+        query_vector = np.ascontiguousarray(query_vectors, dtype=np.float32)
 
         if query_vector.shape[1] != self._index.d:
             raise ValueError(
@@ -93,7 +86,7 @@ class KnowledgeBaseRetriever:
         scores, indices = self._index.search(query_vector, k)
 
         results: list[dict[str, Any]] = []
-        for score, idx in zip(scores[0], indices[0]):
+        for score, idx in zip(scores[0], indices[0], strict=True):
             if idx < 0:
                 continue
 
