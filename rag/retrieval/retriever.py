@@ -93,7 +93,7 @@ class KnowledgeBaseRetriever:
         scores, indices = self._index.search(query_vector, k)
 
         results: list[dict[str, Any]] = []
-        for score, idx in zip(scores[0], indices[0]):
+        for score, idx in zip(scores[0], indices[0], strict=True):
             if idx < 0:
                 continue
 

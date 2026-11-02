@@ -1,6 +1,6 @@
 
-from rag.retrieval import KnowledgeBaseRetriever
 from app.services.answer_generator import PoultryAnswerGenerator
+from rag.retrieval import KnowledgeBaseRetriever
 
 question = "How should a poultry house be cleaned and disinfected between flocks?"
 

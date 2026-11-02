@@ -1,8 +1,8 @@
 
 """Streamlit interface for the PoultryGuard AI MVP."""
 
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import streamlit as st
 
@@ -10,9 +10,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from rag.retrieval import KnowledgeBaseRetriever
-from app.services.answer_generator import PoultryAnswerGenerator
-
+from app.services.answer_generator import PoultryAnswerGenerator  # noqa: E402
+from rag.retrieval import KnowledgeBaseRetriever  # noqa: E402
 
 st.set_page_config(
     page_title="PoultryGuard AI",
