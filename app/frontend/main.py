@@ -1,4 +1,3 @@
-
 """Streamlit interface for the PoultryGuard AI MVP."""
 
 import sys
@@ -112,20 +111,14 @@ if submitted:
                 st.subheader("Supporting sources")
 
                 for number, source in enumerate(result.sources, start=1):
-                    source_path = str(
-                        source.get("source", "Unknown source")
-                    )
-                    section = str(
-                        source.get("section", "Unspecified section")
-                    )
+                    source_path = str(source.get("source", "Unknown source"))
+                    section = str(source.get("section", "Unspecified section"))
                     score = source.get("score")
 
                     heading = f"{number}. {section}"
 
                     if score is not None:
-                        heading += (
-                            f" — similarity {float(score):.3f}"
-                        )
+                        heading += f" — similarity {float(score):.3f}"
 
                     with st.expander(heading):
                         st.markdown(f"**Source file:** `{source_path}`")
@@ -149,6 +142,4 @@ if submitted:
 
 st.divider()
 
-st.caption(
-    "PoultryGuard AI | Local knowledge retrieval + Groq answer generation"
-)
+st.caption("PoultryGuard AI | Local knowledge retrieval + Groq answer generation")

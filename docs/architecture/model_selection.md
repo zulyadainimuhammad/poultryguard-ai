@@ -120,13 +120,13 @@ The following llama.cpp parameters are configured for the ADTC Standard Laptop:
 ```python
 LlamaConfig(
     model_path="models/gguf/qwen2.5-1.5b-instruct-q4_k_m.gguf",
-    n_ctx=2048,          # Context window — balances quality and RAM
-    n_threads=4,         # CPU threads — matches typical i5 core count
-    n_batch=512,         # Prompt processing batch size
-    n_gpu_layers=0,      # CPU-only — no GPU offloading
-    use_mmap=True,       # Memory-mapped loading — reduces RAM pressure
-    use_mlock=False,     # Do not lock pages — allows OS to swap if needed
-    verbose=False,       # Suppress llama.cpp console output
+    n_ctx=2048,  # Context window — balances quality and RAM
+    n_threads=4,  # CPU threads — matches typical i5 core count
+    n_batch=512,  # Prompt processing batch size
+    n_gpu_layers=0,  # CPU-only — no GPU offloading
+    use_mmap=True,  # Memory-mapped loading — reduces RAM pressure
+    use_mlock=False,  # Do not lock pages — allows OS to swap if needed
+    verbose=False,  # Suppress llama.cpp console output
 )
 ```
 

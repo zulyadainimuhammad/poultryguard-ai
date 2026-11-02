@@ -1,4 +1,3 @@
-
 from app.services.answer_generator import PoultryAnswerGenerator
 from rag.retrieval import KnowledgeBaseRetriever
 

@@ -80,9 +80,9 @@ graph LR
 class Chunk:
     id: int
     text: str
-    source: str       # relative path to source .md file
-    section: str      # heading under which this chunk appears
-    domain: str       # knowledge base domain (diseases, vaccination, etc.)
+    source: str  # relative path to source .md file
+    section: str  # heading under which this chunk appears
+    domain: str  # knowledge base domain (diseases, vaccination, etc.)
     char_count: int
 ```
 
@@ -158,7 +158,7 @@ class Retriever:
 @dataclass
 class RetrievedChunk:
     chunk: Chunk
-    score: float      # cosine similarity score [0, 1]
+    score: float  # cosine similarity score [0, 1]
     rank: int
 ```
 

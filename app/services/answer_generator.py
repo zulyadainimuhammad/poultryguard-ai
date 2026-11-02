@@ -1,4 +1,3 @@
-
 """Generate source-grounded poultry answers using the Groq API."""
 
 from __future__ import annotations
@@ -26,13 +25,9 @@ class PoultryAnswerGenerator:
         api_key = os.getenv("GROQ_API_KEY")
 
         if not api_key:
-            raise ValueError(
-                "GROQ_API_KEY is missing. Add it to your local .env file."
-            )
+            raise ValueError("GROQ_API_KEY is missing. Add it to your local .env file.")
 
-        self.model = model or os.getenv(
-            "GROQ_MODEL", "openai/gpt-oss-120b"
-        )
+        self.model = model or os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
         self.client = Groq(api_key=api_key)
 
     def generate(
