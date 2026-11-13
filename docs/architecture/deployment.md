@@ -42,14 +42,13 @@ Never commit `.env` or real API credentials.
 
 The retriever expects the generated FAISS index and metadata under `vector_store/`. The indexing implementation is `KnowledgeBaseIndexer` in `rag/indexing/indexer.py`. The Sentence Transformer model is configured for local-only loading; make sure it is available in the local model cache before indexing.
 
-A stable CLI wrapper for index generation is a required developer-experience improvement. Until that exists, run the indexer through a short local Python helper:
+The index builder is exposed through the command-line wrapper:
 
-```python
-from rag.indexing.indexer import KnowledgeBaseIndexer
-
-result = KnowledgeBaseIndexer().build()
-print(result)
+```powershell
+python scripts/build_index.py
 ```
+
+On a connected development machine, populate the local Sentence Transformers model cache before running the build. The encoder uses local-only loading at runtime.
 
 ## 4. Run the application
 
