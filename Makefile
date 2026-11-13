@@ -1,20 +1,19 @@
-# Common developer commands for PoultryGuard AI.
-# These targets are intentionally lightweight while the repository is in scaffold mode.
+# Developer commands for the current PoultryGuard prototype.
 
-.PHONY: help install install-dev lint format format-check test check run clean benchmark profile
+.PHONY: help install install-dev lint format format-check test check run index clean
 
 help:
 	@echo "Available targets:"
 	@echo "  install       Install runtime dependencies"
-	@echo "  install-dev   Install development dependencies"
+	@echo "  install-dev   Install runtime and development dependencies"
 	@echo "  lint          Run Ruff lint checks"
-	@echo "  format        Format Python files with Black and Ruff"
+	@echo "  format        Format Python files with Ruff"
 	@echo "  format-check  Verify formatting without modifying files"
-	@echo "  test          Run unit tests"
+	@echo "  test          Run pytest"
 	@echo "  check         Run lint, format-check, and tests"
-	@echo "  run           Placeholder for future Streamlit app"
-	@echo "  benchmark     Placeholder for future benchmark suite"
-	@echo "  profile       Placeholder for future profiler suite"
+	@echo "  run           Start the current Streamlit knowledge assistant"
+	@echo "  index         Build the local FAISS knowledge index"
+	@echo "  clean         Display safe cleanup guidance"
 
 install:
 	python -m pip install -r requirements.txt
@@ -26,26 +25,22 @@ lint:
 	ruff check .
 
 format:
-	ruff check . --fix
-	black .
+	ruff format .
 
 format-check:
-	black --check .
+	ruff format --check .
 
 test:
-	pytest
+	python -m pytest
 
 check: lint format-check test
 
 run:
-	@echo "Streamlit app is not implemented yet."
+	streamlit run app/frontend/main.py
 
-benchmark:
-	python benchmarks/benchmark_placeholder.py
-
-profile:
-	python profiler/profile_placeholder.py
+index:
+	python scripts/build_index.py
 
 clean:
-	@echo "Remove generated caches, benchmark outputs, and vector indexes manually with care."
-
+	@echo "Remove generated caches and local artefacts only when you understand their contents."
+	@echo "Do not delete data/poultryguard.db unless you intend to discard local farm records."

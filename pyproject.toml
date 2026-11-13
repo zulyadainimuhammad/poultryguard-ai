@@ -4,27 +4,27 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "poultryguard-ai"
-version = "0.0.0"
-description = "Offline AI-powered poultry health and farm management assistant for ADTC 2026."
+version = "0.1.0"
+description = "AI-assisted poultry farm management, analytics and knowledge support."
 readme = "README.md"
 requires-python = ">=3.11,<3.12"
 license = { text = "MIT" }
 authors = [
-  { name = "PoultryGuard AI Contributors" }
+  { name = "Zulyadaini Muhammad Aminu" }
 ]
 keywords = [
-  "offline-ai",
   "poultry",
+  "farm-management",
+  "farm-analytics",
   "rag",
-  "llama-cpp",
   "faiss",
   "agritech",
-  "adtc"
+  "smallholder-farmers"
 ]
 classifiers = [
-  "Development Status :: 1 - Planning",
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: End Users/Desktop",
   "Intended Audience :: Developers",
-  "Intended Audience :: Science/Research",
   "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3.11",
   "Topic :: Scientific/Engineering :: Artificial Intelligence"
@@ -33,10 +33,6 @@ classifiers = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["app*", "rag*", "models*"]
-
-[tool.black]
-line-length = 88
-target-version = ["py311"]
 
 [tool.ruff]
 line-length = 88

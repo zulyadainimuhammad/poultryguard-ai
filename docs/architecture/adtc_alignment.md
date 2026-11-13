@@ -1,3 +1,5 @@
+> **Historical document:** This file preserves the original ADTC 2026 design and planning material. It is not a statement of the active product architecture or proof of competition compliance. The current prototype uses Groq API answer generation and therefore requires internet access; the active app is not fully offline. See [system_overview.md](system_overview.md) and [deployment.md](deployment.md) for current implementation details.
+
 # ADTC Alignment
 
 ## Purpose
