@@ -82,7 +82,7 @@ Exit criteria:
 
 Tasks:
 - Preserve Markdown chunking and FAISS indexing.
-- Provide a reproducible index-build command and clear model-cache setup instructions.
+- Use the implemented `scripts/build_index.py` command and document model-cache setup; validate the command on a clean Python 3.11 environment.
 - Test retrieval relevance and source attribution.
 - Add answer-quality tests, insufficient-evidence cases and safety regression cases.
 - Handle missing index, missing embedding model and provider/API failures clearly.
