@@ -1,75 +1,68 @@
 # Contributing to PoultryGuard AI
 
-Thank you for helping build PoultryGuard AI. This project aims to be a reliable, offline-first assistant for poultry farming contexts, with a special focus on practical use in African environments.
+Thank you for your interest in contributing. PoultryGuard AI is currently maintained by its repository owner and is being developed as a poultry farm intelligence prototype.
 
-## Contribution Principles
+## Project principles
 
-- Keep the system offline-first and compatible with modest laptop hardware.
-- Prefer clear, maintainable Python over clever abstractions.
-- Separate UI, orchestration, retrieval, model inference, and knowledge-base concerns.
-- Document assumptions, limitations, and data sources.
-- Avoid adding cloud services, telemetry, or internet-dependent runtime behavior.
+- Match documentation to implemented behaviour; label future capabilities as planned.
+- Keep Streamlit presentation code separate from services, repositories and persistence.
+- Preserve traceability for poultry knowledge and cite credible sources.
+- Treat AI as decision support, not veterinary diagnosis or prescription.
+- Validate data carefully and document assumptions.
+- Keep API credentials, personal data, local databases, model files and generated indexes out of Git.
+- Introduce cloud infrastructure only when validated product requirements justify it.
 
-## Development Setup
+## Development setup
 
-```bash
-python3.11 -m venv .venv
-source .venv/bin/activate
+Use Python 3.11.
+
+Windows PowerShell:
+
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
 pip install -r requirements-dev.txt
-make lint
-make format-check
-make test
 ```
 
-## Branching
+Run checks:
 
-- Use short, descriptive branch names such as `docs/architecture-notes` or `feat/rag-indexer`.
-- Keep pull requests focused on one logical change.
-- Avoid mixing generated artifacts, model files, indexes, and source code in the same change.
-
-## Pull Request Checklist
-
-- The change is scoped and documented.
-- Tests pass locally with `make test`.
-- Linting passes with `make lint`.
-- Formatting passes with `make format-check`.
-- New documentation is added for new user-facing or developer-facing behavior.
-- Large files, GGUF models, FAISS indexes, and raw datasets are not committed.
-
-## Knowledge Base Contributions
-
-Knowledge base material must be:
-
-- Written in clear Markdown.
-- Attributed to credible sources where applicable.
-- Reviewed for local relevance and practical usefulness.
-- Marked with uncertainty where evidence is incomplete.
-- Free from claims that replace professional veterinary diagnosis.
-
-## Code Style
-
-This repository uses:
-
-- Python 3.11
-- Ruff for linting
-- Black for formatting
-- pytest for tests
-
-Run the standard checks before opening a pull request:
-
-```bash
-make check
+```powershell
+python -m pytest -v
+ruff check .
+ruff format --check .
+python scripts/validate_knowledge_base.py
+python scripts/validate_metadata.py
+python scripts/validate_references.py
+python scripts/validate_links.py
 ```
 
-## Reporting Issues
+## Branching and commits
 
-When opening an issue, include:
+- Use focused branches such as `feat/farm-dashboard`, `feat/vaccination-records` or `docs/roadmap-refresh`.
+- Keep pull requests limited to one coherent change.
+- Use descriptive commit messages.
+- Do not rewrite shared history or force-push without explicit coordination.
+- The repository owner is responsible for merging changes to the default branch.
 
-- Expected behavior
-- Actual behavior
-- Steps to reproduce
-- Operating system and Python version
-- Any relevant logs or screenshots
+## Pull request checklist
 
-Security issues should be reported using the process in [SECURITY.md](SECURITY.md).
+- [ ] The change solves a stated product or engineering need.
+- [ ] Tests cover changed behaviour.
+- [ ] Ruff lint and format checks pass.
+- [ ] Knowledge-base changes include credible sources and review metadata.
+- [ ] Documentation reflects the actual implementation.
+- [ ] No secrets, local databases, indexes, model files or private farmer data are committed.
+- [ ] User-facing safety limitations are preserved.
 
+## Knowledge-base contributions
+
+Knowledge content must be sourced, dated/reviewed where appropriate, locally relevant and clear about uncertainty. Disease, vaccination and treatment guidance should receive review by qualified poultry professionals before being presented as authoritative advice. Do not invent drug dosages, diagnosis criteria or treatment protocols.
+
+## Attribution
+
+Contributions must accurately identify the people who made substantive contributions. Do not add co-author trailers, contributor entries or endorsements for tools or automated assistants unless required by the actual contribution and authorised by the named party. Do not alter existing commit history solely to change attribution without an agreed, backed-up history-rewrite plan.
+
+## Reporting issues
+
+Include expected behaviour, actual behaviour, reproduction steps, Python version, operating system and relevant non-sensitive logs. Report security concerns using [SECURITY.md](SECURITY.md).
