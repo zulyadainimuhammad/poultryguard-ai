@@ -215,7 +215,7 @@ These are development checks, not evidence of farmer field validation.
 | Phase | Focus | Status |
 |---|---|---|
 | 0 | Repository and engineering foundation | In place; ongoing maintenance |
-| 1 | Poultry knowledge base and content quality | Implemented foundation; expert review continues |
+| 1 | Poultry knowledge base and content quality | Implemented foundation; domain-expert validation pending |
 | 2 | RAG retrieval and AI knowledge assistant | Working prototype |
 | 3 | Farm data foundation: farms, flocks, daily records and analytics services | Implemented at service/data layer |
 | 4 | Farm Intelligence UI: profiles, flock workflows, records and charts | **Next implementation phase** |
