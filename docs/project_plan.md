@@ -1,338 +1,254 @@
-# Project Plan
+# PoultryGuard AI — Implementation Plan
 
-## Overview
+**Last reviewed:** 13 November 2026  
+**Planning basis:** Active `feature/gta-mvp` branch and current repository implementation.
 
-This document defines the PoultryGuard AI implementation roadmap for the Africa Deep Tech Challenge (ADTC) 2026. The project is organised into eight sprints, each with a clear objective, deliverables, acceptance criteria, and dependencies.
+## Purpose
 
-All sprints target the `feature/<sprint-name>` branch workflow. No sprint work is merged to `main` without passing CI (Ruff lint, Ruff format, pytest).
+This plan sequences work from the current prototype toward a validated poultry farm intelligence product. It supersedes the former ADTC offline/llama.cpp sprint plan as the primary delivery plan. Historical ADTC design documents remain historical references and must not be treated as descriptions of the current runtime.
 
----
+## Current baseline
 
-## Sprint Summary
+Implemented in the active branch:
 
-| Sprint | Name | Focus | Branch |
+- Streamlit knowledge assistant at `app/frontend/main.py`.
+- Markdown knowledge content and automated content validators.
+- Heading-aware Markdown chunking, local Sentence Transformer embeddings, FAISS indexing and retrieval.
+- Groq-backed answer generation with source metadata.
+- SQLite schema for farms, flocks and daily records.
+- Farm, flock and daily-record repositories and application services.
+- Flock summary and daily analytics service.
+- Latest local test run reported by the developer: 62 tests passed.
+
+Not yet implemented as user workflows:
+
+- Farm Intelligence Streamlit screens and navigation.
+- Health, vaccination, treatment, biosecurity and task records.
+- Farm-aware AI summaries.
+- Formal farmer pilot and professional validation.
+- Production authentication, API, PostgreSQL and cloud deployment.
+
+## Delivery sequence
+
+| Phase | Name | Priority | Dependencies |
 |---|---|---|---|
-| 1 | System Design | Architecture documentation | `feature/system-design` |
-| 2 | Knowledge Base | Domain content curation | `feature/knowledge-base` |
-| 3 | Dataset Preparation | Evaluation and training data | `feature/datasets` |
-| 4 | RAG Pipeline | Chunking, embedding, retrieval | `feature/rag` |
-| 5 | Local LLM Integration | llama.cpp inference | `feature/local-llm` |
-| 6 | Desktop Application | Streamlit UI | `feature/frontend` |
-| 7 | Benchmarking & Optimisation | Performance and quality | `feature/benchmarking` |
-| 8 | ADTC Submission | Final packaging and submission | `feature/documentation` |
-
----
-
-## Sprint 1 — System Design
-
-**Objective:** Design the complete software architecture before implementing any application logic. Establish the technical foundation that all subsequent sprints build upon.
-
-**Branch:** `feature/system-design`
-
-**Deliverables:**
-
-- [ ] `docs/architecture/system_overview.md`
-- [ ] `docs/architecture/software_architecture.md`
-- [ ] `docs/architecture/data_flow.md`
-- [ ] `docs/architecture/model_selection.md`
-- [ ] `docs/architecture/rag_design.md`
-- [ ] `docs/architecture/deployment.md`
-- [ ] `docs/architecture/adtc_alignment.md`
-- [ ] `docs/project_plan.md`
-- [ ] Updated `README.md`
-- [ ] Updated `ROADMAP.md`
-- [ ] Updated `CHANGELOG.md`
-
-**Acceptance Criteria:**
-
-- All architecture documents written to professional engineering standards
-- Mermaid diagrams render correctly in GitHub Markdown
-- Documents are internally consistent (no contradictions between files)
-- ADTC alignment document maps every competition requirement to a design decision
-- CI passes on the feature branch
-
-**Dependencies:** None
-
----
-
-## Sprint 2 — Knowledge Base
-
-**Objective:** Curate a comprehensive, high-quality Markdown knowledge base covering all seven poultry farming domains. This is the primary data source for the RAG pipeline.
-
-**Branch:** `feature/knowledge-base`
-
-**Deliverables:**
-
-- [ ] Markdown schema definition (`docs/knowledge_base_schema.md`)
-- [ ] Minimum 5 documents per domain (35 documents total):
-  - `knowledge_base/diseases/` — Newcastle, Avian Influenza, Gumboro, Marek's, Coccidiosis, Fowl Pox, Fowl Typhoid, Infectious Bronchitis
-  - `knowledge_base/vaccination/` — Broiler schedule, Layer schedule, vaccine storage, administration guide
-  - `knowledge_base/climate/` — Housing ventilation, heat stress, cold stress, humidity management
-  - `knowledge_base/biosecurity/` — Farm biosecurity checklist, visitor protocols, disinfection guide
-  - `knowledge_base/feeding/` — Broiler nutrition, layer nutrition, feed storage, water quality
-  - `knowledge_base/management/` — Flock records, mortality tracking, production records
-  - `knowledge_base/market/` — Market pricing, record keeping, cost management
-- [ ] Source attribution for all documents
-- [ ] Knowledge base quality review checklist
-- [ ] `scripts/validate_knowledge_base.py` — validates schema compliance
-- [ ] Updated `knowledge_base/README.md`
-
-**Acceptance Criteria:**
-
-- All documents follow the defined Markdown schema
-- No documents contain invented facts (all claims sourced)
-- `validate_knowledge_base.py` passes on all documents
-- Minimum 35 documents across 7 domains
-- CI passes
-
-**Dependencies:** Sprint 1 (architecture defines KB schema)
-
----
-
-## Sprint 3 — Dataset Preparation
-
-**Objective:** Prepare evaluation datasets and synthetic question-answer pairs for benchmarking RAG retrieval quality and LLM answer quality.
-
-**Branch:** `feature/datasets`
-
-**Deliverables:**
-
-- [ ] `datasets/raw/` — collected reference Q&A pairs from agricultural extension sources
-- [ ] `datasets/processed/evaluation_set.json` — 100 question-answer pairs with domain labels
-- [ ] `datasets/synthetic/synthetic_qa.json` — 200 synthetic Q&A pairs generated from KB documents
-- [ ] `datasets/README.md` — dataset documentation and provenance
-- [ ] `scripts/generate_synthetic_qa.py` — synthetic Q&A generation script
-- [ ] `evaluation/metrics.py` — BLEU, ROUGE, and semantic similarity scoring
-- [ ] `evaluation/README.md`
-
-**Acceptance Criteria:**
-
-- Evaluation set covers all 7 knowledge base domains
-- Synthetic Q&A pairs are grounded in KB content (no hallucinated facts)
-- Evaluation metrics script produces reproducible scores
-- Dataset provenance documented
-- CI passes
-
-**Dependencies:** Sprint 2 (knowledge base required for synthetic Q&A generation)
-
----
-
-## Sprint 4 — RAG Pipeline
-
-**Objective:** Implement the complete RAG pipeline: document chunking, local embedding, FAISS indexing, retrieval, and prompt construction.
-
-**Branch:** `feature/rag`
-
-**Deliverables:**
-
-- [ ] `rag/chunking/markdown_chunker.py`
-- [ ] `rag/embeddings/embedder.py`
-- [ ] `rag/indexing/index_builder.py`
-- [ ] `rag/retrieval/retriever.py`
-- [ ] `rag/prompts/prompt_builder.py`
-- [ ] `scripts/build_index.py` — CLI script to build FAISS index
-- [ ] `tests/unit/test_chunker.py`
-- [ ] `tests/unit/test_embedder.py`
-- [ ] `tests/unit/test_retriever.py`
-- [ ] `tests/unit/test_prompt_builder.py`
-- [ ] `tests/integration/test_rag_pipeline.py`
-- [ ] Updated `requirements.txt` with `faiss-cpu`, `sentence-transformers`
-
-**Acceptance Criteria:**
-
-- `build_index.py` successfully indexes all KB documents
-- Retriever returns relevant chunks for domain-specific queries (manual spot-check)
-- Unit test coverage ≥ 80% for all RAG modules
-- Integration test exercises full pipeline without LLM
-- Retrieval latency < 500 ms on ADTC laptop spec
-- CI passes
-
-**Dependencies:** Sprint 2 (knowledge base), Sprint 3 (evaluation dataset for retrieval quality check)
-
----
-
-## Sprint 5 — Local LLM Integration
-
-**Objective:** Integrate llama.cpp inference via `llama-cpp-python`, implement the query orchestrator, emergency advisory module, and configuration management.
-
-**Branch:** `feature/local-llm`
-
-**Deliverables:**
-
-- [ ] `models/inference/llm_runner.py`
-- [ ] `models/configs/model_profiles.py`
-- [ ] `app/backend/orchestrator.py`
-- [ ] `app/services/query_service.py`
-- [ ] `app/services/emergency_service.py`
-- [ ] `app/services/session_service.py`
-- [ ] `app/config/settings.py`
-- [ ] `app/config/defaults.py`
-- [ ] `app/utils/logger.py`
-- [ ] `app/utils/timer.py`
-- [ ] `app/utils/memory.py`
-- [ ] `scripts/download_model.py`
-- [ ] `tests/unit/test_emergency_service.py`
-- [ ] `tests/unit/test_orchestrator.py`
-- [ ] `tests/smoke/test_full_pipeline.py` (with mock LLM)
-- [ ] Updated `requirements.txt` with `llama-cpp-python`
-
-**Acceptance Criteria:**
-
-- Full query pipeline executes end-to-end with real GGUF model
-- Emergency module correctly identifies critical disease keywords
-- RAM usage stays below 6 GB during inference
-- Inference latency < 60 seconds on ADTC laptop spec
-- All unit tests pass
-- Smoke test passes with mock LLM (no model file required for CI)
-- CI passes
-
-**Dependencies:** Sprint 4 (RAG pipeline)
-
----
-
-## Sprint 6 — Desktop Application
-
-**Objective:** Build the Streamlit desktop UI with all farmer-facing workflows, session management, and the emergency alert panel.
-
-**Branch:** `feature/frontend`
-
-**Deliverables:**
-
-- [ ] `app/frontend/pages/home.py`
-- [ ] `app/frontend/pages/disease_advisor.py`
-- [ ] `app/frontend/pages/vaccination.py`
-- [ ] `app/frontend/pages/climate.py`
-- [ ] `app/frontend/pages/biosecurity.py`
-- [ ] `app/frontend/pages/feeding.py`
-- [ ] `app/frontend/pages/records.py`
-- [ ] `app/frontend/components/chat_widget.py`
-- [ ] `app/frontend/components/alert_banner.py`
-- [ ] `app/frontend/components/sidebar.py`
-- [ ] `app/backend/main.py` — Streamlit entry point
-- [ ] `demo/demo_walkthrough.md`
-- [ ] `docs/screenshots/` — UI screenshots for ADTC submission
-- [ ] Updated `requirements.txt` with `streamlit`
-
-**Acceptance Criteria:**
-
-- All 7 domain pages functional
-- Emergency alert banner displays for critical queries
-- Session history persists within a session
-- UI is accessible (keyboard navigable, sufficient colour contrast)
-- Application starts in < 30 seconds on ADTC laptop
-- Manual end-to-end test passes for all domain workflows
-- CI passes
-
-**Dependencies:** Sprint 5 (backend services and LLM integration)
-
----
-
-## Sprint 7 — Benchmarking and Optimisation
-
-**Objective:** Measure system performance against ADTC targets, optimise bottlenecks, and produce reproducible benchmark evidence for the competition submission.
-
-**Branch:** `feature/benchmarking`
-
-**Deliverables:**
-
-- [ ] `benchmarks/run_benchmarks.py` — full benchmark suite
-- [ ] `benchmarks/results/benchmark_report.json`
-- [ ] `profiler/profile_inference.py`
-- [ ] `profiler/profile_retrieval.py`
-- [ ] `evaluation/run_evaluation.py` — answer quality evaluation
-- [ ] `evaluation/results/evaluation_report.json`
-- [ ] `docs/benchmarks/benchmark_results.md`
-- [ ] `docs/benchmarks/optimisation_log.md`
-
-**Acceptance Criteria:**
-
-- All ADTC performance targets met (see `adtc_alignment.md`)
-- Startup time < 30 seconds
-- Query latency < 30 seconds (subsequent queries)
-- RAM usage < 6 GB peak
-- Answer relevance score > 0.7
-- Benchmark results reproducible across two runs
-- CI passes
-
-**Dependencies:** Sprint 6 (full application required for end-to-end benchmarking)
-
----
-
-## Sprint 8 — ADTC Submission
-
-**Objective:** Finalise all documentation, freeze versions, produce the competition submission package, and tag the release candidate.
-
-**Branch:** `feature/documentation`
-
-**Deliverables:**
-
-- [ ] `report/adtc_submission_report.md` — competition report
-- [ ] `report/technical_summary.md`
-- [ ] `demo/demo_script.md` — judge demonstration script
-- [ ] `docs/deployment/offline_setup_guide.md`
-- [ ] `docs/api/api_reference.md`
-- [ ] Final `README.md` with screenshots and demo GIF
-- [ ] Final `CHANGELOG.md` with all sprint entries
-- [ ] Final `ROADMAP.md` marked complete
-- [ ] Git tag: `v1.0.0-adtc`
-- [ ] GitHub Release with offline distribution package
-
-**Acceptance Criteria:**
-
-- All documentation complete and internally consistent
-- `v1.0.0-adtc` tag created on `main`
-- GitHub Release includes offline distribution package
-- All CI checks pass on `main`
-- ADTC submission checklist fully completed
-- Demo runs successfully on ADTC Standard Laptop
-
-**Dependencies:** Sprint 7 (benchmark results required for submission report)
-
----
-
-## Milestone Timeline
-
-```mermaid
-gantt
-    title PoultryGuard AI — Sprint Timeline
-    dateFormat  YYYY-MM-DD
-    section Sprint 1
-    System Design           :s1, 2026-07-07, 7d
-    section Sprint 2
-    Knowledge Base          :s2, after s1, 14d
-    section Sprint 3
-    Dataset Preparation     :s3, after s2, 7d
-    section Sprint 4
-    RAG Pipeline            :s4, after s3, 14d
-    section Sprint 5
-    Local LLM Integration   :s5, after s4, 14d
-    section Sprint 6
-    Desktop Application     :s6, after s5, 14d
-    section Sprint 7
-    Benchmarking            :s7, after s6, 7d
-    section Sprint 8
-    ADTC Submission         :s8, after s7, 7d
-```
-
----
-
-## Definition of Done
-
-A sprint is complete when:
-
-1. All deliverables listed above are present in the repository
-2. `ruff check .` passes with zero errors
-3. `ruff format --check .` passes
-4. `pytest` passes with zero failures
-5. A pull request has been opened from the feature branch to `main`
-6. The PR description includes: Summary, Files Changed, Reason for Changes, Testing Completed, Potential Improvements
-7. `CHANGELOG.md` has been updated with the sprint's changes
-8. `README.md` and `ROADMAP.md` reflect the current state
-
----
-
-## References
-
-- See `docs/architecture/` for all architecture documents
-- See `ROADMAP.md` for the high-level phase overview
-- See `CHANGELOG.md` for the change history
+| 0 | Engineering baseline and repository accuracy | Maintain | None |
+| 1 | Poultry knowledge content and quality | High | Phase 0 |
+| 2 | RAG and knowledge assistant | High | Phase 1 |
+| 3 | Farm data and analytics foundation | High | Phase 0 |
+| 4 | Farm Intelligence UI | **Current next phase** | Phase 3 |
+| 5 | Health and operational records | High | Phase 4, schema migrations |
+| 6 | Farm-aware AI summaries and expert workflow | Medium | Phases 2, 4 and 5 |
+| 7 | Field validation and localisation | High | Usable end-to-end workflows |
+| 8 | Production/cloud architecture | Later | Validated workflows and multi-user need |
+| 9 | Environmental integrations and predictive intelligence | Later | Reliable longitudinal data and validation |
+
+## Phase 0 — Engineering baseline and documentation
+
+**Objective:** Keep the repository reproducible, tested and accurately described.
+
+Tasks:
+- Maintain Python 3.11 development environment and a deliberate dependency-management strategy.
+- Keep secrets, local SQLite databases, FAISS artefacts and model files out of Git.
+- Retain CI for lint, formatting, tests and knowledge-base validation.
+- Keep runtime and deployment instructions aligned with implemented code.
+- Maintain clear branch and pull-request practices.
+
+Exit criteria:
+- Fresh environment setup is documented and verified.
+- CI matches commands developers run locally.
+- No live credentials or local runtime artefacts are tracked.
+- README and roadmap describe the active architecture.
+
+## Phase 1 — Poultry knowledge base
+
+**Objective:** Maintain a traceable, reviewable poultry knowledge corpus.
+
+Tasks:
+- Maintain metadata and source references for all knowledge documents.
+- Continue coverage across diseases, vaccination, climate, biosecurity, feeding, management, emergency guidance and FAQs.
+- Conduct qualified poultry/veterinary review of high-risk content.
+- Review Hausa content with fluent local reviewers before publication.
+
+Exit criteria:
+- Knowledge-base validators pass.
+- Sources are traceable.
+- Critical guidance has professional review status and review dates.
+- Known content gaps are documented.
+
+## Phase 2 — RAG knowledge assistant
+
+**Objective:** Retrieve relevant knowledge and generate answers that distinguish evidence from uncertainty.
+
+Tasks:
+- Preserve Markdown chunking and FAISS indexing.
+- Provide a reproducible index-build command and clear model-cache setup instructions.
+- Test retrieval relevance and source attribution.
+- Add answer-quality tests, insufficient-evidence cases and safety regression cases.
+- Handle missing index, missing embedding model and provider/API failures clearly.
+- Document that Groq generation requires internet connectivity and an API key.
+
+Exit criteria:
+- Index can be built reproducibly from the tracked knowledge base.
+- Retriever returns expected relevant passages for a curated evaluation set.
+- Answers show source traceability and abstain when evidence is inadequate.
+- No treatment/dosage or diagnostic overclaim is introduced.
+
+## Phase 3 — Farm data and analytics foundation
+
+**Objective:** Store and compute basic farm-level production information.
+
+Existing entities:
+- Farm
+- Flock
+- DailyRecord
+
+Existing operations:
+- Create/list/get farms.
+- Create/list/get flocks.
+- Create daily records and retrieve records.
+- Calculate flock-level summary and daily metrics.
+
+Remaining quality gates:
+- Test chronological and cumulative-mortality calculations using unsorted repository fixtures.
+- Define duplicate-date handling and record correction semantics.
+- Validate numeric fields and flock relationships.
+- Add database migrations before future schema expansion.
+- Test persistence and foreign-key cascade behaviour.
+
+Exit criteria:
+- Service and repository contracts are documented.
+- Chronological calculations are deterministic.
+- Invalid inputs are rejected.
+- Existing data can be migrated safely.
+
+## Phase 4 — Farm Intelligence UI
+
+**Objective:** Connect the data foundation to farmer-facing workflows in Streamlit.
+
+Implementation order:
+
+1. Navigation shell separating Knowledge Assistant and Farm Intelligence.
+2. Farm profile creation, listing and selection.
+3. Flock creation and listing for a selected farm.
+4. Daily record entry with field validation.
+5. Farm/flock summary cards and chronological charts.
+6. Empty states, error handling, confirmation and data-refresh behaviour.
+
+Required analytics:
+- Initial/current bird count.
+- Total mortality and mortality rate.
+- Feed and water totals.
+- Average weight.
+- Temperature and humidity summaries.
+
+Exit criteria:
+- User completes the farm → flock → daily record → analytics path.
+- Restarting Streamlit does not lose saved records.
+- Dashboard values reconcile with repository data.
+- Existing knowledge assistant remains functional.
+- Tests cover UI-facing service contracts and core validation.
+
+## Phase 5 — Health and operational records
+
+**Objective:** Expand the data model safely.
+
+Potential entities:
+- HealthObservation
+- VaccinationEvent
+- TreatmentRecord
+- BiosecurityCheck
+- FarmTask
+
+Tasks:
+- Add versioned database migrations.
+- Define validation and event-history semantics.
+- Record source/author for professional recommendations.
+- Add treatment withdrawal-period tracking only with appropriate product and professional data.
+- Do not implement unsupported prescriptions or automatic treatment selection.
+
+Exit criteria:
+- Migration tests preserve existing farm/flock/record data.
+- Every entity has repository, service and validation tests.
+- UI presents clear status and audit history.
+
+## Phase 6 — Farm-aware AI and expert workflows
+
+**Objective:** Combine selected farm records with relevant knowledge in an auditable way.
+
+Tasks:
+- Define a minimised, permission-checked farm context payload.
+- Generate weekly summaries with explicit time range and data coverage.
+- Cite knowledge-base sources separately from user-recorded farm measurements.
+- Flag unusual changes as observations requiring review, not diagnoses.
+- Add expert consultation request and response workflows with clear professional role identity.
+
+Exit criteria:
+- Every generated metric traces to stored records.
+- AI distinguishes recorded facts, retrieved guidance and uncertain interpretation.
+- Safety evaluation includes high-risk poultry-health scenarios.
+
+## Phase 7 — Field validation and localisation
+
+**Objective:** Test usefulness with intended users and domain professionals.
+
+Tasks:
+- Conduct farmer interviews and workflow observation.
+- Run consent-based usability sessions and a limited pilot.
+- Obtain veterinary and extension review.
+- Evaluate Hausa labels, help text and content with fluent reviewers.
+- Measure task completion, completeness, repeat usage, confidence and usability.
+- Record failures and corrective actions.
+
+Exit criteria:
+- Validation report includes methods, participants, findings and limitations.
+- Claims about impact are supported by measured evidence.
+- Product priorities reflect actual farmer feedback.
+
+## Phase 8 — Production and cloud engineering
+
+**Objective:** Support secure multi-user use when remote access and operational reliability are required.
+
+Tasks:
+- Separate UI from application services with a stable API contract.
+- Add authentication, roles and farm-level authorisation.
+- Adopt migrations and PostgreSQL for production.
+- Add Docker images, CI/CD and environment-specific configuration.
+- Add encryption, secret management, backups, restore drills, observability and incident procedures.
+- Validate deployment security and data isolation.
+
+Exit criteria:
+- Tested deployment and rollback process.
+- Verified backups and restores.
+- Farm-level access-control tests pass.
+- No secrets are stored in source control.
+
+## Phase 9 — Environmental and predictive features
+
+**Objective:** Add sensor-informed and predictive functionality only when reliable longitudinal data exists.
+
+Tasks:
+- Validate manual and sensor-based temperature/humidity readings.
+- Monitor calibration, missing data, sampling intervals and device connectivity.
+- Build transparent baselines before machine-learning models.
+- Evaluate models using representative, independently reviewed data.
+- Measure false positives, false negatives, drift and generalisation limits.
+- Keep professional review and escalation paths.
+
+Exit criteria:
+- Data provenance and quality thresholds are documented.
+- Evaluation is reproducible.
+- Product language accurately communicates uncertainty and limitations.
+
+## Working method
+
+- Use a focused branch for each coherent feature.
+- Make small commits with clear messages.
+- Run focused tests after each change and the full suite before merging.
+- Update documentation when implementation changes—not before.
+- Merge only after review and passing CI.
+- Do not mix product claims, planned capabilities and implemented features.
+
+## First work item
+
+Start Phase 4 with the Streamlit navigation shell and Farm Profile page. Before charting cumulative performance, verify chronological ordering in `AnalyticsService.get_daily_metrics` and add a regression test.
