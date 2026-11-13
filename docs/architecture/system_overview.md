@@ -1,167 +1,106 @@
 # System Overview
 
+**Last reviewed:** 13 November 2026  
+**Product state:** Working prototype
+
 ## Purpose
 
-This document provides a high-level description of the PoultryGuard AI system: what it is, why it exists, who it serves, and how its major components relate to one another. It is the entry point for any engineer, reviewer, or contributor seeking to understand the system before reading more detailed design documents.
+PoultryGuard AI is a developing poultry farm intelligence platform intended to help smallholder poultry farmers organise farm records, understand flock performance and access evidence-informed poultry knowledge. The initial product context is Northern Nigeria.
 
----
+The current system has two working foundations:
 
-## Background
+1. A poultry knowledge assistant built around curated Markdown knowledge, local semantic retrieval and Groq-based answer generation.
+2. A farm data layer with SQLite persistence, farm/flock/daily-record repositories, application services and flock analytics.
 
-Poultry farming is a critical livelihood for millions of smallholder farmers across sub-Saharan Africa. Access to timely, accurate veterinary and agronomic guidance is severely limited in rural areas due to poor internet connectivity, shortage of extension officers, and high cost of professional consultations.
+The Farm Intelligence screens that will expose the farm-data services to users are the next implementation phase. The project has not yet completed formal farmer or veterinary/extension validation.
 
-PoultryGuard AI addresses this gap by delivering an intelligent, offline-capable advisory assistant that runs entirely on modest consumer hardware. The system is designed for the Africa Deep Tech Challenge (ADTC) 2026 and must operate without cloud APIs, internet access, or dedicated GPU hardware.
-
----
-
-## Design Decisions
-
-| Decision | Rationale |
-|---|---|
-| Offline-first architecture | Rural areas have unreliable or no internet. All inference and retrieval must work without connectivity. |
-| GGUF model via llama.cpp | Enables CPU-only inference with quantised models that fit within 8 GB RAM. |
-| Retrieval-Augmented Generation | Grounds model responses in curated, domain-specific knowledge rather than relying on model parametric memory alone. |
-| FAISS vector store | Lightweight, embeddable, no server required, fast approximate nearest-neighbour search on CPU. |
-| Markdown knowledge base | Human-readable, version-controllable, easy to extend by domain experts without programming knowledge. |
-| Streamlit desktop UI | Rapid development, Python-native, suitable for MVP; can be replaced with a richer framework in later sprints. |
-| Rule-based emergency module | Deterministic, zero-latency triage for critical disease alerts that must not depend on LLM availability. |
-| Query Classification Layer | Classifies every incoming query before routing so the orchestrator can apply the correct pipeline (emergency, RAG+LLM, or FAQ direct-lookup) without coupling routing logic to individual services. |
-
----
-
-## System Architecture
+## Current system architecture
 
 ```mermaid
-graph TD
-    subgraph User["User Layer"]
-        U[Farmer / Extension Officer]
-    end
-
-    subgraph UI["Frontend — Streamlit Desktop App"]
-        Q[Question Input]
-        R[Response Display]
-        E[Emergency Alert Panel]
-        H[History & Session]
-    end
-
-    subgraph Backend["Backend — Application Services"]
-        O[Query Orchestrator]
-        QC[Query Classifier]
-        EM[Emergency Advisory Module]
-        LOG[Logger & Monitor]
-        CFG[Configuration Manager]
-    end
-
-    subgraph RAG["RAG Pipeline"]
-        EMB[Embedding Service]
-        RET[FAISS Retrieval]
-        PB[Prompt Builder]
-    end
-
-    subgraph KB["Knowledge Base"]
-        KBD[Markdown Documents]
-        IDX[Indexing Service]
-    end
-
-    subgraph VS["Vector Store"]
-        FAISS[(FAISS Index)]
-    end
-
-    subgraph LLM["Local Inference"]
-        LC[llama.cpp Runtime]
-        GGUF[Qwen2.5-1.5B-Instruct GGUF]
-    end
-
-    subgraph Eval["Evaluation & Benchmarking"]
-        BM[Benchmark Runner]
-        EV[Answer Quality Evaluator]
-    end
-
-    U --> Q
-    Q --> O
-    O --> QC
-    QC -- emergency --> EM
-    QC -- rag --> EMB
-    QC -- faq --> RET
-    EMB --> RET
-    RET --> FAISS
-    FAISS --> RET
-    RET --> PB
-    KBD --> IDX
-    IDX --> FAISS
-    PB --> LC
-    LC --> GGUF
-    LC --> R
-    EM --> E
-    O --> LOG
-    CFG --> O
-    CFG --> LC
-    BM --> LC
-    BM --> RET
-    EV --> BM
+flowchart TD
+    USER[Farmer / Farm Operator] --> UI[Streamlit: app/frontend/main.py]
+    UI --> FS[FarmService]
+    UI --> AS[AnalyticsService]
+    UI --> Q[Knowledge assistant workflow]
+    FS --> FR[FarmRepository]
+    FS --> FLR[FlockRepository]
+    FS --> DRR[DailyRecordRepository]
+    AS --> FLR
+    AS --> DRR
+    FR --> DB[(SQLite)]
+    FLR --> DB
+    DRR --> DB
+    Q --> RET[KnowledgeBaseRetriever]
+    RET --> EMB[SentenceTransformerEncoder]
+    RET --> IDX[(FAISS index + metadata)]
+    Q --> GEN[PoultryAnswerGenerator]
+    GEN --> GROQ[Groq API]
+    KB[knowledge_base/*.md] --> INDEXER[KnowledgeBaseIndexer]
+    INDEXER --> EMB
+    INDEXER --> IDX
 ```
 
----
+## Current components
 
-## Component Responsibilities
-
-| Component | Responsibility |
-|---|---|
-| Streamlit Frontend | Render farmer-facing UI, capture queries, display responses and alerts |
-| Query Orchestrator | Coordinate the full query lifecycle; delegate routing decisions to the Query Classifier |
-| Query Classifier | Classify each query as `emergency`, `rag`, or `faq`; return a typed routing decision to the orchestrator |
-| Emergency Advisory Module | Rule-based triage for high-priority disease symptoms; deterministic, no LLM dependency; triggered only when Query Classifier returns `emergency` |
-| Embedding Service | Convert text chunks to dense vectors using a local embedding model |
-| FAISS Retrieval | Approximate nearest-neighbour search over the indexed knowledge base |
-| Prompt Builder | Assemble system prompt, retrieved context, and user query into a structured LLM prompt |
-| llama.cpp Runtime | CPU-only GGUF model inference via `llama-cpp-python` |
-| Knowledge Base | Curated Markdown documents covering diseases, vaccination, climate, biosecurity, feeding, management, and market |
-| Indexing Service | Parse, chunk, embed, and persist knowledge base documents into the FAISS index |
-| Configuration Manager | Load and validate runtime configuration from environment and config files |
-| Logger & Monitor | Structured logging of queries, latency, memory usage, and errors |
-| Benchmark Runner | Measure startup time, inference latency, RAM usage, and retrieval quality |
-| Answer Quality Evaluator | Score responses against reference answers for ADTC submission evidence |
-
----
-
-## Key Constraints
-
-- Maximum RAM: 8 GB total system RAM
-- CPU-only: no GPU, no CUDA, no Metal
-- Offline: no network calls at runtime
-- OS targets: Ubuntu 22.04 LTS and Windows 10/11
-- Python: 3.11
-- Model: Qwen2.5-1.5B-Instruct Q4_K_M GGUF (~1 GB on disk)
-
----
-
-## Trade-offs
-
-| Trade-off | Accepted Cost | Benefit |
+| Component | Repository path | State and responsibility |
 |---|---|---|
-| Small 1.5B parameter model | Lower reasoning depth than larger models | Fits in 8 GB RAM with headroom for OS and RAG |
-| Quantised Q4_K_M | Slight quality reduction vs FP16 | ~4× memory reduction, viable on CPU |
-| FAISS flat index | No incremental updates without full rebuild | Zero server dependency, fast on small corpora |
-| Streamlit UI | Limited UI customisation | Fast development, Python-native, offline-capable |
-| Markdown knowledge base | Manual curation effort | Human-readable, version-controlled, no database required |
+| Streamlit interface | `app/frontend/main.py` | Current knowledge assistant interface |
+| Farm service | `app/services/farm_service.py` | Creates and retrieves farms, flocks and daily records |
+| Analytics service | `app/services/analytics_service.py` | Calculates flock summary and daily production metrics |
+| Answer generator | `app/services/answer_generator.py` | Sends retrieved evidence to Groq and returns answer plus sources |
+| Database connection | `app/database/connection.py` | Creates SQLite connections and initial schema |
+| Data models | `app/database/models.py` | Farm, Flock and DailyRecord dataclasses |
+| Repositories | `app/database/repositories.py` | SQLite persistence operations |
+| Markdown parsing/chunking | `rag/chunking/` | Parses source metadata and splits documents into retrieval chunks |
+| Embeddings | `rag/embeddings/encoder.py` | Generates local sentence-transformer embeddings |
+| Indexing | `rag/indexing/indexer.py` | Builds and persists a FAISS inner-product index and chunk metadata |
+| Retrieval | `rag/retrieval/retriever.py` | Loads FAISS index and searches semantically |
+| Knowledge corpus | `knowledge_base/` | Poultry content with metadata and source references |
 
----
+## Farm data model
 
-## Future Improvements
+The current SQLite schema contains three tables:
 
-- Replace Streamlit with a packaged Electron or Tauri desktop application for better offline UX
-- Add multilingual support (Hausa, Swahili, Yoruba, Amharic) for broader African farmer reach
-- Introduce incremental FAISS index updates to avoid full rebuilds on knowledge base changes
-- Explore larger GGUF models (3B–7B) as hardware targets improve
-- Add voice input/output for low-literacy users
+- `farms`: farm and farmer profile fields.
+- `flocks`: flock identity, farm relationship, species, production type, breed, initial population, stocking date and status.
+- `daily_records`: date, feed, water, mortality, average weight, temperature, humidity and notes.
 
----
+Health observations, vaccination events, treatment events, tasks, expert consultations and sensor telemetry are not yet part of the current schema.
 
-## References
+## Technology and connectivity
 
-- [ADTC 2026 Competition Brief](https://adtc.africa)
-- [llama.cpp](https://github.com/ggerganov/llama.cpp)
-- [Qwen2.5 Model Card](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct)
-- [FAISS](https://github.com/facebookresearch/faiss)
-- [Streamlit](https://streamlit.io)
-- See also: `software_architecture.md`, `data_flow.md`, `rag_design.md`, `model_selection.md`
+| Concern | Current choice |
+|---|---|
+| Runtime | Python 3.11 |
+| User interface | Streamlit |
+| Farm persistence | SQLite |
+| Data access | `sqlite3` repositories |
+| Embedding model | `sentence-transformers/all-MiniLM-L6-v2` (local inference; cache required) |
+| Vector search | FAISS CPU |
+| Answer generation | Groq API |
+| Knowledge content | Version-controlled Markdown |
+| Test framework | pytest |
+| Lint and formatting | Ruff |
+| CI | GitHub Actions |
+
+**Important:** retrieval and database operations are local, but generated answers currently use the Groq API and require network connectivity and `GROQ_API_KEY`. The current runtime is therefore not an entirely offline application. llama.cpp/GGUF documents in the repository describe an earlier design direction, not the active answer-generation implementation.
+
+## Architectural boundaries
+
+- Streamlit pages should call application services, not execute SQL directly.
+- Services coordinate use cases and depend on repositories.
+- Repositories own persistence queries.
+- RAG components remain independent of Streamlit.
+- Generated index and database files are local runtime artefacts and must not be committed.
+- New database tables should be introduced through explicit migrations once schema evolution begins.
+
+## Product limitations
+
+- The Farm Intelligence user interface is not yet integrated.
+- No formal farmer pilot or veterinary/extension review is claimed.
+- The current product does not diagnose poultry disease or prescribe medication.
+- Predictive performance and impact outcomes have not been established.
+
+## Roadmap
+
+See [`ROADMAP.md`](../../ROADMAP.md) for product phases and [`docs/project_plan.md`](../project_plan.md) for implementation tasks.
