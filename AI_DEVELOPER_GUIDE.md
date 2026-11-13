@@ -1,269 +1,89 @@
-# AI Developer Guide
+# AI-Assisted Development Guide
 
-This guide is the permanent instruction manual for AI coding assistants working on PoultryGuard AI, including ChatGPT, Continue, Amazon Q, GitHub Copilot, and similar tools.
+This document defines working rules for human developers and any coding assistant used on PoultryGuard AI. It is guidance for the current codebase, not a substitute for reviewing the implementation and tests.
 
-Every AI assistant must read this file before making changes to the repository.
+## 1. Product overview
 
----
+PoultryGuard AI is a developing poultry farm intelligence platform. The current prototype combines:
 
-## 1. Project Overview
+- A Streamlit poultry knowledge assistant.
+- Curated Markdown content, local semantic embeddings and FAISS retrieval.
+- Groq-based answer generation using retrieved evidence.
+- SQLite persistence for farms, flocks and daily records.
+- Farm and analytics application services.
 
-PoultryGuard AI is an offline AI-powered poultry health, vaccination, climate, biosecurity, and farm management assistant.
+The Farm Intelligence UI, health and vaccination records, farm-aware AI summaries, field validation and production cloud deployment remain planned work. Do not describe planned capabilities as implemented.
 
-The project exists to support the Africa Deep Tech Challenge (ADTC) 2026 by demonstrating a practical, locally deployable AI system that can help poultry farmers and extension officers without relying on cloud infrastructure.
+## 2. Current architecture
 
-Target users include:
+- `app/frontend/`: Streamlit user interface.
+- `app/services/`: application services for farm operations, analytics and answer generation.
+- `app/database/`: dataclasses, SQLite connection and repositories.
+- `rag/`: Markdown parsing/chunking, embeddings, FAISS indexing and retrieval.
+- `knowledge_base/`: sourced poultry reference content.
+- `vector_store/`: generated index and chunk metadata; do not commit.
+- `data/`: local SQLite database; do not commit.
+- `tests/`: pytest suite.
+- `scripts/`: knowledge-base and development validators.
 
-- Smallholder poultry farmers
-- Agricultural extension officers
-- Veterinary support workers
-- Poultry farm managers
-- Students and researchers working on African agritech systems
+The intended dependency flow is UI → services → repositories → database. RAG components should remain independent of Streamlit.
 
-The central philosophy is offline-first development. PoultryGuard AI must remain useful in low-connectivity and no-connectivity environments. Runtime inference, retrieval, knowledge access, logging, and evaluation must be designed so they can operate locally on the target machine.
+## 3. Runtime facts
 
----
+- Python 3.11 is the supported development runtime.
+- Embeddings and FAISS retrieval run locally once the model and index are present.
+- Answer generation currently calls Groq and requires internet access and `GROQ_API_KEY`.
+- The current application is not fully offline.
+- The current Streamlit entry point is `streamlit run app/frontend/main.py`.
+- The current farm schema includes farms, flocks and daily_records only.
 
-## 2. ADTC Constraints
+Do not assume `app/backend/main.py`, Docker Compose or llama.cpp/GGUF scaffolding is the current application entry point or active generation implementation.
 
-All development decisions must respect the ADTC Standard Laptop target and competition constraints.
+## 4. Coding principles
 
-Required constraints:
+- Keep UI, business workflows, persistence and retrieval concerns separate.
+- Add type hints and clear docstrings to public interfaces.
+- Use parameterised SQL and validate user input.
+- Keep credentials in environment variables, never in source code.
+- Make tests deterministic and independent of live external APIs where possible.
+- Handle missing index/model/provider errors explicitly.
+- Avoid wide refactors while implementing a product vertical slice.
+- Preserve existing farmer data when changing the schema.
 
-- CPU-only inference.
-- Maximum practical RAM target: 8 GB system memory.
-- Ubuntu 22.04 LTS compatibility.
-- llama.cpp runtime only for local LLM inference.
-- GGUF model files only.
-- No cloud inference.
-- No external API calls during inference.
-- No runtime dependency on internet access.
-- No GPU, CUDA, ROCm, Metal, or cloud accelerator assumption.
+## 5. Data and analytics rules
 
-Do not add features, dependencies, or architecture choices that require cloud-hosted models, remote vector databases, managed APIs, or online services during normal operation.
+- Daily production metrics must be based on dated records.
+- Sort records chronologically before cumulative calculations.
+- Do not silently convert missing measurements into zero.
+- Define duplicate-record and correction semantics before enabling editing.
+- Add versioned migrations before introducing new tables.
+- Do not expose one farm's records to another farm or user.
 
----
+## 6. Responsible AI rules
 
-## 3. Architecture Principles
+PoultryGuard is a decision-support tool, not a veterinary diagnostic or prescription system.
 
-PoultryGuard AI follows a clean, layered architecture. Preserve the boundaries defined in `README.md` and `docs/architecture/`.
+- Use only relevant retrieved evidence for knowledge answers.
+- Acknowledge when evidence is insufficient.
+- Never invent drug dosages, prescriptions or treatment protocols.
+- Escalate severe illness, suspected outbreaks and high mortality to qualified professionals.
+- Distinguish recorded farm measurements from generated interpretation.
+- Do not claim prediction accuracy, reduced mortality or productivity impact without formal evaluation.
 
-Core principles:
+## 7. Development workflow
 
-- Use layered architecture with clear separation between UI, backend orchestration, services, RAG, model inference, configuration, utilities, and storage.
-- Keep modules small, modular, and testable.
-- Apply single responsibility: each module should have one clear reason to change.
-- Use dependency inversion: high-level workflows should depend on interfaces or injected collaborators, not hardcoded concrete implementations.
-- Avoid circular imports.
-- Prefer composition over inheritance.
-- Keep the Query Classification Layer separate from the orchestrator.
-- Keep the Emergency Advisory Module deterministic and independent of the LLM.
-- Keep RAG, inference, and Streamlit UI concerns separate.
+Use focused feature branches and descriptive commits. Do not commit directly to `main`.
 
-Expected architecture boundaries:
+Before opening a pull request, run:
 
-- `app/frontend/`: Streamlit pages and reusable UI components.
-- `app/backend/`: entry points, query orchestration, and query classification.
-- `app/services/`: use-case services and application workflow coordination.
-- `app/config/`: settings, defaults, and configuration loading.
-- `app/utils/`: logging, timing, memory, and shared helpers.
-- `rag/`: chunking, embeddings, indexing, retrieval, and prompt construction.
-- `models/`: llama.cpp inference boundary and model configuration.
-- `knowledge_base/`: curated Markdown source documents.
-- `vector_store/`: generated FAISS indexes and metadata.
-
----
-
-## 4. Coding Standards
-
-Use production-quality Python and keep the codebase easy for humans and AI tools to reason about.
-
-Required standards:
-
-- Python 3.11 or newer.
-- Type hints for public functions, classes, and service boundaries.
-- Clear docstrings for modules, classes, and non-trivial functions.
-- `pathlib.Path` instead of `os.path` for filesystem paths.
-- PEP 8 naming and readability conventions.
-- Ruff for linting and formatting.
-- pytest for tests.
-- Small, focused modules.
-- Deterministic behavior where possible.
-- No hidden network calls.
-- No unnecessary global state.
-- No broad exception swallowing.
-- No large binary files committed to Git.
-
-Prefer explicit configuration through `app/config/` and `.env.example` over hardcoded paths or magic numbers.
-
----
-
-## 5. Git Workflow
-
-Do not commit directly to `main`.
-
-Required workflow:
-
-- Create a feature branch for every change.
-- Use descriptive branch names, such as `feature/knowledge-base`, `docs/architecture-update`, or `fix/rag-validator`.
-- Use Conventional Commits.
-- Open a pull request before merging.
-- Keep pull requests focused and reviewable.
-- Do not mix unrelated refactors with feature work.
-- Do not commit generated FAISS indexes, GGUF models, caches, logs, virtual environments, or local secrets.
-
-Conventional commit examples:
-
-```text
-docs(project): add AI developer guide
-feat(rag): add markdown chunker
-fix(config): validate missing model path
-test(kb): add schema validator tests
+```powershell
+python -m pytest -v
+ruff check .
+ruff format --check .
+python scripts/validate_knowledge_base.py
+python scripts/validate_metadata.py
+python scripts/validate_references.py
+python scripts/validate_links.py
 ```
 
----
-
-## 6. Knowledge Base Standards
-
-All knowledge base work must follow:
-
-- `docs/knowledge_engineering.md`
-- `docs/knowledge_base_schema.md`
-- `knowledge_base/README.md`
-
-Knowledge base documents must be written in RAG-optimized Markdown. Headings, metadata, section structure, and source fields must remain consistent so the future chunking and retrieval pipeline can produce high-quality context.
-
-Use authoritative veterinary and agricultural sources only, such as:
-
-- FAO publications
-- WOAH/OIE technical disease cards
-- Peer-reviewed veterinary and poultry science literature
-- National veterinary authority guidance
-- University extension publications
-- Reputable agricultural research institutions
-
-Do not cite Wikipedia, social media, marketing pages, undated blogs, forums, or AI-generated content as sources.
-
-Never invent veterinary advice, drug names, dosages, mortality rates, vaccine schedules, or disease claims. If the source does not support a claim, remove the claim or mark uncertainty clearly.
-
----
-
-## 7. RAG Principles
-
-PoultryGuard AI uses Retrieval-Augmented Generation to ground model responses in local, curated knowledge.
-
-Required RAG principles:
-
-- Use a local FAISS index.
-- Use a local embedding model.
-- Build indexes from local Markdown knowledge base files.
-- Ground answers using retrieved context.
-- Include source metadata where possible.
-- Never hallucinate unsupported facts.
-- Prefer saying that the knowledge base does not contain enough information over guessing.
-- Keep retrieval fast enough for the ADTC Standard Laptop.
-- Keep the prompt builder aware of context-window limits.
-- Preserve the emergency path as deterministic and independent of RAG or LLM availability.
-
-The local LLM is an answer generator, not an authority. The knowledge base and retrieved context are the factual source of truth.
-
----
-
-## 8. Performance Goals
-
-Optimize for the ADTC Standard Laptop, not high-end development machines.
-
-Performance goals:
-
-- Low RAM usage under the 8 GB system-memory constraint.
-- Peak runtime memory target below 6 GB where practical.
-- CPU-only inference through llama.cpp.
-- Fast FAISS retrieval.
-- Responsive Streamlit UI.
-- Application startup target below 30 seconds.
-- First query target below 60 seconds.
-- Subsequent query target below 30 seconds.
-- Retrieval latency target below 500 ms.
-
-Avoid dependencies or design choices that substantially increase RAM usage, startup time, model load time, or offline package size without a documented reason.
-
----
-
-## 9. AI Assistant Behaviour
-
-Every AI assistant must do the following before making changes:
-
-- Read this file.
-- Read `README.md`.
-- Read `ROADMAP.md`.
-- Read `CHANGELOG.md`.
-- Read the files in `docs/architecture/`.
-- Read `docs/knowledge_engineering.md`.
-- Read `docs/knowledge_base_schema.md`.
-
-Every AI assistant must preserve project architecture:
-
-- Respect existing module boundaries.
-- Avoid unnecessary dependencies.
-- Avoid application feature implementation when the task is documentation, planning, or scaffolding only.
-- Avoid broad rewrites unless explicitly requested.
-- Avoid changing generated files, local caches, or large artifacts.
-- Keep CI passing.
-- Explain major design decisions.
-- Summarize what changed and what was verified.
-
-When working with knowledge base content, AI assistants must prioritize factual accuracy, source traceability, and farmer safety over speed or completeness.
-
-When unsure, prefer a smaller, well-documented change that fits the architecture over a large speculative implementation.
-
----
-
-## 10. Standard Development Workflow
-
-Every task should follow this workflow:
-
-1. Read documentation.
-2. Confirm the requested scope.
-3. Implement the smallest coherent change.
-4. Run Ruff lint:
-
-   ```bash
-   ruff check .
-   ```
-
-5. Run Ruff format check or formatting:
-
-   ```bash
-   ruff format --check .
-   ```
-
-   or, when formatting changes are intended:
-
-   ```bash
-   ruff format .
-   ```
-
-6. Run pytest:
-
-   ```bash
-   pytest
-   ```
-
-7. Run knowledge base validation when knowledge documents changed:
-
-   ```bash
-   python scripts/validate_knowledge_base.py
-   ```
-
-8. Summarize changes.
-9. Summarize verification.
-10. Suggest a Conventional Commit message.
-
-If a task changes only Markdown documentation and no Python files, Ruff and pytest may be unnecessary. In that case, explicitly say that code checks were not run because the change was documentation-only.
-
-Suggested commit for this file:
-
-```text
-docs(project): add AI developer guide
-```
-
+Update README, roadmap, project plan and changelog when implementation state changes. Do not rewrite shared history or force-push without explicit approval and a backup plan.
