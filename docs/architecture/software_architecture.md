@@ -1,291 +1,122 @@
 # Software Architecture
 
-## Purpose
+**Last reviewed:** 13 November 2026  
+**Status:** Describes the active prototype, not the earlier proposed ADTC architecture.
 
-This document defines the internal software architecture of PoultryGuard AI. It describes the layered structure, module boundaries, dependency rules, and design patterns applied across the codebase. It is the authoritative reference for any engineer making structural decisions about where code belongs and how components communicate.
+## 1. Architectural style
 
----
+PoultryGuard AI currently uses a modular, single-process Streamlit application. The code separates presentation, application services, repository-based data access, local persistence and the RAG subsystem. This keeps core operations testable and provides a path to introduce an API boundary and managed database later without prematurely adding distributed infrastructure.
 
-## Background
+## 2. Current module map
 
-PoultryGuard AI follows a clean, layered architecture adapted for a single-process desktop application. Because the system runs offline on a single machine, there is no network boundary between layers. However, maintaining clear logical boundaries is essential for testability, maintainability, and the ability to swap implementations (e.g., replacing Streamlit with a different UI, or FAISS with a different vector store) without cascading changes.
-
-The architecture is inspired by Clean Architecture and Hexagonal Architecture principles, simplified to match the scale and constraints of this project.
-
----
-
-## Design Decisions
-
-| Decision | Rationale |
-|---|---|
-| Layered architecture with strict dependency direction | Outer layers depend on inner layers; inner layers never import from outer layers. Keeps domain logic testable in isolation. |
-| Service layer as orchestration boundary | Application services coordinate workflows without containing business logic themselves. |
-| Dependency injection via constructor arguments | Avoids global state; makes unit testing straightforward without mocking frameworks. |
-| Configuration isolated in `app/config` | All tuneable parameters (model path, chunk size, top-k, temperature) live in one place. |
-| No ORM or database | Offline constraint and small data volume make a file-based approach (Markdown + FAISS) sufficient. |
-| Emergency module as a pure function module | Deterministic rule evaluation must never depend on LLM state or retrieval availability. |
-| Query Classification Layer before routing | Separates the routing decision from the orchestrator; each classifier output maps to exactly one pipeline path, making the orchestrator a thin coordinator. |
-
----
-
-## Layer Definitions
-
-```mermaid
-graph TD
-    subgraph L1["Layer 1 — Presentation"]
-        UI[app/frontend — Streamlit pages and components]
-    end
-
-    subgraph L2["Layer 2 — Application"]
-        BE[app/backend — Query orchestrator and entry points]
-        QC[app/backend/classifier — Query Classification Layer]
-        SVC[app/services — Use-case services]
-    end
-
-    subgraph L3["Layer 3 — Domain / Infrastructure"]
-        RAG[rag — Chunking, embedding, retrieval, prompt building]
-        MDL[models — llama.cpp inference boundary]
-        EM[app/services/emergency — Rule-based advisory]
-        CFG[app/config — Configuration management]
-        UTL[app/utils — Shared utilities]
-    end
-
-    subgraph L4["Layer 4 — Data / Storage"]
-        KB[knowledge_base — Markdown source documents]
-        VS[vector_store — FAISS index files]
-        GGUF[models/gguf — GGUF model files]
-    end
-
-    L1 --> L2
-    L2 --> L3
-    L3 --> L4
-```
-
-**Dependency rule:** arrows point inward only. `app/frontend` may import from `app/backend` and `app/services`. `app/services` may import from `rag` and `models`. `rag` and `models` may import from `app/config` and `app/utils`. Nothing in layers 3 or 4 imports from layers 1 or 2.
-
----
-
-## Module Map
-
-```
+```text
 poultryguard-ai/
 ├── app/
-│   ├── backend/
-│   │   ├── main.py               # Application entry point
-│   │   ├── orchestrator.py       # Query routing and pipeline coordination
-│   │   └── classifier.py         # Query Classification Layer
+│   ├── database/
+│   │   ├── connection.py       # SQLite connection and initial schema
+│   │   ├── models.py           # Farm, Flock, DailyRecord dataclasses
+│   │   └── repositories.py     # SQL persistence operations
 │   ├── frontend/
-│   │   ├── pages/                # Streamlit multi-page app pages
-│   │   │   ├── home.py
-│   │   │   ├── disease_advisor.py
-│   │   │   ├── vaccination.py
-│   │   │   ├── climate.py
-│   │   │   ├── biosecurity.py
-│   │   │   ├── feeding.py
-│   │   │   └── records.py
-│   │   └── components/           # Reusable UI widgets
-│   │       ├── chat_widget.py
-│   │       ├── alert_banner.py
-│   │       └── sidebar.py
-│   ├── services/
-│   │   ├── query_service.py      # Orchestrates RAG + LLM for a single query
-│   │   ├── emergency_service.py  # Wraps the rule-based emergency module
-│   │   ├── session_service.py    # Manages conversation history
-│   │   └── index_service.py      # Triggers knowledge base indexing
-│   ├── config/
-│   │   ├── settings.py           # Pydantic settings model
-│   │   └── defaults.py           # Default configuration constants
-│   └── utils/
-│       ├── logger.py             # Structured logging setup
-│       ├── timer.py              # Latency measurement helpers
-│       └── memory.py             # RAM usage monitoring helpers
-│
+│   │   └── main.py             # Current Streamlit entry point
+│   └── services/
+│       ├── answer_generator.py # Groq-backed answer generation
+│       ├── farm_service.py     # Farm, flock and daily-record use cases
+│       └── analytics_service.py
+├── knowledge_base/              # Curated source documents
 ├── rag/
-│   ├── chunking/
-│   │   └── markdown_chunker.py   # Parse and chunk Markdown documents
-│   ├── embeddings/
-│   │   └── embedder.py           # Local embedding model wrapper
-│   ├── indexing/
-│   │   └── index_builder.py      # Build and persist FAISS index
-│   ├── retrieval/
-│   │   └── retriever.py          # FAISS nearest-neighbour retrieval
-│   └── prompts/
-│       └── prompt_builder.py     # Assemble final LLM prompt
-│
-├── models/
-│   ├── inference/
-│   │   └── llm_runner.py         # llama-cpp-python inference wrapper
-│   └── configs/
-│       └── model_profiles.py     # Per-model RAM and parameter profiles
-│
-├── knowledge_base/               # Markdown source documents (see data_flow.md)
-├── vector_store/                 # Generated FAISS index (git-ignored)
-├── datasets/                     # Raw, processed, synthetic datasets
-├── evaluation/                   # Answer quality evaluation scripts
-├── benchmarks/                   # Performance benchmark scripts
-├── profiler/                     # Runtime profiling helpers
-├── scripts/                      # Developer utility scripts
-├── tests/                        # Pytest test suite
-└── docs/                         # All documentation
+│   ├── chunking/               # Markdown parser and chunker
+│   ├── embeddings/             # Sentence Transformer encoder
+│   ├── indexing/               # FAISS index builder
+│   └── retrieval/              # Semantic retriever
+├── vector_store/                # Generated index and metadata (ignored)
+├── data/                        # SQLite database (ignored)
+├── tests/
+├── scripts/
+└── docs/
 ```
 
----
-
-## Component Interaction Diagram
+## 3. Dependency direction
 
 ```mermaid
-sequenceDiagram
-    actor Farmer
-    participant UI as Streamlit Frontend
-    participant Orch as Query Orchestrator
-    participant EM as Emergency Service
-    participant QS as Query Service
-    participant EMB as Embedder
-    participant RET as Retriever
-    participant PB as Prompt Builder
-    participant LLM as LLM Runner
-
-    Farmer->>UI: Submit question
-    UI->>Orch: dispatch_query(question)
-    Orch->>QC: classify(question)
-    Note over QC: Returns QueryClass:\nemergency | rag | faq
-    alt QueryClass == emergency
-        Orch->>EM: check_emergency(question)
-        EM-->>UI: Return emergency alert
-    else QueryClass == faq
-        Orch->>QS: handle_faq(question)
-        QS->>RET: retrieve(query_vector, top_k)
-        RET-->>QS: context_chunks[]
-        QS-->>UI: Return direct answer
-    else QueryClass == rag
-        Orch->>QS: handle_query(question)
-        QS->>EMB: embed(question)
-        EMB-->>QS: query_vector
-        QS->>RET: retrieve(query_vector, top_k)
-        RET-->>QS: context_chunks[]
-        QS->>PB: build_prompt(question, context_chunks)
-        PB-->>QS: prompt_text
-        QS->>LLM: generate(prompt_text)
-        LLM-->>QS: response_text
-        QS-->>UI: Return response
-    end
-    UI-->>Farmer: Display answer
+flowchart TD
+    UI[Streamlit presentation] --> SERVICES[Application services]
+    SERVICES --> REPOS[Repositories]
+    REPOS --> DB[(SQLite)]
+    UI --> SERVICES
+    UI --> RAG[RAG components]
+    SERVICES --> RAG
+    RAG --> KB[Markdown knowledge]
+    RAG --> VS[(FAISS index + metadata)]
+    SERVICES --> PROVIDER[Groq API adapter]
 ```
 
----
+Rules:
 
-## Query Classification Layer
+1. UI code calls service methods and renders results; it must not contain SQL statements.
+2. Application services own use-case coordination and validation that spans repositories.
+3. Repositories own SQL and map database rows to plain Python dictionaries.
+4. RAG modules must not import Streamlit.
+5. The answer-generation provider is isolated in a service so it can be replaced or supplemented later.
+6. External services and secrets are configured outside source code.
 
-The Query Classification Layer sits between the orchestrator and all downstream services. It receives the raw query text and returns a typed `QueryClass` enum value that the orchestrator uses to select the correct pipeline path.
+## 4. Farm workflow
 
-```python
-class QueryClass(str, Enum):
-    EMERGENCY = "emergency"  # Route to Emergency Advisory Module
-    FAQ = "faq"  # Route to direct retrieval (no LLM)
-    RAG = "rag"  # Route to full RAG + LLM pipeline
+The intended user journey is:
+
+```text
+Create farm
+    ↓
+Create flock for the farm
+    ↓
+Record daily flock observations
+    ↓
+Retrieve records and calculate metrics
+    ↓
+Display farm/flock dashboard
 ```
 
-Classification logic (in priority order):
+The first three data operations and analytics service exist. The Streamlit workflow and dashboard do not yet exist.
 
-1. **Emergency** — query text matches one or more keywords in the emergency symptom dictionary (e.g., "twisted neck", "sudden death", "mass mortality"). Checked first; sub-millisecond.
-2. **FAQ** — query text matches a high-confidence FAQ pattern (short, factual, single-topic). Routes to retrieval-only path without LLM inference.
-3. **RAG** — all other queries. Full RAG + LLM pipeline.
+### Persistence entities
 
-Design properties:
-- Pure function — `classify(query: str) -> QueryClass`
-- No I/O, no side effects
-- Fully unit-testable without any ML dependencies
-- Keyword dictionary and FAQ patterns are loaded from configuration, not hardcoded
-
----
-
-## Emergency Advisory Module
-
-The Emergency Advisory Module is a deterministic, rule-based component that operates independently of the LLM and RAG pipeline. It evaluates incoming queries against a curated symptom keyword dictionary and returns structured alerts for high-priority conditions (e.g., Newcastle disease, Avian Influenza, Gumboro).
-
-Design properties:
-- Pure functions only — no side effects, no I/O
-- No dependency on model availability
-- Sub-millisecond response time
-- Fully unit-testable without any ML dependencies
-- Alert severity levels: `CRITICAL`, `WARNING`, `INFO`
-
----
-
-## Configuration Management
-
-All runtime parameters are managed through a Pydantic `Settings` model loaded from environment variables and an optional `.env` file. No hardcoded paths or magic numbers exist outside `app/config/`.
-
-Key configuration parameters:
-
-| Parameter | Default | Description |
+| Entity/table | Key relationship | Current fields |
 |---|---|---|
-| `MODEL_PATH` | `models/gguf/qwen2.5-1.5b-instruct-q4_k_m.gguf` | Path to GGUF model file |
-| `EMBEDDING_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` | Local embedding model identifier |
-| `FAISS_INDEX_PATH` | `vector_store/index.faiss` | Path to persisted FAISS index |
-| `CHUNK_SIZE` | `512` | Token target per knowledge chunk |
-| `CHUNK_OVERLAP` | `64` | Overlap between adjacent chunks |
-| `TOP_K` | `5` | Number of retrieved chunks per query |
-| `MAX_TOKENS` | `512` | Maximum LLM output tokens |
-| `TEMPERATURE` | `0.2` | LLM sampling temperature |
-| `N_CTX` | `2048` | llama.cpp context window size |
-| `N_THREADS` | `4` | CPU threads for llama.cpp |
+| Farm / `farms` | Parent of flocks | Farm name, farmer, location, phone, email, production type |
+| Flock / `flocks` | Belongs to farm | Name, species, production type, breed, initial count, stocking date, status |
+| DailyRecord / `daily_records` | Belongs to flock | Record date, feed, water, mortality, average weight, temperature, humidity, notes |
 
----
+The current database schema is initialised through `initialise_database()`. The application startup should invoke this before farm workflows are exposed. Add a migration framework before extending the schema with new entities.
 
-## Logging and Monitoring
+## 5. Knowledge assistant workflow
 
-Structured logging is implemented via Python's `logging` module with a JSON formatter for machine-readable output. Every query records:
+1. User submits a question in Streamlit.
+2. `KnowledgeBaseRetriever` loads the persisted FAISS index and metadata.
+3. The encoder transforms the query into a normalised embedding.
+4. FAISS returns the nearest chunks and associated source metadata.
+5. `PoultryAnswerGenerator` sends the question and retrieved passages to Groq.
+6. The UI displays the generated answer and supporting source passages.
 
-- Timestamp
-- Query text (truncated for privacy)
-- Emergency flag
-- Retrieval latency (ms)
-- Inference latency (ms)
-- Total latency (ms)
-- Peak RAM delta (MB)
-- Response length (tokens)
+The embedding and retrieval work is local. The current generation request is sent to the Groq API. This is not a zero-network/offline runtime.
 
-Log files are written to `logs/poultryguard.log` (git-ignored). Log level is configurable via `LOG_LEVEL` environment variable.
+## 6. Data and service design
 
----
+- Use dependency injection in service constructors so repositories can be replaced by fakes in unit tests.
+- Keep repository methods parameterised; never interpolate user input into SQL.
+- Validate numerical inputs at service/repository boundaries.
+- Ensure time-series metrics use chronological ordering before cumulative calculations.
+- Define duplicate daily-record and correction semantics before the dashboard enables editing.
+- Never treat missing observations as zero unless the metric definition explicitly requires it.
 
-## Testing Strategy
+## 7. Future production boundary
 
-| Test Type | Location | Scope |
-|---|---|---|
-| Unit tests | `tests/unit/` | Individual functions and classes in isolation |
-| Integration tests | `tests/integration/` | RAG pipeline end-to-end without LLM |
-| Smoke tests | `tests/smoke/` | Full pipeline with a tiny test model |
-| Scaffold tests | `tests/test_scaffold.py` | Verify repository structure integrity |
+Do not add cloud services merely to make the architecture look distributed. When multi-user access, remote synchronisation or reliable hosted operation becomes necessary:
 
-All tests run with `pytest`. CI enforces Ruff lint, Ruff format check, and full test suite on every pull request.
+- Introduce a documented API contract between UI and services.
+- Add authentication, authorisation and farm-level data isolation.
+- Add schema migrations and PostgreSQL as the production datastore.
+- Keep SQLite useful for local development and tests.
+- Add Docker, CI/CD, backups, observability and deployment controls with measurable operational requirements.
 
----
+## 8. Safety and auditability
 
-## Trade-offs
-
-| Trade-off | Accepted Cost | Benefit |
-|---|---|---|
-| Single-process architecture | No horizontal scaling | Eliminates IPC complexity; appropriate for desktop app |
-| Pydantic settings | Extra dependency | Type-safe config with validation and clear error messages |
-| No async I/O | Blocking inference calls | Simplicity; llama.cpp is inherently synchronous on CPU |
-| Flat FAISS index | Full rebuild on KB update | No server, no daemon, no persistence complexity |
-
----
-
-## Future Improvements
-
-- Introduce async query handling with `asyncio` to keep the UI responsive during long inference calls
-- Add a plugin architecture for knowledge base domain modules to allow community contributions
-- Replace Pydantic v1 settings with Pydantic v2 `BaseSettings` when dependency ecosystem stabilises
-- Add OpenTelemetry tracing for detailed performance profiling in benchmarking sprints
-
----
-
-## References
-
-- [Clean Architecture — Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
-- [Pydantic Settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)
-- [llama-cpp-python](https://github.com/abetlen/llama-cpp-python)
-- See also: `system_overview.md`, `data_flow.md`, `rag_design.md`
+PoultryGuard is a decision-support product, not a veterinary diagnostic or prescription system. AI output must distinguish recorded farm facts from retrieved general guidance, identify uncertainty and refer consequential health decisions to qualified professionals. Future health/treatment workflows require review, provenance and audit history.
