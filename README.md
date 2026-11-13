@@ -42,9 +42,9 @@ The active architecture is a single-process Streamlit application with separate 
 ```mermaid
 flowchart TD
     U[Farmer / Farm Operator] --> UI[Streamlit UI]
-    UI --> FS[FarmService]
-    UI --> AN[AnalyticsService]
     UI --> AG[Knowledge Assistant Flow]
+    FUTURE[Planned Farm Intelligence screens] -. planned .-> FS[FarmService]
+    FUTURE -. planned .-> AN[AnalyticsService]
     FS --> REPO[SQLite Repositories]
     AN --> REPO
     REPO --> DB[(SQLite: farms, flocks, daily_records)]
@@ -175,7 +175,17 @@ The retriever expects these generated files:
 - `vector_store/poultryguard.faiss`
 - `vector_store/metadata.json`
 
-The index builder is implemented in `rag/indexing/indexer.py`. The embedding model must be available in the local Sentence Transformers cache because the encoder is configured for local-only model loading. A stable command-line wrapper for index generation is still to be added; until then, invoke the `KnowledgeBaseIndexer` API from a Python session or helper script.
+The index builder is implemented in `rag/indexing/indexer.py`, with a command-line wrapper at `scripts/build_index.py`. The embedding model must be available in the local Sentence Transformers cache because the encoder is configured for local-only model loading. On a connected development machine, populate the cache once with:
+
+```powershell
+python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')"
+```
+
+Then build the index:
+
+```powershell
+python scripts/build_index.py
+```
 
 ### 5. Run the current Streamlit interface
 
@@ -195,6 +205,7 @@ python scripts/validate_knowledge_base.py
 python scripts/validate_metadata.py
 python scripts/validate_references.py
 python scripts/validate_links.py
+make check
 ```
 
 These are development checks, not evidence of farmer field validation.
