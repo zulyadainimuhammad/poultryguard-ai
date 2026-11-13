@@ -8,7 +8,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). Thi
 
 ## [Unreleased]
 
-## [Unreleased] — Product realignment (13 November 2026)
+### Product realignment (13 November 2026)
 
 ### Added
 - Product roadmap aligned to the current PoultryGuard architecture and implementation status.
