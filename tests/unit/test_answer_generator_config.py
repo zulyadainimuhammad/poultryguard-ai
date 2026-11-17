@@ -40,8 +40,6 @@ def test_explicit_model_argument_overrides_environment(monkeypatch) -> None:
     monkeypatch.setenv("GROQ_MODEL", "allam-2-7b")
     monkeypatch.setattr(answer_generator, "Groq", StubGroq)
 
-    generator = answer_generator.PoultryAnswerGenerator(
-        model="qwen/qwen3.8-27b"
-    )
+    generator = answer_generator.PoultryAnswerGenerator(model="qwen/qwen3.8-27b")
 
     assert generator.model == "qwen/qwen3.8-27b"
