@@ -10,9 +10,11 @@ This document distinguishes the model components used by the active prototype fr
 |---|---|---|
 | Text embeddings | `sentence-transformers/all-MiniLM-L6-v2` | Local; model must be present in the Sentence Transformers cache |
 | Vector similarity | FAISS `IndexFlatIP` | Local CPU |
-| Answer generation | Groq API; configured default `openai/gpt-oss-120b` | Remote API; internet and `GROQ_API_KEY` required |
+| Answer generation | Groq API; configured default `qwen/qwen3.8-27b` | Remote API; internet and `GROQ_API_KEY` required |
 
 The encoder normalises vectors before indexing and query search. With normalised vectors, FAISS inner-product ranking corresponds to cosine similarity. The retrieval score indicates vector similarity only; it is not a factual confidence score.
+
+The project owner has verified `qwen/qwen3.8-27b` as a text-generating chat model for the currently configured Groq account. `allam-2-7b` has also been observed to return text and can be selected by setting `GROQ_MODEL` in `.env`. Model availability and behaviour are account-dependent; verify the configured model with a real chat-completion smoke test when changing accounts or providers.
 
 ## Runtime behaviour
 

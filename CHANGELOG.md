@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+- Set the Groq answer-generation default to `qwen/qwen3.8-27b`, verified by the project owner to return text for the configured account.
+- Added tests for the default model and environment/constructor overrides.
+
 All notable changes to PoultryGuard AI are documented in this file.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). This project uses semantic versioning after the first release.

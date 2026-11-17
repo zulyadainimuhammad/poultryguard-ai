@@ -27,7 +27,7 @@ class PoultryAnswerGenerator:
         if not api_key:
             raise ValueError("GROQ_API_KEY is missing. Add it to your local .env file.")
 
-        self.model = model or os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
+        self.model = model or os.getenv("GROQ_MODEL", "qwen/qwen3.8-27b")
         self.client = Groq(api_key=api_key)
 
     def generate(
