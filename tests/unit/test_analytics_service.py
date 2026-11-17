@@ -1,5 +1,6 @@
 from datetime import date
 
+import pytest
 from app.database import (
     DailyRecord,
     DailyRecordRepository,
@@ -174,11 +175,8 @@ def test_missing_flock_raises_error() -> None:
 
     service = AnalyticsService()
 
-    try:
+    with pytest.raises(ValueError, match="was not found"):
         service.get_flock_summary(999999)
-        assert False, "Expected ValueError for missing flock."
-    except ValueError as error:
-        assert "was not found" in str(error)
 
 
 def test_empty_flock_records() -> None:
