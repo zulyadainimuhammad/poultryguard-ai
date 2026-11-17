@@ -68,18 +68,12 @@ class FarmRepository:
             "production_type",
         }
 
-        updates = {
-            key: value
-            for key, value in fields.items()
-            if key in allowed_fields
-        }
+        updates = {key: value for key, value in fields.items() if key in allowed_fields}
 
         if not updates:
             return
 
-        set_clause = ", ".join(
-            f"{field} = ?" for field in updates
-        )
+        set_clause = ", ".join(f"{field} = ?" for field in updates)
 
         values = list(updates.values())
         values.append(farm_id)
@@ -111,9 +105,7 @@ class FlockRepository:
 
     def create(self, flock: Flock) -> int:
         if flock.initial_count <= 0:
-            raise ValueError(
-                "Initial flock count must be greater than zero."
-            )
+            raise ValueError("Initial flock count must be greater than zero.")
 
         with get_connection() as connection:
             cursor = connection.execute(
@@ -182,26 +174,15 @@ class FlockRepository:
             "status",
         }
 
-        updates = {
-            key: value
-            for key, value in fields.items()
-            if key in allowed_fields
-        }
+        updates = {key: value for key, value in fields.items() if key in allowed_fields}
 
         if not updates:
             return
 
-        if (
-            "initial_count" in updates
-            and updates["initial_count"] <= 0
-        ):
-            raise ValueError(
-                "Initial flock count must be greater than zero."
-            )
+        if "initial_count" in updates and updates["initial_count"] <= 0:
+            raise ValueError("Initial flock count must be greater than zero.")
 
-        set_clause = ", ".join(
-            f"{field} = ?" for field in updates
-        )
+        set_clause = ", ".join(f"{field} = ?" for field in updates)
 
         values = list(updates.values())
         values.append(flock_id)
@@ -237,9 +218,7 @@ class DailyRecordRepository:
 
         if record.humidity_percent is not None:
             if not 0 <= record.humidity_percent <= 100:
-                raise ValueError(
-                    "Humidity must be between 0 and 100 percent."
-                )
+                raise ValueError("Humidity must be between 0 and 100 percent.")
 
         with get_connection() as connection:
             cursor = connection.execute(

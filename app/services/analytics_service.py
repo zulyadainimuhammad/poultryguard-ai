@@ -33,8 +33,7 @@ class AnalyticsService:
         records = self.daily_record_repository.get_by_flock(flock_id)
 
         total_mortality = sum(
-            self._number(record.get("mortality"))
-            for record in records
+            self._number(record.get("mortality")) for record in records
         )
 
         current_flock_size = max(
@@ -48,14 +47,10 @@ class AnalyticsService:
             else 0.0
         )
 
-        total_feed = sum(
-            self._number(record.get("feed_kg"))
-            for record in records
-        )
+        total_feed = sum(self._number(record.get("feed_kg")) for record in records)
 
         total_water = sum(
-            self._number(record.get("water_litres"))
-            for record in records
+            self._number(record.get("water_litres")) for record in records
         )
 
         average_weight = self._average(
@@ -90,12 +85,8 @@ class AnalyticsService:
             "total_feed_kg": round(total_feed, 2),
             "total_water_litres": round(total_water, 2),
             "average_weight_kg": self._round_or_none(average_weight),
-            "average_temperature_c": self._round_or_none(
-                average_temperature
-            ),
-            "average_humidity_percent": self._round_or_none(
-                average_humidity
-            ),
+            "average_temperature_c": self._round_or_none(average_temperature),
+            "average_humidity_percent": self._round_or_none(average_humidity),
             "record_count": len(records),
         }
 
@@ -150,9 +141,7 @@ class AnalyticsService:
                     "average_weight_kg": self._round_or_none(
                         record.get("average_weight_kg")
                     ),
-                    "temperature_c": self._round_or_none(
-                        record.get("temperature_c")
-                    ),
+                    "temperature_c": self._round_or_none(record.get("temperature_c")),
                     "humidity_percent": self._round_or_none(
                         record.get("humidity_percent")
                     ),
@@ -193,18 +182,12 @@ class AnalyticsService:
                     self._number(record.get("water_litres")),
                     2,
                 ),
-                "mortality": self._number(
-                    record.get("mortality")
-                ),
+                "mortality": self._number(record.get("mortality")),
                 "average_weight_kg": self._round_or_none(
                     record.get("average_weight_kg")
                 ),
-                "temperature_c": self._round_or_none(
-                    record.get("temperature_c")
-                ),
-                "humidity_percent": self._round_or_none(
-                    record.get("humidity_percent")
-                ),
+                "temperature_c": self._round_or_none(record.get("temperature_c")),
+                "humidity_percent": self._round_or_none(record.get("humidity_percent")),
                 "notes": record.get("notes"),
             }
             for record in records
