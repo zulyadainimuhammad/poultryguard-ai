@@ -33,7 +33,7 @@ Edit `.env` and set:
 
 ```dotenv
 GROQ_API_KEY=your_groq_api_key
-GROQ_MODEL=openai/gpt-oss-120b
+GROQ_MODEL=qwen/qwen3.8-27b
 ```
 
 Never commit `.env` or real API credentials.
