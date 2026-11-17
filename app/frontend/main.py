@@ -10,7 +10,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-import app.services.answer_generator  # noqa: E402
+from app.services.answer_generator import PoultryAnswerGenerator  # noqa: E402
 from rag.retrieval import KnowledgeBaseRetriever  # noqa: E402
 
 
@@ -45,7 +45,7 @@ def get_retriever():
 
 @st.cache_resource
 def get_answer_generator():
-    return app.services.answer_generator.PoultryAnswerGenerator()
+    return PoultryAnswerGenerator()
 
 
 with st.sidebar:
