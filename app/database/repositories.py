@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from .connection import get_connection
 from .models import DailyRecord, Farm, Flock
@@ -33,7 +33,7 @@ class FarmRepository:
 
             return cursor.lastrowid
 
-    def get_by_id(self, farm_id: int) -> Optional[dict[str, Any]]:
+    def get_by_id(self, farm_id: int) -> dict[str, Any] | None:
         with get_connection() as connection:
             row = connection.execute(
                 """
@@ -144,7 +144,7 @@ class FlockRepository:
 
             return cursor.lastrowid
 
-    def get_by_id(self, flock_id: int) -> Optional[dict[str, Any]]:
+    def get_by_id(self, flock_id: int) -> dict[str, Any] | None:
         with get_connection() as connection:
             row = connection.execute(
                 """
@@ -272,7 +272,7 @@ class DailyRecordRepository:
 
             return cursor.lastrowid
 
-    def get_by_id(self, record_id: int) -> Optional[dict[str, Any]]:
+    def get_by_id(self, record_id: int) -> dict[str, Any] | None:
         with get_connection() as connection:
             row = connection.execute(
                 """
