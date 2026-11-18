@@ -25,8 +25,8 @@ The intended product has these connected capabilities:
 | AI Knowledge Assistant | Search poultry knowledge and generate source-grounded answers | Working prototype |
 | Farm and Flock Records | Organise farms, flocks and daily production records | Implemented MVP |
 | Farm Analytics | Summarise flock population, mortality, feed, water, weight and recorded environmental values | Implemented MVP |
-| Farm Monitoring | Monitor operating conditions and changes over time | Partial foundation through manually entered daily records; dedicated monitoring not implemented |
-| Environmental Data | Capture and manage reliable environmental measurements | Manual temperature/humidity fields exist; sensor ingestion planned |
+| Farm Monitoring | Monitor operating conditions and changes over time | Partial foundation through manually entered daily records; Environmental Monitoring Overview implemented for temperature and humidity coverage and statistics |
+| Environmental Data | Capture and manage reliable environmental measurements | Manual temperature/humidity fields exist; Environmental Monitoring Overview shows recorded coverage and statistics; sensor ingestion planned |
 | AI Farm Intelligence | Turn trustworthy farm and environmental data into useful insights | Planned |
 | Alerts | Notify farmers about conditions requiring attention | Planned |
 | Expert Support | Support escalation and communication with qualified veterinary/agricultural professionals | Planned |

@@ -41,7 +41,7 @@ Not yet implemented:
 | 0 | Engineering baseline and repository accuracy | Maintain | None |
 | 1 | Poultry knowledge content and RAG assistant | Maintain | Stage 0 |
 | 2 | Farm data foundation and Farm Intelligence MVP | Implemented | Stage 0 |
-| 3 | Farm Monitoring and Environmental Intelligence | Next | Stage 2; agreed measurement definitions |
+| 3 | Farm Monitoring and Environmental Intelligence | In progress | Stage 2; agreed measurement definitions |
 | 4 | AI Farm Intelligence insights and alerts | High | Stages 1–3; reviewed evidence and thresholds |
 | 5 | Veterinary and expert support workflows | High | Consent, expert role and safety design |
 | 6 | Cloud Engineering and production foundations | Later | Stable service contracts, security and deployment requirements |
@@ -112,11 +112,26 @@ Limitations:
 - The local SQLite/Streamlit workflow is not a secure multi-user production deployment.
 - Farmer and veterinary/extension validation remains outstanding.
 
-## Stage 3 — Farm Monitoring and Environmental Intelligence (next)
+## Stage 3 — Farm Monitoring and Environmental Intelligence (in progress)
 
 **Objective:** Build a clear, trustworthy monitoring workflow on top of the current records and analytics foundation.
 
-Work packages:
+### Implemented in Stage 3
+
+**Stage 3.1 — Data Quality and Measurement Accuracy**
+- Daily record form fields for feed, water, weight, temperature and humidity changed to empty inputs (`value=None`) with placeholder text. Automatic defaults no longer populate as stored measurements.
+- Genuine zero values are preserved and distinguished from missing observations throughout the service and analytics layers.
+- `get_metrics_by_date_range()` corrected to preserve `None` for unrecorded feed and water.
+- Regression tests added for `None` preservation, genuine zero persistence and date-range accuracy.
+
+**Stage 3.2.1 — Environmental Monitoring Overview**
+- `get_environmental_summary()` added to `AnalyticsService`. Returns recorded count, missing count, coverage percentage, average, minimum, maximum, latest observation date and latest value for temperature and humidity separately.
+- Environmental Monitoring Overview section added to the Analytics tab in the Streamlit interface, above the existing trend charts. Displays Temperature Monitoring and Relative Humidity Monitoring panels with metric cards and latest-observation captions.
+- Measurements are manually entered through daily farm records. Sensor ingestion is not implemented. No automated warning thresholds or alerts are included. Veterinary or agricultural professional validation of thresholds remains outstanding.
+- 8 unit tests added covering averages, counts, coverage, None exclusion, genuine zero counting, different latest dates per measurement, later-missing-does-not-replace-latest, empty flock and unknown flock.
+
+### Remaining Stage 3 work packages
+
 1. Define each measurement's name, unit, timestamp, collection frequency and provenance.
 2. Distinguish farmer-entered observations from automated device readings.
 3. Improve environmental and production trend views, including missing-data and suspicious-value states.
@@ -246,4 +261,4 @@ Exit criteria:
 
 ## Immediate next work
 
-Start Stage 3 with a requirements and data-quality design pass. Review the current daily-record fields, define measurement provenance and semantics, identify the smallest useful monitoring workflow, and document threshold governance. Do not add sensors or automated alerts until measurement quality and domain review processes are clear.
+Stage 3 is in progress. Stage 3.1 (data quality) and Stage 3.2.1 (Environmental Monitoring Overview) are implemented on feature branches. Remaining Stage 3 work includes defining measurement provenance and semantics, improving trend views for missing and suspicious values, establishing data-quality rules, and defining a telemetry ingestion contract before adding sensors or automated alerts.
