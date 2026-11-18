@@ -659,7 +659,74 @@ else:
                     "Add records in the **Daily Records** tab to see charts."
                 )
             else:
+                # ----------------------------------------------------------
+                # Environmental Monitoring Overview
+                # ----------------------------------------------------------
                 import pandas as pd
+
+                env = analytics.get_environmental_summary(flock_id)
+                t = env["temperature"]
+                h = env["humidity"]
+
+                st.divider()
+                st.markdown("**Environmental Monitoring Overview**")
+                st.caption(
+                    "Environmental measurements are currently entered manually "
+                    "through daily farm records. "
+                    "Live sensor monitoring is not yet connected."
+                )
+
+                def _fmt_env(v: object, unit: str = "") -> str:
+                    """Format an environmental value or return an em dash."""
+                    if v is None:
+                        return "—"
+                    return f"{v}{unit}"
+
+                def _fmt_date(d: object) -> str:
+                    """Format a YYYY-MM-DD date string as DD Mon YYYY."""
+                    if d is None:
+                        return "—"
+                    from datetime import datetime as _dt
+
+                    return _dt.strptime(str(d), "%Y-%m-%d").strftime("%d %b %Y")
+
+                env_col_t, env_col_h = st.columns(2)
+
+                with env_col_t:
+                    st.markdown("**Temperature Monitoring**")
+                    tc1, tc2, tc3 = st.columns(3)
+                    tc1.metric("Average (\u00b0C)", _fmt_env(t["average_c"]))
+                    tc2.metric("Minimum (\u00b0C)", _fmt_env(t["minimum_c"]))
+                    tc3.metric("Maximum (\u00b0C)", _fmt_env(t["maximum_c"]))
+                    tc4, tc5, tc6 = st.columns(3)
+                    tc4.metric("Recorded", t["recorded_count"])
+                    tc5.metric("Missing", t["missing_count"])
+                    tc6.metric("Coverage", _fmt_env(t["coverage_percent"], "%"))
+                    if t["latest_value_c"] is not None:
+                        st.caption(
+                            f"Latest: {t['latest_value_c']} \u00b0C "
+                            f"on {_fmt_date(t['latest_record_date'])}"
+                        )
+                    else:
+                        st.caption("No temperature observations recorded.")
+
+                with env_col_h:
+                    st.markdown("**Relative Humidity Monitoring**")
+                    hc1, hc2, hc3 = st.columns(3)
+                    hc1.metric("Average (%)", _fmt_env(h["average_percent"]))
+                    hc2.metric("Minimum (%)", _fmt_env(h["minimum_percent"]))
+                    hc3.metric("Maximum (%)", _fmt_env(h["maximum_percent"]))
+                    hc4, hc5, hc6 = st.columns(3)
+                    hc4.metric("Recorded", h["recorded_count"])
+                    hc5.metric("Missing", h["missing_count"])
+                    hc6.metric("Coverage", _fmt_env(h["coverage_percent"], "%"))
+                    if h["latest_value_percent"] is not None:
+                        st.caption(
+                            f"Latest: {h['latest_value_percent']} % "
+                            f"on {_fmt_date(h['latest_record_date'])}"
+                        )
+                    else:
+                        st.caption("No humidity observations recorded.")
 
                 def _altair_chart(
                     data: pd.DataFrame,

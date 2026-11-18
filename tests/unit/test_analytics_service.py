@@ -554,3 +554,287 @@ def test_date_range_metrics_returns_recorded_values_accurately(repos):
     assert metrics[0]["feed_kg"] == 42.75
     assert metrics[0]["water_litres"] == 85.5
     assert metrics[0]["mortality"] == 1.0
+
+
+# ---------------------------------------------------------------------------
+# Tests: get_environmental_summary
+# ---------------------------------------------------------------------------
+
+
+def test_env_summary_averages_min_max(populated_flock):
+    """Temperature and humidity averages, minimums and maximums are correct."""
+    flock_id, (_, flock_repo, record_repo) = populated_flock
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    result = service.get_environmental_summary(flock_id)
+    t = result["temperature"]
+    h = result["humidity"]
+
+    # populated_flock has temps 28.0, 29.0, 28.5 and humidities 65.0, 66.0, 67.0
+    assert t["average_c"] == round((28.0 + 29.0 + 28.5) / 3, 2)
+    assert t["minimum_c"] == 28.0
+    assert t["maximum_c"] == 29.0
+    assert h["average_percent"] == round((65.0 + 66.0 + 67.0) / 3, 2)
+    assert h["minimum_percent"] == 65.0
+    assert h["maximum_percent"] == 67.0
+
+
+def test_env_summary_counts_and_coverage(populated_flock):
+    """Recorded counts, missing counts and coverage percentages are correct."""
+    flock_id, (_, flock_repo, record_repo) = populated_flock
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    result = service.get_environmental_summary(flock_id)
+
+    assert result["total_records"] == 3
+    assert result["temperature"]["recorded_count"] == 3
+    assert result["temperature"]["missing_count"] == 0
+    assert result["temperature"]["coverage_percent"] == 100.0
+    assert result["humidity"]["recorded_count"] == 3
+    assert result["humidity"]["missing_count"] == 0
+    assert result["humidity"]["coverage_percent"] == 100.0
+
+
+def test_env_summary_missing_measurements_are_none(repos):
+    """When no temperature or humidity is ever recorded, all stats are None."""
+    farm_repo, flock_repo, record_repo = repos
+    farm_id = farm_repo.create(
+        Farm(farm_name="F", farmer_name="N", location="L", production_type="Broiler")
+    )
+    flock_id = flock_repo.create(
+        Flock(
+            farm_id=farm_id,
+            flock_name="NoEnv",
+            species="Chicken",
+            initial_count=100,
+        )
+    )
+    record_repo.create(
+        DailyRecord(
+            flock_id=flock_id,
+            record_date="2026-11-01",
+            mortality=0,
+            temperature_c=None,
+            humidity_percent=None,
+        )
+    )
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    result = service.get_environmental_summary(flock_id)
+    t = result["temperature"]
+    h = result["humidity"]
+
+    assert t["recorded_count"] == 0
+    assert t["missing_count"] == 1
+    assert t["coverage_percent"] == 0.0
+    assert t["average_c"] is None
+    assert t["minimum_c"] is None
+    assert t["maximum_c"] is None
+    assert t["latest_record_date"] is None
+    assert t["latest_value_c"] is None
+    assert h["average_percent"] is None
+    assert h["latest_value_percent"] is None
+
+
+def test_env_summary_zero_is_recorded_observation(repos):
+    """A temperature or humidity of 0.0 counts as a recorded observation."""
+    farm_repo, flock_repo, record_repo = repos
+    farm_id = farm_repo.create(
+        Farm(farm_name="F", farmer_name="N", location="L", production_type="Broiler")
+    )
+    flock_id = flock_repo.create(
+        Flock(
+            farm_id=farm_id,
+            flock_name="ZeroEnv",
+            species="Chicken",
+            initial_count=50,
+        )
+    )
+    record_repo.create(
+        DailyRecord(
+            flock_id=flock_id,
+            record_date="2026-11-01",
+            mortality=0,
+            temperature_c=0.0,
+            humidity_percent=0.0,
+        )
+    )
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    result = service.get_environmental_summary(flock_id)
+
+    assert result["temperature"]["recorded_count"] == 1
+    assert result["temperature"]["average_c"] == 0.0
+    assert result["humidity"]["recorded_count"] == 1
+    assert result["humidity"]["average_percent"] == 0.0
+
+
+def test_env_summary_different_latest_dates_for_temp_and_humidity(repos):
+    """Missing observations are excluded from stats; coverage uses all records.
+
+    Three daily records:
+      Nov 1 — temperature 28.0, humidity 65.0 (both recorded)
+      Nov 2 — temperature 29.0, humidity None (temperature only)
+      Nov 3 — temperature None, humidity None (neither recorded)
+
+    Temperature: 2 recorded, 1 missing, coverage 66.67 %.
+    Humidity:    1 recorded, 2 missing, coverage 33.33 %.
+    Latest observations are not displaced by later None records.
+    """
+    farm_repo, flock_repo, record_repo = repos
+    farm_id = farm_repo.create(
+        Farm(farm_name="F", farmer_name="N", location="L", production_type="Broiler")
+    )
+    flock_id = flock_repo.create(
+        Flock(
+            farm_id=farm_id,
+            flock_name="SplitEnv",
+            species="Chicken",
+            initial_count=100,
+        )
+    )
+    # Nov 1: both recorded
+    record_repo.create(
+        DailyRecord(
+            flock_id=flock_id,
+            record_date="2026-11-01",
+            mortality=0,
+            temperature_c=28.0,
+            humidity_percent=65.0,
+        )
+    )
+    # Nov 2: temperature only
+    record_repo.create(
+        DailyRecord(
+            flock_id=flock_id,
+            record_date="2026-11-02",
+            mortality=0,
+            temperature_c=29.0,
+            humidity_percent=None,
+        )
+    )
+    # Nov 3: neither recorded — must not affect latest observations
+    record_repo.create(
+        DailyRecord(
+            flock_id=flock_id,
+            record_date="2026-11-03",
+            mortality=0,
+            temperature_c=None,
+            humidity_percent=None,
+        )
+    )
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    result = service.get_environmental_summary(flock_id)
+    t = result["temperature"]
+    h = result["humidity"]
+
+    # Temperature: 2 of 3 records have a value
+    assert t["recorded_count"] == 2
+    assert t["missing_count"] == 1
+    assert t["coverage_percent"] == 66.67
+    assert t["average_c"] == round((28.0 + 29.0) / 2, 2)
+    assert t["minimum_c"] == 28.0
+    assert t["maximum_c"] == 29.0
+    # Latest temperature observation is Nov 2; Nov 3 (None) must not replace it
+    assert t["latest_record_date"] == "2026-11-02"
+    assert t["latest_value_c"] == 29.0
+
+    # Humidity: 1 of 3 records has a value
+    assert h["recorded_count"] == 1
+    assert h["missing_count"] == 2
+    assert h["coverage_percent"] == 33.33
+    assert h["average_percent"] == 65.0
+    assert h["minimum_percent"] == 65.0
+    assert h["maximum_percent"] == 65.0
+    # Latest humidity observation is Nov 1; later None records must not replace it
+    assert h["latest_record_date"] == "2026-11-01"
+    assert h["latest_value_percent"] == 65.0
+
+
+def test_env_summary_later_missing_does_not_replace_latest(repos):
+    """A later record with None does not become the latest observation."""
+    farm_repo, flock_repo, record_repo = repos
+    farm_id = farm_repo.create(
+        Farm(farm_name="F", farmer_name="N", location="L", production_type="Broiler")
+    )
+    flock_id = flock_repo.create(
+        Flock(
+            farm_id=farm_id,
+            flock_name="LatestCheck",
+            species="Chicken",
+            initial_count=100,
+        )
+    )
+    record_repo.create(
+        DailyRecord(
+            flock_id=flock_id,
+            record_date="2026-11-01",
+            mortality=0,
+            temperature_c=27.5,
+        )
+    )
+    # Nov 2 has no temperature — must not overwrite Nov 1 as latest
+    record_repo.create(
+        DailyRecord(
+            flock_id=flock_id,
+            record_date="2026-11-02",
+            mortality=0,
+            temperature_c=None,
+        )
+    )
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    result = service.get_environmental_summary(flock_id)
+    t = result["temperature"]
+
+    assert t["latest_record_date"] == "2026-11-01"
+    assert t["latest_value_c"] == 27.5
+    assert t["recorded_count"] == 1
+    assert t["missing_count"] == 1
+    assert t["coverage_percent"] == 50.0
+
+
+def test_env_summary_no_records_returns_zero_counts(repos):
+    """A flock with no daily records returns zero counts and None stats."""
+    farm_repo, flock_repo, record_repo = repos
+    farm_id = farm_repo.create(
+        Farm(farm_name="F", farmer_name="N", location="L", production_type="Broiler")
+    )
+    flock_id = flock_repo.create(
+        Flock(
+            farm_id=farm_id,
+            flock_name="Empty",
+            species="Chicken",
+            initial_count=100,
+        )
+    )
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    result = service.get_environmental_summary(flock_id)
+
+    assert result["total_records"] == 0
+    assert result["temperature"]["recorded_count"] == 0
+    assert result["temperature"]["missing_count"] == 0
+    assert result["temperature"]["coverage_percent"] == 0.0
+    assert result["temperature"]["average_c"] is None
+    assert result["temperature"]["latest_record_date"] is None
+    assert result["humidity"]["recorded_count"] == 0
+    assert result["humidity"]["average_percent"] is None
+
+
+def test_env_summary_unknown_flock_raises(repos):
+    """Requesting a summary for an unknown flock raises ValueError."""
+    _, flock_repo, record_repo = repos
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    with pytest.raises(ValueError, match="was not found"):
+        service.get_environmental_summary(999999)

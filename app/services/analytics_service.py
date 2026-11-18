@@ -183,6 +183,105 @@ class AnalyticsService:
             for record in records
         ]
 
+    def get_environmental_summary(self, flock_id: int) -> dict[str, Any]:
+        """Return a descriptive environmental summary for the selected flock.
+
+        Summarises recorded temperature and humidity observations from the
+        existing daily records. Measurements are manually entered; no sensor
+        ingestion is implemented. Returns counts, coverage, statistics and
+        the latest available observation for each measurement.
+        """
+
+        flock = self.flock_repository.get_by_id(flock_id)
+
+        if flock is None:
+            raise ValueError(f"Flock with ID {flock_id} was not found.")
+
+        records = self.daily_record_repository.get_by_flock(flock_id)
+        total_records = len(records)
+
+        temp_summary = self._env_field_summary(records, "temperature_c", total_records)
+        humidity_summary = self._env_field_summary(
+            records, "humidity_percent", total_records
+        )
+
+        return {
+            "total_records": total_records,
+            "temperature": {
+                "recorded_count": temp_summary["recorded_count"],
+                "missing_count": temp_summary["missing_count"],
+                "coverage_percent": temp_summary["coverage_percent"],
+                "average_c": temp_summary["average"],
+                "minimum_c": temp_summary["minimum"],
+                "maximum_c": temp_summary["maximum"],
+                "latest_record_date": temp_summary["latest_record_date"],
+                "latest_value_c": temp_summary["latest_value"],
+            },
+            "humidity": {
+                "recorded_count": humidity_summary["recorded_count"],
+                "missing_count": humidity_summary["missing_count"],
+                "coverage_percent": humidity_summary["coverage_percent"],
+                "average_percent": humidity_summary["average"],
+                "minimum_percent": humidity_summary["minimum"],
+                "maximum_percent": humidity_summary["maximum"],
+                "latest_record_date": humidity_summary["latest_record_date"],
+                "latest_value_percent": humidity_summary["latest_value"],
+            },
+        }
+
+    def _env_field_summary(
+        self,
+        records: list[dict[str, Any]],
+        field: str,
+        total_records: int,
+    ) -> dict[str, Any]:
+        """Calculate summary statistics for one environmental field."""
+
+        # Records are already in chronological ASC order from the repository.
+        recorded = [r for r in records if r.get(field) is not None]
+        recorded_count = len(recorded)
+        missing_count = total_records - recorded_count
+
+        if total_records == 0:
+            coverage_percent = 0.0
+        else:
+            coverage_percent = round((recorded_count / total_records) * 100, 2)
+
+        if not recorded:
+            return {
+                "recorded_count": recorded_count,
+                "missing_count": missing_count,
+                "coverage_percent": coverage_percent,
+                "average": None,
+                "minimum": None,
+                "maximum": None,
+                "latest_record_date": None,
+                "latest_value": None,
+            }
+
+        values = [float(r[field]) for r in recorded]
+        average = self._round_or_none(sum(values) / len(values))
+        minimum = self._round_or_none(min(values))
+        maximum = self._round_or_none(max(values))
+
+        # Latest observation: last record in chronological order that has a
+        # non-None value. A later record with a missing measurement does not
+        # replace an earlier actual observation as the latest recorded value.
+        latest = recorded[-1]
+        latest_record_date = latest["record_date"]
+        latest_value = self._round_or_none(float(latest[field]))
+
+        return {
+            "recorded_count": recorded_count,
+            "missing_count": missing_count,
+            "coverage_percent": coverage_percent,
+            "average": average,
+            "minimum": minimum,
+            "maximum": maximum,
+            "latest_record_date": latest_record_date,
+            "latest_value": latest_value,
+        }
+
     @staticmethod
     def _number(value: Any) -> float:
         """Convert a numeric value to float."""
