@@ -1,254 +1,249 @@
 # PoultryGuard AI — Implementation Plan
 
-**Last reviewed:** 13 November 2026  
-**Planning basis:** Active `feature/gta-mvp` branch and current repository implementation.
+**Last reviewed:** 18 November 2026  
+**Baseline:** `main` at the merge of PR #11 (Farm Intelligence MVP)
 
 ## Purpose
 
-This plan sequences work from the current prototype toward a validated poultry farm intelligence product. It supersedes the former ADTC offline/llama.cpp sprint plan as the primary delivery plan. Historical ADTC design documents remain historical references and must not be treated as descriptions of the current runtime.
+This plan sequences the work from the current local MVP toward a validated, secure poultry farm intelligence platform. It supersedes the former ADTC/offline/llama.cpp sprint plan as the primary delivery plan. Historical design material remains historical and must not be treated as a description of the current runtime.
+
+The plan distinguishes implemented capability from planned capability. Passing software tests does not establish farmer impact, veterinary correctness or production readiness.
 
 ## Current baseline
 
-Implemented in the active branch:
+Implemented and merged into `main`:
 
-- Streamlit knowledge assistant at `app/frontend/main.py`.
-- Markdown knowledge content and automated content validators.
-- Heading-aware Markdown chunking, local Sentence Transformer embeddings, FAISS indexing and retrieval.
-- Groq-backed answer generation with source metadata.
-- SQLite schema for farms, flocks and daily records.
-- Farm, flock and daily-record repositories and application services.
-- Flock summary and daily analytics service.
-- Latest local test run reported by the developer: 62 tests passed.
+- Streamlit application entry point at `app/frontend/main.py`.
+- Knowledge Assistant using curated Markdown, local Sentence Transformer embeddings, FAISS retrieval and Groq-backed answer generation.
+- SQLite schema, connection management, models and repositories for farms, flocks and daily records.
+- Farm and flock profile workflows.
+- Daily production record entry and validation.
+- Flock summary and daily analytics, including population, mortality, feed, water, weight and recorded environmental measurements.
+- Altair analytics charts with point markers for single observations.
+- Automated unit tests, Ruff checks and knowledge-base validation in GitHub Actions.
 
-Not yet implemented as user workflows:
+The Farm Intelligence work was merged through PR #11 on 18 November 2026. The local test run reported 98 passing tests; the PR CI pipeline passed. Manual checks covered farm/flock workflows, record entry, chart display and SQLite persistence after a Streamlit restart.
 
-- Farm Intelligence Streamlit screens and navigation.
-- Health, vaccination, treatment, biosecurity and task records.
-- Farm-aware AI summaries.
-- Formal farmer pilot and professional validation.
-- Production authentication, API, PostgreSQL and cloud deployment.
+Not yet implemented:
+
+- Automated environmental sensor ingestion or continuous monitoring.
+- Automated farm alerts and AI-generated farm insights.
+- Veterinary/expert consultation workflow.
+- Health, vaccination, treatment, biosecurity and task modules.
+- Production API, multi-user authentication, authorisation and farm-level data isolation.
+- Cloud hosting, managed production database, operational monitoring and disaster recovery.
+- Formal farmer pilot, veterinary/extension validation or measured impact evaluation.
 
 ## Delivery sequence
 
-| Phase | Name | Priority | Dependencies |
+| Stage | Name | Priority | Dependencies |
 |---|---|---|---|
 | 0 | Engineering baseline and repository accuracy | Maintain | None |
-| 1 | Poultry knowledge content and quality | High | Phase 0 |
-| 2 | RAG and knowledge assistant | High | Phase 1 |
-| 3 | Farm data and analytics foundation | High | Phase 0 |
-| 4 | Farm Intelligence UI | **Current next phase** | Phase 3 |
-| 5 | Health and operational records | High | Phase 4, schema migrations |
-| 6 | Farm-aware AI summaries and expert workflow | Medium | Phases 2, 4 and 5 |
-| 7 | Field validation and localisation | High | Usable end-to-end workflows |
-| 8 | Production/cloud architecture | Later | Validated workflows and multi-user need |
-| 9 | Environmental integrations and predictive intelligence | Later | Reliable longitudinal data and validation |
+| 1 | Poultry knowledge content and RAG assistant | Maintain | Stage 0 |
+| 2 | Farm data foundation and Farm Intelligence MVP | Implemented | Stage 0 |
+| 3 | Farm Monitoring and Environmental Intelligence | Next | Stage 2; agreed measurement definitions |
+| 4 | AI Farm Intelligence insights and alerts | High | Stages 1–3; reviewed evidence and thresholds |
+| 5 | Veterinary and expert support workflows | High | Consent, expert role and safety design |
+| 6 | Cloud Engineering and production foundations | Later | Stable service contracts, security and deployment requirements |
+| 7 | Farmer pilot, professional validation and localisation | High | Usable workflows and domain-reviewed content |
+| 8 | Sensor integrations and predictive intelligence | Later | Reliable longitudinal data and validation |
 
-## Phase 0 — Engineering baseline and documentation
+Stages may overlap. Production cloud deployment should be driven by validated multi-user, remote-access and reliability requirements.
 
-**Objective:** Keep the repository reproducible, tested and accurately described.
+## Stage 0 — Engineering baseline and documentation
+
+**Objective:** Keep the repository reproducible, tested, secure and accurately described.
 
 Tasks:
-- Maintain Python 3.11 development environment and a deliberate dependency-management strategy.
-- Keep secrets, local SQLite databases, FAISS artefacts and model files out of Git.
+- Maintain Python 3.11 development environment and dependency-management strategy.
+- Keep secrets, local SQLite databases, generated FAISS artefacts and model files out of Git.
 - Retain CI for lint, formatting, tests and knowledge-base validation.
-- Keep runtime and deployment instructions aligned with implemented code.
-- Maintain clear branch and pull-request practices.
+- Keep runtime and deployment instructions aligned with the merged application.
+- Use focused branches and reviewed pull requests.
+- Update product and architecture documentation whenever implementation changes.
 
 Exit criteria:
-- Fresh environment setup is documented and verified.
-- CI matches commands developers run locally.
-- No live credentials or local runtime artefacts are tracked.
-- README and roadmap describe the active architecture.
+- Fresh environment setup is documented.
+- CI matches local development checks.
+- No credentials or runtime artefacts are tracked.
+- README, roadmap and architecture docs describe the actual runtime and target separately.
 
-## Phase 1 — Poultry knowledge base
+## Stage 1 — Poultry knowledge base and RAG assistant
 
-**Objective:** Maintain a traceable, reviewable poultry knowledge corpus.
-
-Tasks:
-- Maintain metadata and source references for all knowledge documents.
-- Continue coverage across diseases, vaccination, climate, biosecurity, feeding, management, emergency guidance and FAQs.
-- Conduct qualified poultry/veterinary review of high-risk content.
-- Review Hausa content with fluent local reviewers before publication.
-
-Exit criteria:
-- Knowledge-base validators pass.
-- Sources are traceable.
-- Critical guidance has professional review status and review dates.
-- Known content gaps are documented.
-
-## Phase 2 — RAG knowledge assistant
-
-**Objective:** Retrieve relevant knowledge and generate answers that distinguish evidence from uncertainty.
+**Objective:** Maintain traceable poultry knowledge and evidence-grounded responses.
 
 Tasks:
-- Preserve Markdown chunking and FAISS indexing.
-- Use the implemented `scripts/build_index.py` command and document model-cache setup; validate the command on a clean Python 3.11 environment.
-- Test retrieval relevance and source attribution.
-- Add answer-quality tests, insufficient-evidence cases and safety regression cases.
-- Handle missing index, missing embedding model and provider/API failures clearly.
+- Maintain source metadata and references for knowledge documents.
+- Review high-risk poultry content with qualified veterinary/extension professionals.
+- Maintain retrieval and answer-quality tests, including inadequate-evidence and unsafe-request cases.
+- Verify provider/model configuration with a real chat-completion smoke test when it changes.
+- Keep retrieval relevance separate from factual confidence.
 - Document that Groq generation requires internet connectivity and an API key.
 
 Exit criteria:
-- Index can be built reproducibly from the tracked knowledge base.
-- Retriever returns expected relevant passages for a curated evaluation set.
-- Answers show source traceability and abstain when evidence is inadequate.
-- No treatment/dosage or diagnostic overclaim is introduced.
+- Index can be built reproducibly from tracked knowledge content.
+- Retrieval evaluation uses representative, reviewed questions.
+- Answers display source traceability and abstain when evidence is inadequate.
+- No diagnostic, treatment or dosage overclaim is introduced.
 
-## Phase 3 — Farm data and analytics foundation
+## Stage 2 — Farm data foundation and Farm Intelligence MVP (implemented)
 
-**Objective:** Store and compute basic farm-level production information.
+**Objective:** Make farm and flock records usable through the Streamlit application.
 
-Existing entities:
-- Farm
-- Flock
-- DailyRecord
+Implemented workflows:
+1. Register, list and select farm profiles.
+2. Register flocks linked to a selected farm.
+3. Enter daily records including date, mortality, feed, water, average weight, temperature, humidity and notes.
+4. View flock summaries and daily production analytics.
+5. Inspect charts and the full daily-metrics table.
+6. Persist records locally in SQLite across application restarts.
 
-Existing operations:
-- Create/list/get farms.
-- Create/list/get flocks.
-- Create daily records and retrieve records.
-- Calculate flock-level summary and daily metrics.
+Quality and validation evidence:
+- Service validation covers required fields, supported species, positive initial population, farm/flock relationships, mortality limits and duplicate daily records.
+- Analytics and repository tests cover chronological records, cumulative metrics and missing-value behaviour.
+- Local test suite: 98 passed on 18 November 2026.
+- Ruff lint and format checks passed.
+- PR #11 CI passed, including knowledge-base validators.
+- Manual local test covered two sample flocks and restart persistence.
 
-Remaining quality gates:
-- Test chronological and cumulative-mortality calculations using unsorted repository fixtures.
-- Define duplicate-date handling and record correction semantics.
-- Validate numeric fields and flock relationships.
-- Add database migrations before future schema expansion.
-- Test persistence and foreign-key cascade behaviour.
+Limitations:
+- Manual temperature/humidity fields are not automated sensor monitoring.
+- Sample data is demonstration data, not field evidence.
+- The local SQLite/Streamlit workflow is not a secure multi-user production deployment.
+- Farmer and veterinary/extension validation remains outstanding.
 
-Exit criteria:
-- Service and repository contracts are documented.
-- Chronological calculations are deterministic.
-- Invalid inputs are rejected.
-- Existing data can be migrated safely.
+## Stage 3 — Farm Monitoring and Environmental Intelligence (next)
 
-## Phase 4 — Farm Intelligence UI
+**Objective:** Build a clear, trustworthy monitoring workflow on top of the current records and analytics foundation.
 
-**Objective:** Connect the data foundation to farmer-facing workflows in Streamlit.
-
-Implementation order:
-
-1. Navigation shell separating Knowledge Assistant and Farm Intelligence.
-2. Farm profile creation, listing and selection.
-3. Flock creation and listing for a selected farm.
-4. Daily record entry with field validation.
-5. Farm/flock summary cards and chronological charts.
-6. Empty states, error handling, confirmation and data-refresh behaviour.
-
-Required analytics:
-- Initial/current bird count.
-- Total mortality and mortality rate.
-- Feed and water totals.
-- Average weight.
-- Temperature and humidity summaries.
+Work packages:
+1. Define each measurement's name, unit, timestamp, collection frequency and provenance.
+2. Distinguish farmer-entered observations from automated device readings.
+3. Improve environmental and production trend views, including missing-data and suspicious-value states.
+4. Define configurable, context-aware thresholds only with documented and qualified domain review.
+5. Establish data-quality rules for delayed, duplicate, missing, implausible and out-of-order observations.
+6. Define a device-agnostic telemetry ingestion contract before choosing hardware or protocols.
+7. Prototype sensor ingestion after connectivity, calibration and device identity requirements are known.
 
 Exit criteria:
-- User completes the farm → flock → daily record → analytics path.
-- Restarting Streamlit does not lose saved records.
-- Dashboard values reconcile with repository data.
-- Existing knowledge assistant remains functional.
-- Tests cover UI-facing service contracts and core validation.
+- Measurements have explicit units, source and timestamps.
+- Manual and sensor-originated data are distinguishable.
+- Trends display correctly for one or many observations.
+- Missing or suspicious values are not silently converted or corrected.
+- Alert thresholds have traceable provenance and expert review.
+- Tests cover chronological order, gaps, duplicates, invalid values and boundaries.
 
-## Phase 5 — Health and operational records
+## Stage 4 — AI Farm Intelligence insights and alerts
 
-**Objective:** Expand the data model safely.
-
-Potential entities:
-- HealthObservation
-- VaccinationEvent
-- TreatmentRecord
-- BiosecurityCheck
-- FarmTask
+**Objective:** Convert permitted farm data and reviewed knowledge into transparent decision-support observations.
 
 Tasks:
-- Add versioned database migrations.
-- Define validation and event-history semantics.
-- Record source/author for professional recommendations.
-- Add treatment withdrawal-period tracking only with appropriate product and professional data.
-- Do not implement unsupported prescriptions or automatic treatment selection.
+- Produce daily/weekly summaries with explicit date range and data coverage.
+- Add explainable rule-based identification of unusual changes before ML prediction.
+- Attach supporting measurements, timestamps, data source and rule/version to every insight.
+- Design alert severity, acknowledgement, assignment and resolution.
+- Include uncertainty and missing-data notices.
+- Provide human review for consequential actions.
 
 Exit criteria:
-- Migration tests preserve existing farm/flock/record data.
-- Every entity has repository, service and validation tests.
-- UI presents clear status and audit history.
+- Every generated metric traces to stored data.
+- Insights separate facts, rules, retrieved knowledge and uncertain interpretation.
+- High-risk scenarios pass safety regression tests.
+- No unsupported diagnosis or prescription is generated.
 
-## Phase 6 — Farm-aware AI and expert workflows
+## Stage 5 — Veterinary and expert support
 
-**Objective:** Combine selected farm records with relevant knowledge in an auditable way.
+**Objective:** Connect farmers to qualified veterinary and agricultural professionals.
 
 Tasks:
-- Define a minimised, permission-checked farm context payload.
-- Generate weekly summaries with explicit time range and data coverage.
-- Cite knowledge-base sources separately from user-recorded farm measurements.
-- Flag unusual changes as observations requiring review, not diagnoses.
-- Add expert consultation request and response workflows with clear professional role identity.
+- Define expert identity, role and qualification verification.
+- Add farmer-initiated consultation/referral requests.
+- Define explicit consent and controlled sharing of relevant farm records.
+- Record professional responses, follow-up and authorship.
+- Keep AI-generated suggestions clearly separate from professional advice.
+- Maintain an audit trail for consequential recommendations.
 
 Exit criteria:
-- Every generated metric traces to stored records.
-- AI distinguishes recorded facts, retrieved guidance and uncertain interpretation.
-- Safety evaluation includes high-risk poultry-health scenarios.
+- Expert roles are clear and verifiable.
+- Data sharing is consent-based and scoped.
+- Recommendations have clear authorship and history.
+- Escalation does not imply that AI replaces professional care.
 
-## Phase 7 — Field validation and localisation
+## Stage 6 — Cloud Engineering and production foundations
 
-**Objective:** Test usefulness with intended users and domain professionals.
+**Objective:** Provide secure, reliable shared infrastructure when the product's validated requirements justify remote multi-user use.
 
-Tasks:
-- Conduct farmer interviews and workflow observation.
-- Run consent-based usability sessions and a limited pilot.
-- Obtain veterinary and extension review.
-- Evaluate Hausa labels, help text and content with fluent reviewers.
-- Measure task completion, completeness, repeat usage, confidence and usability.
-- Record failures and corrective actions.
+Cloud Engineering is cross-cutting. It supports the Knowledge Assistant, Farm Intelligence, monitoring, alerts and expert workflows.
 
-Exit criteria:
-- Validation report includes methods, participants, findings and limitations.
-- Claims about impact are supported by measured evidence.
-- Product priorities reflect actual farmer feedback.
-
-## Phase 8 — Production and cloud engineering
-
-**Objective:** Support secure multi-user use when remote access and operational reliability are required.
-
-Tasks:
-- Separate UI from application services with a stable API contract.
-- Add authentication, roles and farm-level authorisation.
-- Adopt migrations and PostgreSQL for production.
-- Add Docker images, CI/CD and environment-specific configuration.
-- Add encryption, secret management, backups, restore drills, observability and incident procedures.
-- Validate deployment security and data isolation.
+Work packages:
+1. Document non-functional requirements: users, availability, connectivity, data residency, privacy, operating cost and recovery objectives.
+2. Define stable service interfaces and a versioned API boundary between clients and application services.
+3. Introduce versioned database migrations and test moving production persistence from SQLite to PostgreSQL.
+4. Add authentication, role-based authorisation and farm-level data isolation.
+5. Evaluate cloud providers and deployment options against documented requirements.
+6. Containerise the supported runtime and establish separate development/staging/production configuration.
+7. Add secrets management, encryption, CI/CD, logs, metrics, operational alerting and rollback.
+8. Implement encrypted backups, retention and tested restore procedures.
+9. Conduct security, access-control and operational readiness testing.
 
 Exit criteria:
-- Tested deployment and rollback process.
-- Verified backups and restores.
-- Farm-level access-control tests pass.
-- No secrets are stored in source control.
+- Repeatable deployment and rollback.
+- Verified farm-level access controls.
+- Backups and recovery tested.
+- Secrets never stored in source control.
+- Monitoring and incident-response ownership documented.
 
-## Phase 9 — Environmental and predictive features
+No specific cloud provider is preselected by this plan; choose after a comparative requirements and cost evaluation.
 
-**Objective:** Add sensor-informed and predictive functionality only when reliable longitudinal data exists.
+## Stage 7 — Farmer pilot, professional validation and localisation
+
+**Objective:** Validate product usefulness and safety with intended users.
 
 Tasks:
-- Validate manual and sensor-based temperature/humidity readings.
-- Monitor calibration, missing data, sampling intervals and device connectivity.
-- Build transparent baselines before machine-learning models.
-- Evaluate models using representative, independently reviewed data.
-- Measure false positives, false negatives, drift and generalisation limits.
-- Keep professional review and escalation paths.
+- Conduct farmer discovery and usability sessions in the initial target region.
+- Run a limited, consent-based pilot with documented data handling.
+- Obtain veterinary and extension review of content, thresholds, insights and expert workflows.
+- Review Hausa terminology and interface copy with fluent local reviewers.
+- Measure usability, task completion, record completeness, repeated usage and decision-support usefulness.
+- Publish a validation report including limitations and negative findings.
+
+Exit criteria:
+- Participant selection and methods are documented.
+- Professional review status is traceable.
+- Product changes are linked to observed findings.
+- Any impact claim is supported by measured and attributable evidence.
+
+## Stage 8 — Sensor integrations and predictive intelligence
+
+**Objective:** Introduce automated telemetry and predictive models only when data quality and validation justify them.
+
+Tasks:
+- Select sensors based on farm context, cost, availability and maintainability.
+- Validate calibration, placement, sampling frequency, connectivity and device identity.
+- Design secure ingestion and offline buffering.
+- Collect consented, quality-controlled longitudinal data.
+- Establish domain-reviewed baseline rules before machine learning.
+- Evaluate predictive models on representative data with independent review.
+- Measure false positives, false negatives, uncertainty and model drift.
+- Retain expert escalation.
 
 Exit criteria:
 - Data provenance and quality thresholds are documented.
-- Evaluation is reproducible.
-- Product language accurately communicates uncertainty and limitations.
+- Evaluation is reproducible and independently reviewed.
+- Uncertainty and generalisation limits are visible to users.
+- No unsupported performance or impact claim is made.
 
 ## Working method
 
-- Use a focused branch for each coherent feature.
+- Use one focused branch per coherent change.
 - Make small commits with clear messages.
 - Run focused tests after each change and the full suite before merging.
-- Update documentation when implementation changes—not before.
-- Merge only after review and passing CI.
-- Do not mix product claims, planned capabilities and implemented features.
+- Keep application logic in services, persistence queries in repositories and presentation in the UI.
+- Use migrations for database schema changes and preserve existing records.
+- Update docs when implementation changes.
+- Merge only after code review and successful CI.
+- Keep planned capabilities visibly distinct from working functionality.
 
-## First work item
+## Immediate next work
 
-Start Phase 4 with the Streamlit navigation shell and Farm Profile page. Before charting cumulative performance, verify chronological ordering in `AnalyticsService.get_daily_metrics` and add a regression test.
+Start Stage 3 with a requirements and data-quality design pass. Review the current daily-record fields, define measurement provenance and semantics, identify the smallest useful monitoring workflow, and document threshold governance. Do not add sensors or automated alerts until measurement quality and domain review processes are clear.
