@@ -13,6 +13,7 @@ All notable changes to PoultryGuard AI are documented here. The project uses the
 - Data quality improvements: daily record form fields for feed, water, weight, temperature and humidity now use empty inputs with `value=None` and placeholder text, preventing automatic defaults from being stored as measurements. Genuine zero values are preserved and distinguished from missing observations.
 - `get_environmental_summary()` method on `AnalyticsService` returning structured temperature and humidity coverage and statistics per flock.
 - `get_metrics_by_date_range()` corrected to preserve `None` for unrecorded feed and water instead of coercing to `0.0`.
+- Measurement Provenance and Data Semantics specification (`docs/architecture/measurement_provenance.md`) — Stage 3.2.2 documentation milestone. Covers: current data model assessment and provenance limitations; measurement dictionary for all six daily-record fields; provenance model with four source categories; observation-time and recording-time semantics; missing-value and data-quality status model; data-quality lifecycle; correction and audit model; proposed future measurement data contract with three illustrative JSON examples; recommended future architecture; migration and backward-compatibility considerations; security, privacy and access-control considerations; open design decisions. No Python code, database schema or application behaviour was changed.
 
 ### Changed
 - Updated README, roadmap and implementation plan to reflect the merged Farm Intelligence MVP and the next development stage.

@@ -130,6 +130,12 @@ Limitations:
 - Measurements are manually entered through daily farm records. Sensor ingestion is not implemented. No automated warning thresholds or alerts are included. Veterinary or agricultural professional validation of thresholds remains outstanding.
 - 8 unit tests added covering averages, counts, coverage, None exclusion, genuine zero counting, different latest dates per measurement, later-missing-does-not-replace-latest, empty flock and unknown flock.
 
+**Stage 3.2.2 — Measurement Provenance and Data Semantics** *(documentation milestone; no runtime changes)*
+- Comprehensive measurement provenance and data semantics specification created at `docs/architecture/measurement_provenance.md`.
+- Covers: current data model assessment and its provenance limitations; measurement dictionary for all six daily-record measurements; provenance model with four source categories (`manual_entry`, `file_import`, `sensor_device`, `system_generated`); observation-time and recording-time semantics; missing-value and data-quality status model; data-quality lifecycle; correction and audit model; proposed future measurement data contract with three illustrative JSON examples; recommended future architecture evolution; migration and backward-compatibility considerations; security, privacy and access-control considerations; open design decisions.
+- Architecture README, data-flow document and target architecture updated to reference the new specification.
+- This milestone is documentation only. No Python code, database schema or application behaviour was changed.
+
 ### Remaining Stage 3 work packages
 
 1. Define each measurement's name, unit, timestamp, collection frequency and provenance.
@@ -261,4 +267,4 @@ Exit criteria:
 
 ## Immediate next work
 
-Stage 3 is in progress. Stage 3.1 (data quality) and Stage 3.2.1 (Environmental Monitoring Overview) are implemented on feature branches. Remaining Stage 3 work includes defining measurement provenance and semantics, improving trend views for missing and suspicious values, establishing data-quality rules, and defining a telemetry ingestion contract before adding sensors or automated alerts.
+Stage 3 is in progress. Stage 3.1 (data quality), Stage 3.2.1 (Environmental Monitoring Overview) and Stage 3.2.2 (Measurement Provenance and Data Semantics specification) are implemented on feature branches. Remaining Stage 3 work includes improving trend views for missing and suspicious values, establishing data-quality rules, and defining a telemetry ingestion contract before adding sensors or automated alerts.

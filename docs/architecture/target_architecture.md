@@ -166,6 +166,8 @@ Initial monitoring should reuse the existing daily-record data while making meas
 - Validation and calibration metadata where relevant.
 - Missing, delayed, duplicate or corrected observation status.
 
+The measurement provenance model, observation-time semantics, missing-value rules and proposed data contract are specified in [measurement_provenance.md](measurement_provenance.md). That document is the authoritative design reference for Stage 3.2.2 and the foundation for sensor integration and IoT ingestion.
+
 Future IoT ingestion should use a device-agnostic contract. Sensor selection, communication protocol and provider should follow farm connectivity, maintenance, availability and cost research.
 
 ### 4.5 AI Farm Intelligence

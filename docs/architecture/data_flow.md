@@ -89,7 +89,48 @@ The current schema stores:
 
 The current local workflow persists records in SQLite. Manual restart checks confirmed that sample farm, flock and daily-record data remained available after Streamlit restarted.
 
-## 4. Analytics semantics and data quality
+## 4. Measurement provenance and observation-time flows
+
+### Current state
+
+All measurements in `daily_records` are stored without provenance metadata. The schema records:
+
+- `record_date` — the farmer-chosen calendar date for the record (date only, no time).
+- `created_at` — the SQLite `CURRENT_TIMESTAMP` at the moment of database insertion.
+
+Neither field is a reliable proxy for the actual observation time. `created_at` reflects when the form was submitted, not when the measurement was taken. `record_date` is the reporting date, which may be earlier than `created_at` for retrospective entries.
+
+There is no `source_type`, `observed_at`, `entered_by_user_id`, `device_id` or `calibration_reference` in the current schema.
+
+### Proposed future provenance flow
+
+```mermaid
+flowchart TD
+    MANUAL[Manual entry via Streamlit form] -->|source_type: manual_entry| INGEST[Ingestion service]
+    IMPORT[File / CSV import] -->|source_type: file_import| INGEST
+    SENSOR[Sensor device] -->|source_type: sensor_device, observed_at from device| INGEST
+    INGEST --> VALIDATE[Quality validation service]
+    VALIDATE -->|quality_status: observed| OBS[(measurement_observations)]
+    VALIDATE -->|quality_status: invalid / pending_validation| FLAG[Flag for review]
+    FLAG --> OBS
+    OBS --> ANALYTICS[AnalyticsService]
+    OBS --> AUDIT[Correction and audit service]
+    AUDIT --> OBS
+```
+
+This flow is proposed for future implementation. It is not the current runtime behaviour. See [measurement_provenance.md](measurement_provenance.md) for the full specification.
+
+### Observation-time semantics
+
+| Concept | Current field | Proposed field | Notes |
+|---|---|---|---|
+| Farm reporting date | `record_date` (TEXT, date only) | `record_date` (retained) | Calendar date in farm local timezone |
+| Observation time | Not stored | `observed_at` (TIMESTAMPTZ, UTC) | Actual moment of measurement; NULL when unknown |
+| Recording time | `created_at` (TEXT, SQLite timestamp) | `recorded_at` (TIMESTAMPTZ, UTC) | When the value entered the platform |
+
+`created_at` must not be used as a substitute for `observed_at`. They are semantically different. See [measurement_provenance.md](measurement_provenance.md) Section 5.
+
+## 5. Analytics semantics and data quality
 
 - Daily records are displayed and analysed in chronological order.
 - Cumulative mortality is a running total ordered by record date.
