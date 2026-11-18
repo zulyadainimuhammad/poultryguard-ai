@@ -1,4 +1,10 @@
+"""Tests for AnalyticsService — uses isolated in-memory databases."""
+
+from __future__ import annotations
+
+import sqlite3
 from datetime import date
+from unittest.mock import patch
 
 import pytest
 from app.database import (
@@ -8,153 +14,274 @@ from app.database import (
     FarmRepository,
     Flock,
     FlockRepository,
-    initialise_database,
 )
 from app.services.analytics_service import AnalyticsService
 
+# ---------------------------------------------------------------------------
+# Fixtures: isolated in-memory database per test
+# ---------------------------------------------------------------------------
 
-def create_test_farm() -> int:
-    repository = FarmRepository()
 
-    farm = Farm(
-        farm_name="Analytics Test Farm",
-        farmer_name="Test Farmer",
-        location="Kano, Nigeria",
-        production_type="Broiler",
+@pytest.fixture()
+def db_conn():
+    """Provide an isolated in-memory SQLite connection for each test."""
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.executescript(
+        """
+        CREATE TABLE farms (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            farm_name TEXT NOT NULL,
+            farmer_name TEXT NOT NULL,
+            location TEXT,
+            phone TEXT,
+            email TEXT,
+            production_type TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE TABLE flocks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            farm_id INTEGER NOT NULL,
+            flock_name TEXT NOT NULL,
+            species TEXT NOT NULL,
+            production_type TEXT,
+            breed TEXT,
+            initial_count INTEGER NOT NULL CHECK (initial_count > 0),
+            stocking_date TEXT,
+            status TEXT NOT NULL DEFAULT 'active',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (farm_id) REFERENCES farms(id) ON DELETE CASCADE
+        );
+        CREATE TABLE daily_records (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            flock_id INTEGER NOT NULL,
+            record_date TEXT NOT NULL,
+            feed_kg REAL,
+            water_litres REAL,
+            mortality INTEGER NOT NULL DEFAULT 0,
+            average_weight_kg REAL,
+            temperature_c REAL,
+            humidity_percent REAL,
+            notes TEXT,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (flock_id) REFERENCES flocks(id) ON DELETE CASCADE,
+            CHECK (mortality >= 0),
+            CHECK (
+                humidity_percent IS NULL
+                OR (humidity_percent >= 0 AND humidity_percent <= 100)
+            )
+        );
+        """
     )
+    yield conn
+    conn.close()
 
-    return repository.create(farm)
+
+def _make_repos(conn):
+    """Return repository instances patched to use the given connection."""
+    farm_repo = FarmRepository()
+    flock_repo = FlockRepository()
+    record_repo = DailyRecordRepository()
+
+    def _get_conn():
+        return conn
+
+    patcher = patch("app.database.repositories.get_connection", side_effect=_get_conn)
+    patcher.start()
+    return farm_repo, flock_repo, record_repo, patcher
 
 
-def create_test_flock(farm_id: int) -> int:
-    repository = FlockRepository()
+@pytest.fixture()
+def repos(db_conn):
+    farm_repo, flock_repo, record_repo, patcher = _make_repos(db_conn)
+    yield farm_repo, flock_repo, record_repo
+    patcher.stop()
 
-    flock = Flock(
-        farm_id=farm_id,
-        flock_name="Analytics Test Batch",
-        species="Chicken",
-        production_type="Broiler",
-        breed="Cobb 500",
-        initial_count=500,
-        stocking_date="2026-11-01",
-        status="active",
+
+@pytest.fixture()
+def populated_flock(repos):
+    """Create a farm, flock and three daily records; return (flock_id, repos)."""
+    farm_repo, flock_repo, record_repo = repos
+
+    farm_id = farm_repo.create(
+        Farm(
+            farm_name="Test Farm",
+            farmer_name="Test Farmer",
+            location="Kano",
+            production_type="Broiler",
+        )
     )
+    flock_id = flock_repo.create(
+        Flock(
+            farm_id=farm_id,
+            flock_name="Batch A",
+            species="Chicken",
+            production_type="Broiler",
+            breed="Cobb 500",
+            initial_count=500,
+            stocking_date="2026-11-01",
+            status="active",
+        )
+    )
+    # Insert in non-chronological order to prove sorting works
+    for rec_date, mortality, feed, water, weight, temp, humidity in [
+        ("2026-11-03", 3, 35.0, 70.0, 0.70, 28.5, 67.0),
+        ("2026-11-01", 2, 30.0, 60.0, 0.50, 28.0, 65.0),
+        ("2026-11-02", 1, 32.0, 64.0, 0.60, 29.0, 66.0),
+    ]:
+        record_repo.create(
+            DailyRecord(
+                flock_id=flock_id,
+                record_date=rec_date,
+                feed_kg=feed,
+                water_litres=water,
+                mortality=mortality,
+                average_weight_kg=weight,
+                temperature_c=temp,
+                humidity_percent=humidity,
+            )
+        )
 
-    return repository.create(flock)
-
-
-def create_daily_records(flock_id: int) -> None:
-    repository = DailyRecordRepository()
-
-    records = [
-        DailyRecord(
-            flock_id=flock_id,
-            record_date="2026-11-01",
-            feed_kg=30.0,
-            water_litres=60.0,
-            mortality=2,
-            average_weight_kg=0.50,
-            temperature_c=28.0,
-            humidity_percent=65.0,
-            notes="First test record.",
-        ),
-        DailyRecord(
-            flock_id=flock_id,
-            record_date="2026-11-02",
-            feed_kg=32.0,
-            water_litres=64.0,
-            mortality=1,
-            average_weight_kg=0.60,
-            temperature_c=29.0,
-            humidity_percent=66.0,
-            notes="Second test record.",
-        ),
-        DailyRecord(
-            flock_id=flock_id,
-            record_date="2026-11-03",
-            feed_kg=35.0,
-            water_litres=70.0,
-            mortality=3,
-            average_weight_kg=0.70,
-            temperature_c=28.5,
-            humidity_percent=67.0,
-            notes="Third test record.",
-        ),
-    ]
-
-    for record in records:
-        repository.create(record)
+    return flock_id, repos
 
 
-def test_flock_summary() -> None:
-    initialise_database()
+# ---------------------------------------------------------------------------
+# Tests: flock summary
+# ---------------------------------------------------------------------------
 
-    farm_id = create_test_farm()
-    flock_id = create_test_flock(farm_id)
-    create_daily_records(flock_id)
 
-    service = AnalyticsService()
-
+def test_flock_summary_totals(populated_flock):
+    flock_id, (_, flock_repo, record_repo) = populated_flock
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
     summary = service.get_flock_summary(flock_id)
 
     assert summary["initial_count"] == 500
-    assert summary["current_flock_size"] == 494.0
     assert summary["total_mortality"] == 6.0
+    assert summary["current_flock_size"] == 494
     assert summary["mortality_rate_percent"] == 1.2
-
     assert summary["total_feed_kg"] == 97.0
     assert summary["total_water_litres"] == 194.0
-
     assert summary["average_weight_kg"] == 0.6
     assert summary["average_temperature_c"] == 28.5
     assert summary["average_humidity_percent"] == 66.0
-
     assert summary["record_count"] == 3
 
 
-def test_daily_metrics() -> None:
-    initialise_database()
+def test_flock_summary_empty_records(repos):
+    farm_repo, flock_repo, record_repo = repos
+    farm_id = farm_repo.create(
+        Farm(farm_name="F", farmer_name="N", location="L", production_type="Broiler")
+    )
+    flock_id = flock_repo.create(
+        Flock(
+            farm_id=farm_id,
+            flock_name="Empty",
+            species="Chicken",
+            initial_count=200,
+        )
+    )
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    summary = service.get_flock_summary(flock_id)
 
-    farm_id = create_test_farm()
-    flock_id = create_test_flock(farm_id)
-    create_daily_records(flock_id)
+    assert summary["initial_count"] == 200
+    assert summary["current_flock_size"] == 200
+    assert summary["total_mortality"] == 0.0
+    assert summary["record_count"] == 0
+    assert summary["average_weight_kg"] is None
+    assert summary["average_temperature_c"] is None
+    assert summary["average_humidity_percent"] is None
 
-    service = AnalyticsService()
 
+def test_flock_summary_missing_flock_raises(repos):
+    _, flock_repo, record_repo = repos
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    with pytest.raises(ValueError, match="was not found"):
+        service.get_flock_summary(999999)
+
+
+# ---------------------------------------------------------------------------
+# Tests: daily metrics — chronological order is the critical correctness check
+# ---------------------------------------------------------------------------
+
+
+def test_daily_metrics_are_chronological(populated_flock):
+    """Records inserted out of order must be returned and calculated chronologically."""
+    flock_id, (_, flock_repo, record_repo) = populated_flock
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
     metrics = service.get_daily_metrics(flock_id)
 
     assert len(metrics) == 3
 
-    # Repository returns records in descending date order.
-    first = metrics[0]
-    second = metrics[1]
-    third = metrics[2]
-
-    assert first["record_date"] == "2026-11-03"
-    assert first["mortality"] == 3.0
-    assert first["cumulative_mortality"] == 3.0
-    assert first["current_flock_size"] == 497.0
-
-    assert second["record_date"] == "2026-11-02"
-    assert second["mortality"] == 1.0
-    assert second["cumulative_mortality"] == 4.0
-    assert second["current_flock_size"] == 496.0
-
-    assert third["record_date"] == "2026-11-01"
-    assert third["mortality"] == 2.0
-    assert third["cumulative_mortality"] == 6.0
-    assert third["current_flock_size"] == 494.0
+    # Chronological order: Nov 1, Nov 2, Nov 3
+    assert metrics[0]["record_date"] == "2026-11-01"
+    assert metrics[1]["record_date"] == "2026-11-02"
+    assert metrics[2]["record_date"] == "2026-11-03"
 
 
-def test_metrics_by_date_range() -> None:
-    initialise_database()
+def test_daily_metrics_cumulative_mortality_is_correct(populated_flock):
+    """Cumulative mortality must accumulate in date order, not insertion order."""
+    flock_id, (_, flock_repo, record_repo) = populated_flock
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    metrics = service.get_daily_metrics(flock_id)
 
-    farm_id = create_test_farm()
-    flock_id = create_test_flock(farm_id)
-    create_daily_records(flock_id)
+    # Nov 1: mortality=2, cumulative=2, remaining=498
+    assert metrics[0]["mortality"] == 2.0
+    assert metrics[0]["cumulative_mortality"] == 2.0
+    assert metrics[0]["current_flock_size"] == 498
 
-    service = AnalyticsService()
+    # Nov 2: mortality=1, cumulative=3, remaining=497
+    assert metrics[1]["mortality"] == 1.0
+    assert metrics[1]["cumulative_mortality"] == 3.0
+    assert metrics[1]["current_flock_size"] == 497
 
+    # Nov 3: mortality=3, cumulative=6, remaining=494
+    assert metrics[2]["mortality"] == 3.0
+    assert metrics[2]["cumulative_mortality"] == 6.0
+    assert metrics[2]["current_flock_size"] == 494
+
+
+def test_daily_metrics_empty_flock(repos):
+    farm_repo, flock_repo, record_repo = repos
+    farm_id = farm_repo.create(
+        Farm(farm_name="F", farmer_name="N", location="L", production_type="Broiler")
+    )
+    flock_id = flock_repo.create(
+        Flock(
+            farm_id=farm_id,
+            flock_name="Empty",
+            species="Chicken",
+            initial_count=100,
+        )
+    )
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    assert service.get_daily_metrics(flock_id) == []
+
+
+# ---------------------------------------------------------------------------
+# Tests: date range metrics
+# ---------------------------------------------------------------------------
+
+
+def test_metrics_by_date_range(populated_flock):
+    flock_id, (_, flock_repo, record_repo) = populated_flock
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
     metrics = service.get_metrics_by_date_range(
         flock_id=flock_id,
         start_date=date(2026, 11, 2),
@@ -162,40 +289,151 @@ def test_metrics_by_date_range() -> None:
     )
 
     assert len(metrics) == 2
-
     assert metrics[0]["record_date"] == "2026-11-02"
     assert metrics[0]["mortality"] == 1.0
-
     assert metrics[1]["record_date"] == "2026-11-03"
     assert metrics[1]["mortality"] == 3.0
 
 
-def test_missing_flock_raises_error() -> None:
-    initialise_database()
-
-    service = AnalyticsService()
-
-    with pytest.raises(ValueError, match="was not found"):
-        service.get_flock_summary(999999)
+# ---------------------------------------------------------------------------
+# Tests: None vs 0.0 preservation for chart filtering
+# ---------------------------------------------------------------------------
 
 
-def test_empty_flock_records() -> None:
-    initialise_database()
+def test_daily_metrics_preserves_none_for_unrecorded_feed(repos):
+    """feed_kg=None must stay None in metrics, not become 0.0."""
+    farm_repo, flock_repo, record_repo = repos
+    farm_id = farm_repo.create(
+        Farm(farm_name="F", farmer_name="N", location="L", production_type="Broiler")
+    )
+    flock_id = flock_repo.create(
+        Flock(
+            farm_id=farm_id,
+            flock_name="Sparse",
+            species="Chicken",
+            initial_count=100,
+        )
+    )
+    record_repo.create(
+        DailyRecord(
+            flock_id=flock_id,
+            record_date="2026-11-01",
+            mortality=0,
+            feed_kg=None,
+            water_litres=None,
+            average_weight_kg=None,
+        )
+    )
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    metrics = service.get_daily_metrics(flock_id)
 
-    farm_id = create_test_farm()
-    flock_id = create_test_flock(farm_id)
+    assert len(metrics) == 1
+    assert metrics[0]["feed_kg"] is None
+    assert metrics[0]["water_litres"] is None
+    assert metrics[0]["average_weight_kg"] is None
 
-    service = AnalyticsService()
 
+def test_daily_metrics_preserves_recorded_feed_value(repos):
+    """A recorded feed_kg value must be returned unchanged."""
+    farm_repo, flock_repo, record_repo = repos
+    farm_id = farm_repo.create(
+        Farm(farm_name="F", farmer_name="N", location="L", production_type="Broiler")
+    )
+    flock_id = flock_repo.create(
+        Flock(
+            farm_id=farm_id,
+            flock_name="Fed",
+            species="Chicken",
+            initial_count=100,
+        )
+    )
+    record_repo.create(
+        DailyRecord(
+            flock_id=flock_id,
+            record_date="2026-11-01",
+            mortality=0,
+            feed_kg=35.5,
+            water_litres=70.0,
+        )
+    )
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    metrics = service.get_daily_metrics(flock_id)
+
+    assert metrics[0]["feed_kg"] == 35.5
+    assert metrics[0]["water_litres"] == 70.0
+
+
+def test_daily_metrics_weight_stored_and_returned_accurately(repos):
+    """Small weight values like 0.04 kg must be stored and returned as-is."""
+    farm_repo, flock_repo, record_repo = repos
+    farm_id = farm_repo.create(
+        Farm(farm_name="F", farmer_name="N", location="L", production_type="Broiler")
+    )
+    flock_id = flock_repo.create(
+        Flock(
+            farm_id=farm_id,
+            flock_name="Chicks",
+            species="Chicken",
+            initial_count=100,
+        )
+    )
+    record_repo.create(
+        DailyRecord(
+            flock_id=flock_id,
+            record_date="2026-11-01",
+            mortality=0,
+            average_weight_kg=0.04,
+        )
+    )
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    metrics = service.get_daily_metrics(flock_id)
+
+    # Value must be returned exactly as stored; no biological filtering applied.
+    assert metrics[0]["average_weight_kg"] == 0.04
+
+
+def test_flock_summary_feed_total_excludes_none(repos):
+    """Summary total_feed_kg must sum only recorded values, treating None as 0."""
+    farm_repo, flock_repo, record_repo = repos
+    farm_id = farm_repo.create(
+        Farm(farm_name="F", farmer_name="N", location="L", production_type="Broiler")
+    )
+    flock_id = flock_repo.create(
+        Flock(
+            farm_id=farm_id,
+            flock_name="Mixed",
+            species="Chicken",
+            initial_count=100,
+        )
+    )
+    # One record with feed, one without
+    record_repo.create(
+        DailyRecord(
+            flock_id=flock_id,
+            record_date="2026-11-01",
+            mortality=0,
+            feed_kg=30.0,
+        )
+    )
+    record_repo.create(
+        DailyRecord(
+            flock_id=flock_id,
+            record_date="2026-11-02",
+            mortality=0,
+            feed_kg=None,
+        )
+    )
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
     summary = service.get_flock_summary(flock_id)
 
-    assert summary["initial_count"] == 500
-    assert summary["current_flock_size"] == 500
-    assert summary["total_mortality"] == 0.0
-    assert summary["mortality_rate_percent"] == 0.0
-    assert summary["total_feed_kg"] == 0.0
-    assert summary["total_water_litres"] == 0.0
-    assert summary["average_weight_kg"] is None
-    assert summary["average_temperature_c"] is None
-    assert summary["average_humidity_percent"] is None
-    assert summary["record_count"] == 0
+    # Only the 30.0 record should contribute
+    assert summary["total_feed_kg"] == 30.0
+    assert summary["record_count"] == 2

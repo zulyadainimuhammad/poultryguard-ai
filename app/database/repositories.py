@@ -212,9 +212,33 @@ class FlockRepository:
 class DailyRecordRepository:
     """Database operations for daily flock records."""
 
+    def get_by_flock_and_date(
+        self, flock_id: int, record_date: str
+    ) -> dict[str, Any] | None:
+        with get_connection() as connection:
+            row = connection.execute(
+                """
+                SELECT *
+                FROM daily_records
+                WHERE flock_id = ? AND record_date = ?
+                """,
+                (flock_id, record_date),
+            ).fetchone()
+
+            return dict(row) if row else None
+
     def create(self, record: DailyRecord) -> int:
         if record.mortality < 0:
             raise ValueError("Mortality cannot be negative.")
+
+        if record.feed_kg is not None and record.feed_kg < 0:
+            raise ValueError("Feed consumed cannot be negative.")
+
+        if record.water_litres is not None and record.water_litres < 0:
+            raise ValueError("Water consumed cannot be negative.")
+
+        if record.average_weight_kg is not None and record.average_weight_kg <= 0:
+            raise ValueError("Average weight must be greater than zero.")
 
         if record.humidity_percent is not None:
             if not 0 <= record.humidity_percent <= 100:
@@ -271,7 +295,7 @@ class DailyRecordRepository:
                 SELECT *
                 FROM daily_records
                 WHERE flock_id = ?
-                ORDER BY record_date DESC, id DESC
+                ORDER BY record_date ASC, id ASC
                 """,
                 (flock_id,),
             ).fetchall()
