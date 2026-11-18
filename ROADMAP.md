@@ -25,8 +25,8 @@ The intended product has these connected capabilities:
 | AI Knowledge Assistant | Search poultry knowledge and generate source-grounded answers | Working prototype |
 | Farm and Flock Records | Organise farms, flocks and daily production records | Implemented MVP |
 | Farm Analytics | Summarise flock population, mortality, feed, water, weight and recorded environmental values | Implemented MVP |
-| Farm Monitoring | Monitor operating conditions and changes over time | Partial foundation through manually entered daily records; Environmental Monitoring Overview implemented for temperature and humidity coverage and statistics |
-| Environmental Data | Capture and manage reliable environmental measurements | Manual temperature/humidity fields exist; Environmental Monitoring Overview shows recorded coverage and statistics; sensor ingestion planned |
+| Farm Monitoring | Monitor operating conditions and changes over time | Partial foundation through manually entered daily records; Environmental Monitoring Overview implemented for temperature and humidity coverage and statistics; measurement provenance and data semantics specification completed (Stage 3.2.2 — documentation only; runtime provenance implementation planned) |
+| Environmental Data | Capture and manage reliable environmental measurements | Manual temperature/humidity fields exist; Environmental Monitoring Overview shows recorded coverage and statistics; measurement provenance model and proposed data contract defined (Stage 3.2.2 — documentation only); runtime provenance fields, sensor ingestion and device registry planned |
 | AI Farm Intelligence | Turn trustworthy farm and environmental data into useful insights | Planned |
 | Alerts | Notify farmers about conditions requiring attention | Planned |
 | Expert Support | Support escalation and communication with qualified veterinary/agricultural professionals | Planned |
@@ -41,7 +41,7 @@ The target architecture, including the cross-cutting Cloud Engineering layer, is
 | 0 | Repository and engineering foundation | In place; maintain | Reproducible setup, clean checks, current documentation |
 | 1 | Poultry knowledge base and RAG Knowledge Assistant | Working prototype | Reproducible indexing, retrieval tests, source display and safety checks |
 | 2 | Farm data foundation and Farm Intelligence UI | Implemented local MVP | Farm → flock → daily record → analytics workflow; persistence and tests |
-| 3 | Farm Monitoring and Environmental Intelligence | Next | Defined monitoring workflow, data-quality rules, trend visibility and reviewed thresholds |
+| 3 | Farm Monitoring and Environmental Intelligence | In progress | Defined monitoring workflow, data-quality rules, trend visibility and reviewed thresholds |
 | 4 | AI Farm Intelligence insights and alerts | Planned | Evidence-linked insight rules, alert lifecycle, evaluation and human review |
 | 5 | Veterinary and expert support workflows | Planned | Qualified expert roles, consent, referral and auditable communication |
 | 6 | Cloud Engineering and production foundations | Planned | API boundary, identity, access control, production database, backups, CI/CD and secure deployment |
@@ -70,7 +70,7 @@ Validation recorded for the merged MVP:
 
 These sample records are demonstration data, not measured field results. This validation does not establish production readiness or farmer impact.
 
-## Stage 3 — Farm Monitoring and Environmental Intelligence (next)
+## Stage 3 — Farm Monitoring and Environmental Intelligence (in progress)
 
 **Objective:** Turn the current daily-record foundation into a clearer, trustworthy monitoring capability.
 
@@ -213,6 +213,6 @@ Planned work:
 
 ## Immediate next work
 
-Start Stage 3 with discovery and requirements for Farm Monitoring and Environmental Intelligence. Review the existing daily-record fields and analytics, define measurement semantics and data-quality rules, and agree on a minimal monitoring workflow before adding sensors or alerts.
+Start Stage 3 with discovery and requirements for Farm Monitoring and Environmental Intelligence. Stage 3.1 (data quality), Stage 3.2.1 (Environmental Monitoring Overview) and Stage 3.2.2 (Measurement Provenance and Data Semantics specification) are complete on feature branches. Remaining Stage 3 work includes improving trend views for missing and suspicious values, establishing data-quality rules, and defining a telemetry ingestion contract before adding sensors or automated alerts.
 
 Cloud Engineering should be designed in parallel at the architecture level, but production deployment should follow stable workflows, security requirements and a deliberate provider evaluation.

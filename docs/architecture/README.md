@@ -12,6 +12,7 @@ This directory documents both the **currently implemented local MVP** and the **
 | [rag_design.md](rag_design.md) | Markdown chunking, embeddings, FAISS indexing and retrieval |
 | [model_selection.md](model_selection.md) | Current local embedding model and remote answer-generation provider |
 | [deployment.md](deployment.md) | Supported local developer setup and production-readiness gaps |
+| [measurement_provenance.md](measurement_provenance.md) | Measurement dictionary, provenance model, observation-time semantics, missing-value rules, correction and audit model, proposed data contract and future architecture (Stage 3.2.2 design specification) |
 
 ## Target and historical documents
 
@@ -26,9 +27,10 @@ This directory documents both the **currently implemented local MVP** and the **
 2. [Target architecture](target_architecture.md) — understand the full product vision and Cloud Engineering foundation.
 3. [Software architecture](software_architecture.md) — understand code and dependency boundaries.
 4. [Data flow](data_flow.md) — understand current data movement and planned flows.
-5. [RAG design](rag_design.md) — understand knowledge indexing and retrieval.
-6. [Model and provider selection](model_selection.md) — understand the active AI providers.
-7. [Development and deployment](deployment.md) — run the local MVP and understand production gaps.
+5. [Measurement provenance](measurement_provenance.md) — understand measurement definitions, provenance, timestamps and the proposed data contract.
+6. [RAG design](rag_design.md) — understand knowledge indexing and retrieval.
+7. [Model and provider selection](model_selection.md) — understand the active AI providers.
+8. [Development and deployment](deployment.md) — run the local MVP and understand production gaps.
 
 ## Architecture principles
 
