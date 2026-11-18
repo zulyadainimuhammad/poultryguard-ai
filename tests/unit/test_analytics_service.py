@@ -437,3 +437,120 @@ def test_flock_summary_feed_total_excludes_none(repos):
     # Only the 30.0 record should contribute
     assert summary["total_feed_kg"] == 30.0
     assert summary["record_count"] == 2
+
+
+# ---------------------------------------------------------------------------
+# Tests: get_metrics_by_date_range — None / 0.0 / value preservation
+# ---------------------------------------------------------------------------
+
+
+def test_date_range_metrics_preserves_none_for_unrecorded_feed(repos):
+    """feed_kg=None and water_litres=None must remain None in date-range results."""
+    farm_repo, flock_repo, record_repo = repos
+    farm_id = farm_repo.create(
+        Farm(farm_name="F", farmer_name="N", location="L", production_type="Broiler")
+    )
+    flock_id = flock_repo.create(
+        Flock(
+            farm_id=farm_id,
+            flock_name="Sparse",
+            species="Chicken",
+            initial_count=100,
+        )
+    )
+    record_repo.create(
+        DailyRecord(
+            flock_id=flock_id,
+            record_date="2026-11-01",
+            mortality=0,
+            feed_kg=None,
+            water_litres=None,
+        )
+    )
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    metrics = service.get_metrics_by_date_range(
+        flock_id=flock_id,
+        start_date=date(2026, 11, 1),
+        end_date=date(2026, 11, 1),
+    )
+
+    assert len(metrics) == 1
+    assert metrics[0]["feed_kg"] is None
+    assert metrics[0]["water_litres"] is None
+
+
+def test_date_range_metrics_preserves_genuine_zero_feed(repos):
+    """feed_kg=0.0 and water_litres=0.0 must be returned as 0.0, not None."""
+    farm_repo, flock_repo, record_repo = repos
+    farm_id = farm_repo.create(
+        Farm(farm_name="F", farmer_name="N", location="L", production_type="Broiler")
+    )
+    flock_id = flock_repo.create(
+        Flock(
+            farm_id=farm_id,
+            flock_name="Zero",
+            species="Chicken",
+            initial_count=100,
+        )
+    )
+    record_repo.create(
+        DailyRecord(
+            flock_id=flock_id,
+            record_date="2026-11-01",
+            mortality=0,
+            feed_kg=0.0,
+            water_litres=0.0,
+        )
+    )
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    metrics = service.get_metrics_by_date_range(
+        flock_id=flock_id,
+        start_date=date(2026, 11, 1),
+        end_date=date(2026, 11, 1),
+    )
+
+    assert len(metrics) == 1
+    assert metrics[0]["feed_kg"] == 0.0
+    assert metrics[0]["water_litres"] == 0.0
+
+
+def test_date_range_metrics_returns_recorded_values_accurately(repos):
+    """Recorded feed and water values must be returned with two-decimal precision."""
+    farm_repo, flock_repo, record_repo = repos
+    farm_id = farm_repo.create(
+        Farm(farm_name="F", farmer_name="N", location="L", production_type="Broiler")
+    )
+    flock_id = flock_repo.create(
+        Flock(
+            farm_id=farm_id,
+            flock_name="Measured",
+            species="Chicken",
+            initial_count=100,
+        )
+    )
+    record_repo.create(
+        DailyRecord(
+            flock_id=flock_id,
+            record_date="2026-11-01",
+            mortality=1,
+            feed_kg=42.75,
+            water_litres=85.5,
+        )
+    )
+    service = AnalyticsService(
+        flock_repository=flock_repo, daily_record_repository=record_repo
+    )
+    metrics = service.get_metrics_by_date_range(
+        flock_id=flock_id,
+        start_date=date(2026, 11, 1),
+        end_date=date(2026, 11, 1),
+    )
+
+    assert len(metrics) == 1
+    assert metrics[0]["feed_kg"] == 42.75
+    assert metrics[0]["water_litres"] == 85.5
+    assert metrics[0]["mortality"] == 1.0

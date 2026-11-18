@@ -170,14 +170,8 @@ class AnalyticsService:
             {
                 "record_id": record["id"],
                 "record_date": record["record_date"],
-                "feed_kg": round(
-                    self._number(record.get("feed_kg")),
-                    2,
-                ),
-                "water_litres": round(
-                    self._number(record.get("water_litres")),
-                    2,
-                ),
+                "feed_kg": self._round_or_none(record.get("feed_kg")),
+                "water_litres": self._round_or_none(record.get("water_litres")),
                 "mortality": self._number(record.get("mortality")),
                 "average_weight_kg": self._round_or_none(
                     record.get("average_weight_kg")
