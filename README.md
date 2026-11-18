@@ -2,65 +2,83 @@
 
 **AI-assisted poultry farm management and knowledge intelligence for smallholder farmers.**
 
-PoultryGuard AI is a developing poultry farm intelligence platform designed to help poultry farmers organise farm information and make more informed day-to-day management decisions. It is being developed with smallholder and underserved poultry operations in Northern Nigeria as an initial context.
+PoultryGuard AI is a developing poultry farm intelligence platform designed to help poultry farmers organise farm information, monitor flock performance and access evidence-informed poultry knowledge. Northern Nigeria is the initial product context.
 
-The current codebase combines a source-grounded poultry knowledge assistant with the first farm-data foundation: farms, flocks, daily production records and flock-level analytics. The immediate engineering priority is to connect those existing services to a usable Farm Intelligence dashboard.
-
-> **Status — 13 November 2026:** Working prototype. The Streamlit knowledge assistant, local retrieval components, Groq-based answer generation, SQLite data layer, farm/flock/daily-record services and analytics service are present in the active development branch. The Farm Intelligence user interface is not yet integrated. Formal farmer and veterinary validation has not yet been completed.
+> **Status — 18 November 2026:** Working local MVP. The Streamlit application now includes the Poultry Knowledge Assistant and Farm Intelligence workflows for farm profiles, flock management, daily production records and flock-level analytics. The local test suite reports 98 passing tests, and the PR #11 CI pipeline passed. Formal farmer and veterinary/extension validation has not yet been completed. The application is not yet a production multi-user cloud service.
 
 ## Product direction
 
-PoultryGuard is intended to become a practical digital workspace for poultry farm records, performance visibility and responsible, evidence-informed knowledge support.
+The long-term goal is a cloud-enabled poultry farm intelligence platform connecting knowledge support, farm and flock records, environmental data, useful insights, alerts and qualified expert support.
 
-### Current implementation
+The intended product structure is:
 
-- **Poultry knowledge assistant:** Streamlit question-and-answer interface using retrieved knowledge-base passages.
-- **Knowledge retrieval:** Markdown parsing/chunking, locally generated sentence-transformer embeddings and FAISS similarity search.
+1. **AI Knowledge Assistant** — retrieves poultry knowledge and generates source-grounded answers.
+2. **Farm and Flock Records** — manages farm profiles, flocks and daily production records.
+3. **Farm Analytics** — presents flock population, mortality, feed, water, weight and recorded environmental measurements.
+4. **Farm Monitoring and Environmental Data** — planned expansion for more complete environmental monitoring and validated sensor integrations.
+5. **AI Farm Intelligence** — planned decision-support layer for insights and alerts based on farm records and environmental information.
+6. **Expert Support** — planned workflow to connect farmers with veterinary and agricultural professionals.
+7. **Cloud Engineering** — planned cross-cutting infrastructure for secure hosting, APIs, databases, storage, identity, monitoring, backups and delivery automation.
+
+See [the target architecture](docs/architecture/target_architecture.md) and [ROADMAP.md](ROADMAP.md).
+
+## Current implementation
+
+### Available in the local application
+
+- **Poultry Knowledge Assistant:** Streamlit question-and-answer interface using retrieved knowledge-base passages.
+- **Knowledge retrieval:** Markdown parsing/chunking, locally generated Sentence Transformer embeddings and FAISS similarity search.
 - **Answer generation:** Groq API through the `groq` Python client. This requires internet access and a valid API key.
 - **Source visibility:** The interface displays retrieved source files and sections. Similarity is a retrieval signal, not a measure of factual correctness.
-- **Farm data foundation:** SQLite tables for farms, flocks and daily flock records.
-- **Application services:** `FarmService` supports farm, flock and daily-record operations. `AnalyticsService` calculates flock summaries and daily metrics.
-- **Automated checks:** pytest suite, Ruff checks and knowledge-base validation scripts.
+- **Farm profiles:** Register, list and select farm profiles.
+- **Flock management:** Register and manage flocks linked to a selected farm.
+- **Daily records:** Record date, mortality, feed, water, average bird weight, temperature, humidity and notes.
+- **Flock analytics:** Display current population, mortality rate, production summaries, chronological charts and a daily metrics table.
+- **Local persistence:** Farm, flock and daily-record data are stored in SQLite and persist when Streamlit restarts.
+- **Quality checks:** pytest, Ruff and knowledge-base validation scripts run locally and in GitHub Actions.
 
-### Planned product capabilities
+### Current limitations
 
-These are roadmap items, not claims about features already available in the user interface:
-
-- Farm profile and multi-flock management workflows.
-- Daily entry forms and an analytics dashboard for flock size, mortality, feed, water, weight and environmental readings.
-- Health, vaccination, treatment, biosecurity and task records.
-- Farm-specific AI summaries grounded in a farm's own recorded data and reviewed knowledge sources.
-- Expert consultation workflows and farmer-facing localisation, including Hausa.
-- Environmental sensors and predictive risk indicators only after data quality, domain review and field validation are established.
+- Environmental readings are currently entered through daily records. Automated sensor ingestion and continuous monitoring are not implemented.
+- AI-generated farm insights, automated alerts and predictive risk models are not implemented.
+- Veterinary/expert referral and consultation workflows are not implemented.
+- Health observations, vaccination, treatment, biosecurity and task-management records are not yet part of the current database schema.
+- The application uses local SQLite and does not yet provide production authentication, multi-user authorisation, farm-level access controls or cloud deployment.
+- Formal farmer pilot, usability validation and veterinary/extension review have not yet been completed.
 
 PoultryGuard is not a veterinary diagnostic system. Its AI features are intended to support—not replace—qualified veterinary and extension professionals. It must not prescribe medication or dosages without validated professional protocols.
 
 ## Current architecture
 
-The active architecture is a single-process Streamlit application with separate service, repository, database and RAG concerns.
+The currently implemented application is a Streamlit interface backed by application services, SQLite repositories and a separate retrieval-augmented knowledge assistant.
 
 ```mermaid
 flowchart TD
-    U[Farmer / Farm Operator] --> UI[Streamlit UI]
-    UI --> AG[Knowledge Assistant Flow]
-    FUTURE[Planned Farm Intelligence screens] -. planned .-> FS[FarmService]
-    FUTURE -. planned .-> AN[AnalyticsService]
-    FS --> REPO[SQLite Repositories]
-    AN --> REPO
-    REPO --> DB[(SQLite: farms, flocks, daily_records)]
-    AG --> RET[KnowledgeBaseRetriever]
-    RET --> ENC[SentenceTransformer Encoder]
+    USER[Farmer / Farm Operator] --> UI[Streamlit Application]
+    UI --> KA[AI Knowledge Assistant]
+    UI --> FI[Farm Intelligence UI]
+    KA --> RET[KnowledgeBaseRetriever]
+    RET --> EMB[Local Sentence Transformer]
     RET --> IDX[(FAISS index + metadata)]
-    AG --> GEN[Groq Answer Generator]
+    KA --> GEN[Groq Answer Generator]
     GEN --> API[Groq API]
-    KB[Curated Markdown Knowledge Base] --> IDX
+    FI --> FS[FarmService]
+    FI --> AS[AnalyticsService]
+    FS --> REPO[SQLite Repositories]
+    AS --> REPO
+    REPO --> DB[(SQLite: farms, flocks, daily_records)]
+    KB[Curated Markdown Knowledge Base] --> INDEXER[KnowledgeBaseIndexer]
+    INDEXER --> EMB
+    INDEXER --> IDX
 ```
 
-### Layer responsibilities
+The intended future architecture adds farm monitoring/environmental data, an AI Farm Intelligence decision-support layer, expert support and a cross-cutting Cloud Engineering plane. These future components are documented separately and are not represented as implemented runtime services. See [target_architecture.md](docs/architecture/target_architecture.md).
+
+### Implemented layer responsibilities
 
 | Layer | Current location | Responsibility |
 |---|---|---|
-| Presentation | `app/frontend/main.py` | Current Streamlit knowledge-assistant UI |
+| Presentation | `app/frontend/main.py` | Streamlit Knowledge Assistant and Farm Intelligence workflows |
 | Application services | `app/services/` | Farm operations, analytics and answer generation |
 | Data access | `app/database/repositories.py` | Parameterised SQLite queries |
 | Persistence | `app/database/connection.py` | SQLite connection and initial schema |
@@ -78,7 +96,7 @@ The current farm data schema contains:
 | `flocks` | Flock identity, species, production type, initial count and stocking date |
 | `daily_records` | Dated feed, water, mortality, average weight, temperature, humidity and notes |
 
-The SQLite schema is an initial local-development foundation. Before production multi-user deployment, we will introduce a migration strategy, a database abstraction suitable for PostgreSQL, authentication and access controls.
+The schema is a local-development foundation. Before production multi-user deployment, the project will need a migration strategy, a production database such as PostgreSQL, authentication, authorisation and farm-level data isolation.
 
 ## Technology stack
 
@@ -86,6 +104,7 @@ The SQLite schema is an initial local-development foundation. Before production 
 |---|---|
 | Language | Python 3.11 |
 | UI | Streamlit |
+| Charts | Altair |
 | Local persistence | SQLite |
 | Database access | Python `sqlite3`, repositories and dataclasses |
 | Embeddings | Sentence Transformers: `all-MiniLM-L6-v2` |
@@ -97,7 +116,7 @@ The SQLite schema is an initial local-development foundation. Before production 
 | Lint and formatting | Ruff |
 | CI | GitHub Actions |
 
-**Connectivity clarification:** knowledge files, embeddings, FAISS retrieval and SQLite storage are local components. Answer generation currently calls the Groq API, so the current assistant is not fully offline. A fully local LLM is a separate future option and is not the current runtime.
+**Connectivity clarification:** knowledge files, embeddings, FAISS retrieval and SQLite storage are local components. Answer generation currently calls the Groq API, so the Knowledge Assistant is not fully offline.
 
 ## Repository structure
 
@@ -105,24 +124,19 @@ The SQLite schema is an initial local-development foundation. Before production 
 poultryguard-ai/
 ├── app/
 │   ├── backend/                 # Backend scaffold; not current UI entry point
-│   ├── database/                # SQLite connection, dataclasses and repositories
+│   ├── database/                # SQLite connection, models and repositories
 │   ├── frontend/
-│   │   └── main.py              # Current Streamlit entry point
-│   └── services/
-│       ├── answer_generator.py  # Groq-backed grounded response generation
-│       ├── farm_service.py      # Farm, flock and daily-record use cases
-│       └── analytics_service.py # Flock summary and daily metrics
+│   │   └── main.py              # Streamlit application entry point
+│   └── services/                # Farm, analytics and answer-generation services
 ├── knowledge_base/              # Curated poultry Markdown content
-├── rag/
-│   ├── chunking/                # Markdown parsing and chunking
-│   ├── embeddings/              # Sentence Transformer encoder
-│   ├── indexing/                # FAISS index builder
-│   └── retrieval/               # Similarity retrieval
+├── rag/                          # Chunking, embeddings, indexing and retrieval
 ├── vector_store/                 # Generated FAISS index and metadata (ignored)
 ├── data/                         # Local SQLite database (ignored)
 ├── tests/                        # Unit and project tests
 ├── scripts/                      # Validation and developer utilities
-├── docs/                         # Architecture and project documentation
+├── docs/
+│   ├── architecture/             # Current and target architecture documentation
+│   └── project_plan.md
 ├── .github/workflows/            # Continuous integration
 ├── requirements.txt
 ├── requirements-dev.txt
@@ -134,13 +148,13 @@ poultryguard-ai/
 
 ### 1. Clone the repository
 
+Use the default `main` branch for the current merged MVP:
+
 ```powershell
 git clone https://github.com/zulyadainimuhammad/poultryguard-ai.git
 cd poultryguard-ai
-git switch feature/gta-mvp
+git switch main
 ```
-
-The farm-data implementation and current active development work are on `feature/gta-mvp`. The repository's GitHub default branch is `main`; do not assume it contains every active-branch change until those changes are merged.
 
 ### 2. Create a Python 3.11 environment (Windows PowerShell)
 
@@ -175,7 +189,7 @@ The retriever expects these generated files:
 - `vector_store/poultryguard.faiss`
 - `vector_store/metadata.json`
 
-The index builder is implemented in `rag/indexing/indexer.py`, with a command-line wrapper at `scripts/build_index.py`. The embedding model must be available in the local Sentence Transformers cache because the encoder is configured for local-only model loading. On a connected development machine, populate the cache once with:
+The embedding model must be available in the local Sentence Transformers cache because the encoder is configured for local-only model loading. On a connected development machine, populate the cache once with:
 
 ```powershell
 python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')"
@@ -187,59 +201,55 @@ Then build the index:
 python scripts/build_index.py
 ```
 
-### 5. Run the current Streamlit interface
+### 5. Run PoultryGuard AI
 
 ```powershell
 streamlit run app/frontend/main.py
 ```
 
-The current interface exposes the poultry knowledge assistant. Farm and analytics services are present but are not yet connected to Farm Intelligence screens.
+The application provides two navigation areas: **Knowledge Assistant** and **Farm Intelligence**. Farm Intelligence includes Dashboard, Farm Profiles, Flock Management, Daily Records and Analytics.
 
 ### 6. Run checks
 
 ```powershell
-python -m pytest -v
+python -m pytest
 ruff check .
 ruff format --check .
 python scripts/validate_knowledge_base.py
 python scripts/validate_metadata.py
 python scripts/validate_references.py
 python scripts/validate_links.py
-make check
 ```
 
-These are development checks, not evidence of farmer field validation.
+The 18 November 2026 local test run reported 98 passing tests. CI for the Farm Intelligence MVP pull request also passed. These checks do not substitute for field validation.
 
-## Development phases
+## Development roadmap
 
-| Phase | Focus | Status |
+| Stage | Focus | Status |
 |---|---|---|
-| 0 | Repository and engineering foundation | In place; ongoing maintenance |
-| 1 | Poultry knowledge base and content quality | Implemented foundation; domain-expert validation pending |
-| 2 | RAG retrieval and AI knowledge assistant | Working prototype |
-| 3 | Farm data foundation: farms, flocks, daily records and analytics services | Implemented at service/data layer |
-| 4 | Farm Intelligence UI: profiles, flock workflows, records and charts | **Next implementation phase** |
-| 5 | Health, vaccination, treatments, biosecurity and task records | Planned |
-| 6 | Farm-aware AI summaries and expert review workflows | Planned |
-| 7 | Farmer pilot, usability, veterinary/extension review and impact measurement | Not yet completed |
-| 8 | Production engineering: API boundary, PostgreSQL, authentication, backups, Docker, CI/CD and deployment | Planned |
-| 9 | Environmental data integrations and validated predictive intelligence | Longer-term research and validation |
+| 0 | Repository and engineering foundation | In place; maintain |
+| 1 | Knowledge base, RAG assistant and Farm Intelligence MVP | Implemented working prototype |
+| 2 | Farm Monitoring and Environmental Intelligence | Next |
+| 3 | AI Farm Intelligence insights and alerts | Planned |
+| 4 | Veterinary and expert support workflows | Planned |
+| 5 | Cloud Engineering and production deployment | Planned |
+| 6 | Farmer pilot, professional validation and localisation | Not yet completed |
+| 7 | Sensor integrations and predictive intelligence | Longer-term; dependent on reliable data and validation |
 
-Phases are capability milestones, not fixed dates. See [ROADMAP.md](ROADMAP.md) and [docs/project_plan.md](docs/project_plan.md).
+See [ROADMAP.md](ROADMAP.md), [the implementation plan](docs/project_plan.md) and [the architecture documentation](docs/architecture/README.md).
 
 ## Responsible use and current limitations
 
-- The knowledge assistant can return incomplete or incorrect answers. Verify consequential decisions with qualified professionals.
+- The Knowledge Assistant can return incomplete or incorrect answers. Verify consequential decisions with qualified professionals.
 - Similarity scores indicate retrieval relevance; they do not establish factual accuracy.
-- No formal farmer pilot or veterinary/extension validation is claimed at this stage.
-- The current data model supports farm, flock and daily production records only; health, vaccination, treatment and task modules are future work.
+- No formal farmer pilot or veterinary/extension validation is claimed.
 - No disease-prediction performance, mortality reduction or commercial impact has been established.
 - Do not enter sensitive personal, financial or identifiable farm information into an untrusted deployment.
 - Farm records and AI-generated summaries must not replace veterinary diagnosis or prescription.
 
 ## Contributing
 
-The project is currently maintained by its repository owner. Contributions should use focused branches and pull requests, with tests, documentation and source attribution where relevant. See [CONTRIBUTING.md](CONTRIBUTING.md).
+The project is maintained through focused branches and pull requests. Contributions should include relevant tests, documentation and source attribution. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Licence
 
