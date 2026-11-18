@@ -123,14 +123,10 @@ class AnalyticsService:
                 {
                     "record_id": record["id"],
                     "record_date": record["record_date"],
-                    "feed_kg": round(
-                        self._number(record.get("feed_kg")),
-                        2,
-                    ),
-                    "water_litres": round(
-                        self._number(record.get("water_litres")),
-                        2,
-                    ),
+                    # Preserve None so charts can distinguish "not recorded"
+                    # from a genuine zero measurement.
+                    "feed_kg": self._round_or_none(record.get("feed_kg")),
+                    "water_litres": self._round_or_none(record.get("water_litres")),
                     "mortality": mortality,
                     "cumulative_mortality": cumulative_mortality,
                     "current_flock_size": current_flock_size,
