@@ -440,3 +440,35 @@ def test_records_returned_in_chronological_order(service, flock_id):
     records = service.get_daily_records(flock_id)
     dates = [r["record_date"] for r in records]
     assert dates == ["2026-11-01", "2026-11-02", "2026-11-03"]
+
+
+def test_genuine_zero_feed_water_distinguished_from_none(service, flock_id):
+    """A recorded 0.0 feed/water must be stored as 0.0, not None.
+
+    A separate record with no feed/water must be stored as None.
+    The two must be distinguishable when retrieved.
+    """
+    service.create_daily_record(
+        flock_id=flock_id,
+        record_date=date(2026, 11, 1),
+        mortality=0,
+        feed_kg=0.0,
+        water_litres=0.0,
+    )
+    service.create_daily_record(
+        flock_id=flock_id,
+        record_date=date(2026, 11, 2),
+        mortality=0,
+        feed_kg=None,
+        water_litres=None,
+    )
+    records = service.get_daily_records(flock_id)
+    assert len(records) == 2
+
+    zero_record = records[0]  # 2026-11-01, chronological order
+    none_record = records[1]  # 2026-11-02
+
+    assert zero_record["feed_kg"] == 0.0
+    assert zero_record["water_litres"] == 0.0
+    assert none_record["feed_kg"] is None
+    assert none_record["water_litres"] is None

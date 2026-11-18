@@ -471,6 +471,10 @@ else:
             )
 
             with st.expander("➕ Add a daily record", expanded=True):
+                st.caption(
+                    "Leave a measurement blank when it was not recorded. "
+                    "Enter zero only when zero was genuinely measured."
+                )
                 with st.form("daily_record_form", clear_on_submit=True):
                     col1, col2, col3 = st.columns(3)
                     with col1:
@@ -482,7 +486,8 @@ else:
                             "Feed consumed (kg)",
                             min_value=0.0,
                             step=0.5,
-                            value=0.0,
+                            value=None,
+                            placeholder="Not recorded",
                             format="%.2f",
                         )
                     with col2:
@@ -490,14 +495,16 @@ else:
                             "Water consumed (litres)",
                             min_value=0.0,
                             step=0.5,
-                            value=0.0,
+                            value=None,
+                            placeholder="Not recorded",
                             format="%.2f",
                         )
                         rec_weight = st.number_input(
                             "Average bird weight (kg)",
                             min_value=0.0,
                             step=0.01,
-                            value=0.0,
+                            value=None,
+                            placeholder="Not recorded",
                             format="%.3f",
                         )
                     with col3:
@@ -506,7 +513,8 @@ else:
                             min_value=-10.0,
                             max_value=60.0,
                             step=0.5,
-                            value=28.0,
+                            value=None,
+                            placeholder="Not recorded",
                             format="%.1f",
                         )
                         rec_humidity = st.number_input(
@@ -514,7 +522,8 @@ else:
                             min_value=0.0,
                             max_value=100.0,
                             step=1.0,
-                            value=65.0,
+                            value=None,
+                            placeholder="Not recorded",
                             format="%.1f",
                         )
 
@@ -525,12 +534,10 @@ else:
                             record_id = get_farm_service().create_daily_record(
                                 flock_id=flock_id,
                                 record_date=rec_date,
-                                feed_kg=rec_feed if rec_feed > 0 else None,
-                                water_litres=rec_water if rec_water > 0 else None,
+                                feed_kg=rec_feed,
+                                water_litres=rec_water,
                                 mortality=int(rec_mortality),
-                                average_weight_kg=(
-                                    rec_weight if rec_weight > 0 else None
-                                ),
+                                average_weight_kg=rec_weight,
                                 temperature_c=rec_temp,
                                 humidity_percent=rec_humidity,
                                 notes=rec_notes.strip() or None,
