@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import sqlite3
 
-import pytest
-
 import app.database.connection as database_connection
+import pytest
 from app.database.migrations import runner
 from app.database.migrations.versions import add_measurement_observations
 
