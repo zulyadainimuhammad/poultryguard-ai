@@ -170,12 +170,6 @@ def _verify_foreign_key_integrity(connection: sqlite3.Connection) -> None:
 
 def _verify_baseline(connection: sqlite3.Connection) -> None:
     _verify_required_tables(connection)
-    if missing_tables:
-        raise BaselineSchemaError(
-            "Database is not initialised with the PoultryGuard baseline schema; "
-            f"missing tables: {sorted(missing_tables)}. Run the existing "
-            "initialise_database() bootstrap on a new database before migrations."
-        )
 
     expected_column_info = {
         "farms": {
