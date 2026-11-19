@@ -479,4 +479,3 @@ class MeasurementObservationRepository(_BaseRepository):
                 (flock_id, metric_name, start_date, end_date),
             ).fetchall()
             return [dict(row) for row in rows]
-
