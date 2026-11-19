@@ -2,9 +2,8 @@
 
 import sqlite3
 
-import pytest
-
 import app.database.connection as database_connection
+import pytest
 from app.database import DailyRecord, Farm, Flock, UnitOfWork
 
 
