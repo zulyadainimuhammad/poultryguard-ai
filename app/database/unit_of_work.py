@@ -1,7 +1,7 @@
 """Shared SQLite transaction boundary for multi-repository use cases."""
 
-from collections.abc import Callable
 import sqlite3
+from collections.abc import Callable
 
 from .connection import get_connection
 from .repositories import DailyRecordRepository, FarmRepository, FlockRepository
