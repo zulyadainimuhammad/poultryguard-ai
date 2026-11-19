@@ -157,23 +157,29 @@ def test_populated_legacy_database_is_preserved_without_backfill(
     farm_id, flock_id, record_id = _seed_legacy_rows()
 
     with _connect() as connection:
-        before = connection.execute(
-            """
-            SELECT id, flock_id, record_date, feed_kg, water_litres,
-                   mortality, temperature_c, humidity_percent
-            FROM daily_records
-            """
-        ).fetchall()
+        before = [
+            tuple(row)
+            for row in connection.execute(
+                """
+                SELECT id, flock_id, record_date, feed_kg, water_litres,
+                       mortality, temperature_c, humidity_percent
+                FROM daily_records
+                """
+            ).fetchall()
+        ]
         assert runner.migrate(connection) == ["0001"]
 
     with _connect() as connection:
-        after = connection.execute(
-            """
-            SELECT id, flock_id, record_date, feed_kg, water_litres,
-                   mortality, temperature_c, humidity_percent
-            FROM daily_records
-            """
-        ).fetchall()
+        after = [
+            tuple(row)
+            for row in connection.execute(
+                """
+                SELECT id, flock_id, record_date, feed_kg, water_litres,
+                       mortality, temperature_c, humidity_percent
+                FROM daily_records
+                """
+            ).fetchall()
+        ]
         observation_count = connection.execute(
             "SELECT COUNT(*) FROM measurement_observations"
         ).fetchone()[0]
@@ -246,7 +252,7 @@ def test_partial_observation_table_without_ledger_is_not_auto_adopted(
         )
 
     with _connect() as connection:
-        with pytest.raises(MigrationErrorAlias, match="without a migration ledger"):
+        with pytest.raises(runner.MigrationError, match="without a migration ledger"):
             runner.migrate(connection)
 
 
@@ -385,13 +391,16 @@ def test_observation_schema_accepts_zero_and_explicit_missing_status(
         )
 
     with _connect() as connection:
-        rows = connection.execute(
-            """
-            SELECT observation_id, value_numeric, quality_status
-            FROM measurement_observations
-            ORDER BY observation_id
-            """
-        ).fetchall()
+        rows = [
+            tuple(row)
+            for row in connection.execute(
+                """
+                SELECT observation_id, value_numeric, quality_status
+                FROM measurement_observations
+                ORDER BY observation_id
+                """
+            ).fetchall()
+        ]
 
     assert rows == [
         ("obs-001", 0.0, "observed"),
@@ -574,4 +583,3 @@ def test_correction_chain_is_linear_and_append_only(
     assert ids == ["correction-1", "correction-2", "original"]
 
 
-MigrationErrorAlias = runner.MigrationError
