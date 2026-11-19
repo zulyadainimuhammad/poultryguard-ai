@@ -71,7 +71,7 @@ Final ADR numbering for these topics must be reconciled if the original v2.1 reg
 |---|---|---|---|
 | SUP-01 | Measurement provenance | Retain \`daily_records\`; introduce granular \`measurement_observations\` additively. Existing analytics remain on \`daily_records\` until a separate parity-tested cutover. | Proposed |
 | SUP-02 | Correction attempts and accepted supersession | Separate correction attempts/reviews from accepted supersession relationships. A rejected attempt remains auditable but does not supersede or block a later valid attempt. | Proposed |
-| SUP-03 | Internal identity mapping | Application-owned internal user IDs are referenced by memberships, audit and provenance. External identities are separate and unique by provider plus stable subject ID. Email is not a permanent identity key. | Proposed |
+| SUP-03 | Internal identity mapping | Application-owned internal user IDs are referenced by memberships, audit and provenance. External identities are stored separately and unique by provider plus stable subject ID; one internal user may link more than one approved external identity. Email is not a permanent identity key. | Proposed |
 | SUP-04 | First platform administrator | If a platform-admin role is required, use a one-time, high-entropy, expiring, hashed and atomically consumed bootstrap secret. Bind the administrator to an authenticated provider subject, not email alone. | Proposed |
 | SUP-05 | Farm ownership invariant | Every active farm must retain at least one active Owner. Whether multiple simultaneous Owners are allowed remains unresolved. | Open |
 | SUP-06 | Staff permission scope | Product-owner-selected proposal: Staff access is limited to assigned flocks in the first multi-farm release. Final approval and the exact read/write capability catalogue remain pending. | Proposed; approval pending |
@@ -82,7 +82,7 @@ Final ADR numbering for these topics must be reconciled if the original v2.1 reg
 | SUP-11 | Quality-review transitions | Use append-only quality-review events for pending-validation decisions. Do not mutate original observations to record review outcomes. | Proposed |
 | SUP-12 | SQLite connection and transaction lifecycle | Keep foreign-key enforcement enabled per connection; explicitly close connections; share one transaction for logical multi-repository writes. | Required engineering work |
 | SUP-13 | Zero-recurring-cost development | No recurring service/subscription without explicit product-owner approval during development and initial validation. | Agreed project constraint |
-| SUP-14 | Agriculture-led product evolution | New agricultural ideas may be proposed at any stage and assessed for user value, evidence, safety, cost and architecture impact. | Agreed working principle |
+| SUP-14 | Agriculture-led product evolution | New agricultural ideas may be proposed at any stage and assessed for user value, evidence, safety, cost and architecture impact. | Agreed working principle |\n| SUP-15 | Daily-record and observation transaction boundary | Daily-record and observation writes must share one connection/transaction; design a small unit-of-work boundary before dual-write. | Required design work |\n| SUP-16 | Daily-record source grouping | Observations originating from a daily record retain `daily_record_id`; do not assume one record per flock/date while duplicate override remains supported. | Open design work |
 
 ## 8. Staff permissions — selected proposal
 
@@ -117,7 +117,7 @@ A unique index on \`supersedes_observation_id\` across all correction attempts c
 
 The inspected connection factory already runs \`PRAGMA foreign_keys = ON\`. Repository methods currently use SQLite connection context managers without explicit close. The schema uses cascading deletion from farms to flocks and flocks to daily records. These are findings for reviewed remediation, not permission to change the live database.
 
-Choose a small custom migration runner versus Alembic before schema evolution. SQLite table-rebuild/batch operations are required when a requested change is not supported directly; they are not required for every SQLite alteration. Rehearse migrations on a database copy and verify preservation before any live operation.
+Choose a small custom migration runner versus Alembic before schema evolution. SQLite table-rebuild/batch operations are required only where the selected schema operation is not supported natively; they are not automatically required for every SQLite alteration. The migration design must explicitly handle an existing populated database without a migration ledger and Python SQLite `executescript()` transaction semantics. Rehearse migrations on a database copy and verify preservation before any live operation.
 
 ## 11. Security and AI boundaries
 
