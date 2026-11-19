@@ -12,7 +12,7 @@ A Unit-of-Work creates one write transaction and binds the farm, flock and daily
 2. It executes `BEGIN IMMEDIATE` so a write workflow obtains SQLite's writer reservation before performing validation reads.
 3. The repositories share that connection.
 4. Successful exit commits; exceptional exit rolls back.
-5. The existing connection context-manager contract closes the connection in either case.
+5. The Unit-of-Work closes the connection after the commit or rollback.
 
 Standalone repository usage remains supported: when a repository is constructed without an injected connection, each method obtains and closes its own connection as before.
 
