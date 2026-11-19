@@ -1,14 +1,34 @@
+from collections.abc import Iterator
+from contextlib import contextmanager
+import sqlite3
 from typing import Any
 
 from .connection import get_connection
 from .models import DailyRecord, Farm, Flock
 
 
-class FarmRepository:
+class _BaseRepository:
+    """Provide either a shared Unit-of-Work connection or a standalone one."""
+
+    def __init__(self, connection: sqlite3.Connection | None = None) -> None:
+        self._connection = connection
+
+    @contextmanager
+    def _connection_scope(self) -> Iterator[sqlite3.Connection]:
+        """Yield the injected connection without taking ownership of it."""
+        if self._connection is not None:
+            yield self._connection
+            return
+
+        with self._connection_scope() as connection:
+            yield connection
+
+
+class FarmRepository(_BaseRepository):
     """Database operations for farms."""
 
     def create(self, farm: Farm) -> int:
-        with get_connection() as connection:
+        with self._connection_scope() as connection:
             cursor = connection.execute(
                 """
                 INSERT INTO farms (
@@ -34,7 +54,7 @@ class FarmRepository:
             return cursor.lastrowid
 
     def get_by_id(self, farm_id: int) -> dict[str, Any] | None:
-        with get_connection() as connection:
+        with self._connection_scope() as connection:
             row = connection.execute(
                 """
                 SELECT *
@@ -47,7 +67,7 @@ class FarmRepository:
             return dict(row) if row else None
 
     def get_all(self) -> list[dict[str, Any]]:
-        with get_connection() as connection:
+        with self._connection_scope() as connection:
             rows = connection.execute(
                 """
                 SELECT *
@@ -78,7 +98,7 @@ class FarmRepository:
         values = list(updates.values())
         values.append(farm_id)
 
-        with get_connection() as connection:
+        with self._connection_scope() as connection:
             connection.execute(
                 f"""
                 UPDATE farms
@@ -90,7 +110,7 @@ class FarmRepository:
             )
 
     def delete(self, farm_id: int) -> None:
-        with get_connection() as connection:
+        with self._connection_scope() as connection:
             connection.execute(
                 """
                 DELETE FROM farms
@@ -100,14 +120,14 @@ class FarmRepository:
             )
 
 
-class FlockRepository:
+class FlockRepository(_BaseRepository):
     """Database operations for poultry flocks."""
 
     def create(self, flock: Flock) -> int:
         if flock.initial_count <= 0:
             raise ValueError("Initial flock count must be greater than zero.")
 
-        with get_connection() as connection:
+        with self._connection_scope() as connection:
             cursor = connection.execute(
                 """
                 INSERT INTO flocks (
@@ -137,7 +157,7 @@ class FlockRepository:
             return cursor.lastrowid
 
     def get_by_id(self, flock_id: int) -> dict[str, Any] | None:
-        with get_connection() as connection:
+        with self._connection_scope() as connection:
             row = connection.execute(
                 """
                 SELECT *
@@ -150,7 +170,7 @@ class FlockRepository:
             return dict(row) if row else None
 
     def get_by_farm(self, farm_id: int) -> list[dict[str, Any]]:
-        with get_connection() as connection:
+        with self._connection_scope() as connection:
             rows = connection.execute(
                 """
                 SELECT *
@@ -187,7 +207,7 @@ class FlockRepository:
         values = list(updates.values())
         values.append(flock_id)
 
-        with get_connection() as connection:
+        with self._connection_scope() as connection:
             connection.execute(
                 f"""
                 UPDATE flocks
@@ -199,7 +219,7 @@ class FlockRepository:
             )
 
     def delete(self, flock_id: int) -> None:
-        with get_connection() as connection:
+        with self._connection_scope() as connection:
             connection.execute(
                 """
                 DELETE FROM flocks
@@ -209,13 +229,13 @@ class FlockRepository:
             )
 
 
-class DailyRecordRepository:
+class DailyRecordRepository(_BaseRepository):
     """Database operations for daily flock records."""
 
     def get_by_flock_and_date(
         self, flock_id: int, record_date: str
     ) -> dict[str, Any] | None:
-        with get_connection() as connection:
+        with self._connection_scope() as connection:
             row = connection.execute(
                 """
                 SELECT *
@@ -244,7 +264,7 @@ class DailyRecordRepository:
             if not 0 <= record.humidity_percent <= 100:
                 raise ValueError("Humidity must be between 0 and 100 percent.")
 
-        with get_connection() as connection:
+        with self._connection_scope() as connection:
             cursor = connection.execute(
                 """
                 INSERT INTO daily_records (
@@ -276,7 +296,7 @@ class DailyRecordRepository:
             return cursor.lastrowid
 
     def get_by_id(self, record_id: int) -> dict[str, Any] | None:
-        with get_connection() as connection:
+        with self._connection_scope() as connection:
             row = connection.execute(
                 """
                 SELECT *
@@ -289,7 +309,7 @@ class DailyRecordRepository:
             return dict(row) if row else None
 
     def get_by_flock(self, flock_id: int) -> list[dict[str, Any]]:
-        with get_connection() as connection:
+        with self._connection_scope() as connection:
             rows = connection.execute(
                 """
                 SELECT *
@@ -308,7 +328,7 @@ class DailyRecordRepository:
         start_date: str,
         end_date: str,
     ) -> list[dict[str, Any]]:
-        with get_connection() as connection:
+        with self._connection_scope() as connection:
             rows = connection.execute(
                 """
                 SELECT *
@@ -323,7 +343,7 @@ class DailyRecordRepository:
             return [dict(row) for row in rows]
 
     def delete(self, record_id: int) -> None:
-        with get_connection() as connection:
+        with self._connection_scope() as connection:
             connection.execute(
                 """
                 DELETE FROM daily_records
