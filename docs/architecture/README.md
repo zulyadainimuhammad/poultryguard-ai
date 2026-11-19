@@ -12,9 +12,9 @@ This directory documents both the **currently implemented local MVP** and the **
 | [rag_design.md](rag_design.md) | Markdown chunking, embeddings, FAISS indexing and retrieval |
 | [model_selection.md](model_selection.md) | Current local embedding model and remote answer-generation provider |
 | [deployment.md](deployment.md) | Supported local developer setup and production-readiness gaps |
-| [measurement_provenance.md](measurement_provenance.md) | Measurement dictionary, provenance model, observation-time semantics, missing-value rules, correction and audit model, proposed data contract and future architecture (Stage 3.2.2 design specification) |
+| [measurement_provenance.md](measurement_provenance.md) | Measurement dictionary, provenance model, observation-time semantics, missing-value rules, correction and audit model, proposed data contract and future architecture (Stage 3.2.2 design specification) |\n| [measurement_provenance_implementation_plan.md](measurement_provenance_implementation_plan.md) | Proposed Stage 3.2.3 implementation sequence, migration safeguards, repository/service boundaries, testing and release gates |\n| [adr_v2_2_correction_report.md](adr_v2_2_correction_report.md) | Source correction report for five architecture issues; legacy ADR numbering remains subject to reconciliation |\n| [architecture_decision_register_v2_2_draft.md](architecture_decision_register_v2_2_draft.md) | Consolidated architecture register draft; not approved for implementation |\n| [repository_assessment_2026-11-19.md](repository_assessment_2026-11-19.md) | Read-only inspection of the current committed repository baseline |\n| [source_document_reconciliation_review_2026-11-19.md](source_document_reconciliation_review_2026-11-19.md) | Cross-document reconciliation, current-code facts, unresolved design issues and safe next steps |
 
-## Target and historical documents
+## Product requirements\n\n| Document | Description |\n|---|---|\n| [product_requirements_ui_ux.md](../product/product_requirements_ui_ux.md) | Product vision, users, account and farm membership requirements, roles, UI/UX, security, localisation and release acceptance criteria |\n\n## Target and historical documents
 
 | Document | Description |
 |---|---|
