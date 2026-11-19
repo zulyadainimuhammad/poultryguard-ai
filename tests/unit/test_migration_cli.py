@@ -4,10 +4,41 @@ from __future__ import annotations
 
 import sqlite3
 
+import app.database.connection as database_connection
 from app.database.migrations import runner
 from scripts import migrate_database
 
-from tests.unit.test_migrations import _initialised_database, _seed_legacy_rows
+
+def _initialised_database(tmp_path, monkeypatch):
+    database_path = tmp_path / "migration-cli-test.db"
+    monkeypatch.setattr(database_connection, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(database_connection, "DATABASE_PATH", database_path)
+    database_connection.initialise_database()
+    return database_path
+
+
+def _seed_legacy_rows():
+    with database_connection.get_connection() as connection:
+        farm_id = connection.execute(
+            """
+            INSERT INTO farms (farm_name, farmer_name, location)
+            VALUES ('CLI Farm', 'Test Farmer', 'Kano')
+            """
+        ).lastrowid
+        flock_id = connection.execute(
+            """
+            INSERT INTO flocks (farm_id, flock_name, species, initial_count)
+            VALUES (?, 'Batch 1', 'Chicken', 80)
+            """,
+            (farm_id,),
+        ).lastrowid
+        connection.execute(
+            """
+            INSERT INTO daily_records (flock_id, record_date, mortality)
+            VALUES (?, '2026-11-19', 0)
+            """,
+            (flock_id,),
+        )
 
 
 def test_status_command_is_read_only(tmp_path, monkeypatch, capsys):
@@ -92,4 +123,5 @@ def test_status_command_does_not_initialise_a_blank_database(
     result = migrate_database.main(["--database", str(database_path), "--status"])
 
     assert result == 2
-    assert not runner._table_exists(sqlite3.connect(database_path), runner.LEDGER_TABLE)
+    with sqlite3.connect(database_path) as connection:
+        assert not runner._table_exists(connection, runner.LEDGER_TABLE)
