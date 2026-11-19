@@ -115,9 +115,7 @@ def _insert_observation(
     )
 
 
-def test_migration_adopts_baseline_and_applies_schema_once(
-    tmp_path, monkeypatch
-):
+def test_migration_adopts_baseline_and_applies_schema_once(tmp_path, monkeypatch):
     _initialised_database(tmp_path, monkeypatch)
 
     with _connect() as connection:
@@ -187,17 +185,13 @@ def test_registered_follow_on_migration_can_extend_adopted_baseline(
             assert runner.migrate(connection) == ["0002"]
             assert "timezone" in {
                 row[1]
-                for row in connection.execute(
-                    "PRAGMA table_info('farms')"
-                ).fetchall()
+                for row in connection.execute("PRAGMA table_info('farms')").fetchall()
             }
     finally:
         runner.MIGRATIONS = original
 
 
-def test_populated_legacy_database_is_preserved_without_backfill(
-    tmp_path, monkeypatch
-):
+def test_populated_legacy_database_is_preserved_without_backfill(tmp_path, monkeypatch):
     _initialised_database(tmp_path, monkeypatch)
     farm_id, flock_id, record_id = _seed_legacy_rows()
 
@@ -256,9 +250,7 @@ def test_unrecognised_baseline_fails_without_creating_ledger(tmp_path, monkeypat
         assert not runner._table_exists(connection, "measurement_observations")
 
 
-def test_baseline_with_missing_check_constraint_fails_closed(
-    tmp_path, monkeypatch
-):
+def test_baseline_with_missing_check_constraint_fails_closed(tmp_path, monkeypatch):
     _initialised_database(tmp_path, monkeypatch)
 
     with _connect() as connection:
@@ -321,9 +313,7 @@ def test_migration_requires_foreign_keys_enabled(tmp_path, monkeypatch):
         connection.close()
 
 
-def test_migration_rejects_a_connection_with_an_open_transaction(
-    tmp_path, monkeypatch
-):
+def test_migration_rejects_a_connection_with_an_open_transaction(tmp_path, monkeypatch):
     _initialised_database(tmp_path, monkeypatch)
 
     with _connect() as connection:
@@ -414,9 +404,7 @@ def test_migration_ledger_is_append_only(tmp_path, monkeypatch):
                 "UPDATE schema_migrations SET name = 'tampered' WHERE version = '0001'"
             )
         with pytest.raises(sqlite3.IntegrityError, match="append-only"):
-            connection.execute(
-                "DELETE FROM schema_migrations WHERE version = '0001'"
-            )
+            connection.execute("DELETE FROM schema_migrations WHERE version = '0001'")
         with pytest.raises(sqlite3.IntegrityError, match="append-only"):
             connection.execute(
                 """
@@ -520,9 +508,7 @@ def test_observation_rejects_metric_unit_and_status_value_mismatch(
             )
 
 
-def test_daily_record_reference_must_belong_to_same_flock(
-    tmp_path, monkeypatch
-):
+def test_daily_record_reference_must_belong_to_same_flock(tmp_path, monkeypatch):
     _initialised_database(tmp_path, monkeypatch)
     _, flock_id, record_id = _seed_legacy_rows()
 
@@ -576,9 +562,7 @@ def test_observation_foreign_keys_prevent_invalid_parent_and_parent_deletion(
             connection.execute("DELETE FROM flocks WHERE id = ?", (flock_id,))
 
 
-def test_correction_chain_is_linear_and_append_only(
-    tmp_path, monkeypatch
-):
+def test_correction_chain_is_linear_and_append_only(tmp_path, monkeypatch):
     _initialised_database(tmp_path, monkeypatch)
     _, flock_id, record_id = _seed_legacy_rows()
 
@@ -651,8 +635,7 @@ def test_correction_chain_is_linear_and_append_only(
             )
         with pytest.raises(sqlite3.IntegrityError, match="append-only"):
             connection.execute(
-                "DELETE FROM measurement_observations "
-                "WHERE observation_id = 'original'"
+                "DELETE FROM measurement_observations WHERE observation_id = 'original'"
             )
 
     with _connect() as connection:
@@ -668,5 +651,3 @@ def test_correction_chain_is_linear_and_append_only(
         ]
 
     assert ids == ["correction-1", "correction-2", "original"]
-
-
