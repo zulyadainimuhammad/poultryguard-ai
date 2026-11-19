@@ -1,11 +1,11 @@
 from .connection import get_connection, initialise_database
 from .models import DailyRecord, Farm, Flock
-from .unit_of_work import UnitOfWork
 from .repositories import (
     DailyRecordRepository,
     FarmRepository,
     FlockRepository,
 )
+from .unit_of_work import UnitOfWork
 
 __all__ = [
     "get_connection",
