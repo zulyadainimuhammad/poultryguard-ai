@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from datetime import date
 from typing import Any
 
@@ -11,6 +12,7 @@ from app.database import (
     FarmRepository,
     Flock,
     FlockRepository,
+    UnitOfWork,
 )
 
 _VALID_SPECIES = {"Chicken", "Turkey", "Duck", "Quail", "Guinea Fowl", "Goose"}
@@ -19,19 +21,27 @@ _VALID_STATUSES = {"active", "closed", "sold"}
 
 
 class FarmService:
-    """Application service for farm, flock and daily-record operations."""
+    """Application service for farm, flock and daily-record operations.
+
+    Standalone repository dependencies support ordinary reads and CRUD.
+    Daily-record creation uses the Unit-of-Work factory so its validation
+    reads and insert share one transaction. Custom database adapters should
+    provide a Unit-of-Work factory targeting the same database.
+    """
 
     def __init__(
         self,
         farm_repository: FarmRepository | None = None,
         flock_repository: FlockRepository | None = None,
         daily_record_repository: DailyRecordRepository | None = None,
+        unit_of_work_factory: Callable[[], UnitOfWork] | None = None,
     ) -> None:
         self.farm_repository = farm_repository or FarmRepository()
         self.flock_repository = flock_repository or FlockRepository()
         self.daily_record_repository = (
             daily_record_repository or DailyRecordRepository()
         )
+        self.unit_of_work_factory = unit_of_work_factory or UnitOfWork
 
     # ------------------------------------------------------------------
     # FARM OPERATIONS
@@ -152,55 +162,57 @@ class FarmService:
         notes: str | None = None,
         allow_duplicate: bool = False,
     ) -> int:
-        """Validate inputs and create a daily production record for a flock.
+        """Validate and create a daily record in one write transaction.
 
-        By default, raises DuplicateRecordError if a record already exists for
-        this flock on this date. Pass allow_duplicate=True to override.
+        Flock lookup, duplicate-date checking, cumulative-mortality checking
+        and insertion share the Unit-of-Work connection. By default, a record
+        already exists for this flock/date and raises DuplicateRecordError.
+        Pass allow_duplicate=True to preserve the existing override behaviour.
         """
-        flock = self.flock_repository.get_by_id(flock_id)
-        if flock is None:
-            raise ValueError(f"Flock with ID {flock_id} does not exist.")
-
         date_str = str(record_date)
 
-        if not allow_duplicate:
-            existing = self.daily_record_repository.get_by_flock_and_date(
-                flock_id, date_str
+        with self.unit_of_work_factory() as unit_of_work:
+            flock = unit_of_work.flocks.get_by_id(flock_id)
+            if flock is None:
+                raise ValueError(f"Flock with ID {flock_id} does not exist.")
+
+            if not allow_duplicate:
+                existing = unit_of_work.daily_records.get_by_flock_and_date(
+                    flock_id, date_str
+                )
+                if existing:
+                    raise DuplicateRecordError(
+                        f"A daily record for flock {flock_id} on {date_str} already "
+                        "exists. Edit the existing record or pass allow_duplicate=True."
+                    )
+
+            if mortality < 0:
+                raise ValueError("Mortality cannot be negative.")
+
+            existing_records = unit_of_work.daily_records.get_by_flock(flock_id)
+            cumulative_mortality = sum(
+                int(record.get("mortality") or 0) for record in existing_records
             )
-            if existing:
-                raise DuplicateRecordError(
-                    f"A daily record for flock {flock_id} on {date_str} already "
-                    "exists. Edit the existing record or pass allow_duplicate=True."
+            remaining = flock["initial_count"] - cumulative_mortality
+            if mortality > remaining:
+                raise ValueError(
+                    f"Mortality ({mortality}) exceeds the remaining flock population "
+                    f"({remaining})."
                 )
 
-        # Validate mortality against remaining flock population
-        if mortality < 0:
-            raise ValueError("Mortality cannot be negative.")
-
-        existing_records = self.daily_record_repository.get_by_flock(flock_id)
-        cumulative_mortality = sum(
-            int(r.get("mortality") or 0) for r in existing_records
-        )
-        remaining = flock["initial_count"] - cumulative_mortality
-        if mortality > remaining:
-            raise ValueError(
-                f"Mortality ({mortality}) exceeds the remaining flock population "
-                f"({remaining})."
+            record = DailyRecord(
+                flock_id=flock_id,
+                record_date=date_str,
+                feed_kg=feed_kg,
+                water_litres=water_litres,
+                mortality=mortality,
+                average_weight_kg=average_weight_kg,
+                temperature_c=temperature_c,
+                humidity_percent=humidity_percent,
+                notes=notes,
             )
 
-        record = DailyRecord(
-            flock_id=flock_id,
-            record_date=date_str,
-            feed_kg=feed_kg,
-            water_litres=water_litres,
-            mortality=mortality,
-            average_weight_kg=average_weight_kg,
-            temperature_c=temperature_c,
-            humidity_percent=humidity_percent,
-            notes=notes,
-        )
-
-        return self.daily_record_repository.create(record)
+            return unit_of_work.daily_records.create(record)
 
     def get_daily_records(self, flock_id: int) -> list[dict[str, Any]]:
         """Return daily records for a flock in chronological order."""

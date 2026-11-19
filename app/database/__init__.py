@@ -5,6 +5,7 @@ from .repositories import (
     FarmRepository,
     FlockRepository,
 )
+from .unit_of_work import UnitOfWork
 
 __all__ = [
     "get_connection",
@@ -15,4 +16,5 @@ __all__ = [
     "FarmRepository",
     "FlockRepository",
     "DailyRecordRepository",
+    "UnitOfWork",
 ]

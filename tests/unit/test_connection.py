@@ -75,3 +75,25 @@ def test_connection_rolls_back_and_closes_when_context_raises(tmp_path, monkeypa
     assert count == 0
     with pytest.raises(sqlite3.ProgrammingError, match="closed"):
         connection.execute("SELECT 1")
+
+
+def test_foreign_key_constraint_rejects_invalid_reference(tmp_path, monkeypatch):
+    _use_temporary_database(tmp_path, monkeypatch)
+
+    with database_connection.get_connection() as connection:
+        connection.execute("CREATE TABLE parent_record (id INTEGER PRIMARY KEY)")
+        connection.execute(
+            """
+            CREATE TABLE child_record (
+                id INTEGER PRIMARY KEY,
+                parent_id INTEGER NOT NULL,
+                FOREIGN KEY (parent_id) REFERENCES parent_record(id)
+            )
+            """
+        )
+
+        with pytest.raises(sqlite3.IntegrityError, match="FOREIGN KEY"):
+            connection.execute(
+                "INSERT INTO child_record (parent_id) VALUES (?)",
+                (99999,),
+            )
