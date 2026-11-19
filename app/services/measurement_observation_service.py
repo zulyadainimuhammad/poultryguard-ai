@@ -95,9 +95,7 @@ class MeasurementObservationService:
                 raise ValueError(f"Flock with ID {flock_id} does not exist.")
 
             if daily_record_id is not None:
-                daily_record = unit_of_work.daily_records.get_by_id(
-                    daily_record_id
-                )
+                daily_record = unit_of_work.daily_records.get_by_id(daily_record_id)
                 if daily_record is None:
                     raise ValueError(
                         f"Daily record with ID {daily_record_id} does not exist."
