@@ -4,7 +4,7 @@ from contextlib import contextmanager
 from typing import Any
 
 from .connection import get_connection
-from .models import DailyRecord, Farm, Flock
+from .models import DailyRecord, Farm, Flock, MeasurementObservation
 
 
 class _BaseRepository:
@@ -351,3 +351,131 @@ class DailyRecordRepository(_BaseRepository):
                 """,
                 (record_id,),
             )
+
+class MeasurementObservationRepository(_BaseRepository):
+    """Insert and query append-only measurement observations.
+
+    The repository intentionally exposes no update or delete operation.
+    """
+
+    def create(self, observation: MeasurementObservation) -> str:
+        """Insert one observation and return its immutable identifier."""
+        with self._connection_scope() as connection:
+            connection.execute(
+                """
+                INSERT INTO measurement_observations (
+                    observation_id,
+                    flock_id,
+                    daily_record_id,
+                    record_date,
+                    metric_name,
+                    value_numeric,
+                    unit,
+                    observed_at,
+                    recorded_at,
+                    source_type,
+                    entered_by_user_id,
+                    device_id,
+                    import_batch_id,
+                    source_reference,
+                    calibration_reference,
+                    calculation_method,
+                    calculation_version,
+                    quality_status,
+                    supersedes_observation_id,
+                    correction_reason,
+                    notes
+                )
+                VALUES (
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                )
+                """,
+                (
+                    observation.observation_id,
+                    observation.flock_id,
+                    observation.daily_record_id,
+                    observation.record_date,
+                    observation.metric_name,
+                    observation.value_numeric,
+                    observation.unit,
+                    observation.observed_at,
+                    observation.recorded_at,
+                    observation.source_type,
+                    observation.entered_by_user_id,
+                    observation.device_id,
+                    observation.import_batch_id,
+                    observation.source_reference,
+                    observation.calibration_reference,
+                    observation.calculation_method,
+                    observation.calculation_version,
+                    observation.quality_status,
+                    observation.supersedes_observation_id,
+                    observation.correction_reason,
+                    observation.notes,
+                ),
+            )
+        return observation.observation_id
+
+    def get_by_id(self, observation_id: str) -> dict[str, Any] | None:
+        """Return a single observation by its immutable identifier."""
+        with self._connection_scope() as connection:
+            row = connection.execute(
+                """
+                SELECT *
+                FROM measurement_observations
+                WHERE observation_id = ?
+                """,
+                (observation_id,),
+            ).fetchone()
+            return dict(row) if row else None
+
+    def get_by_flock(self, flock_id: int) -> list[dict[str, Any]]:
+        """Return a flock's complete observation history in stable order."""
+        with self._connection_scope() as connection:
+            rows = connection.execute(
+                """
+                SELECT *
+                FROM measurement_observations
+                WHERE flock_id = ?
+                ORDER BY record_date ASC, recorded_at ASC, observation_id ASC
+                """,
+                (flock_id,),
+            ).fetchall()
+            return [dict(row) for row in rows]
+
+    def get_by_daily_record(self, daily_record_id: int) -> list[dict[str, Any]]:
+        """Return observations linked to one legacy daily-record row."""
+        with self._connection_scope() as connection:
+            rows = connection.execute(
+                """
+                SELECT *
+                FROM measurement_observations
+                WHERE daily_record_id = ?
+                ORDER BY metric_name ASC, recorded_at ASC, observation_id ASC
+                """,
+                (daily_record_id,),
+            ).fetchall()
+            return [dict(row) for row in rows]
+
+    def get_by_flock_metric_date_range(
+        self,
+        flock_id: int,
+        metric_name: str,
+        start_date: str,
+        end_date: str,
+    ) -> list[dict[str, Any]]:
+        """Return one metric's observations in an inclusive date range."""
+        with self._connection_scope() as connection:
+            rows = connection.execute(
+                """
+                SELECT *
+                FROM measurement_observations
+                WHERE flock_id = ?
+                  AND metric_name = ?
+                  AND record_date BETWEEN ? AND ?
+                ORDER BY record_date ASC, recorded_at ASC, observation_id ASC
+                """,
+                (flock_id, metric_name, start_date, end_date),
+            ).fetchall()
+            return [dict(row) for row in rows]
+
