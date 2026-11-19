@@ -108,6 +108,15 @@ def _columns(connection: sqlite3.Connection, table_name: str) -> set[str]:
     }
 
 
+def _column_info(
+    connection: sqlite3.Connection, table_name: str
+) -> dict[str, tuple[str, int, str | None, int]]:
+    return {
+        row[1]: (row[2].upper(), row[3], row[4], row[5])
+        for row in connection.execute(f'PRAGMA table_info("{table_name}")').fetchall()
+    }
+
+
 def _foreign_keys(
     connection: sqlite3.Connection, table_name: str
 ) -> set[tuple[str, str, str, str]]:
@@ -151,14 +160,61 @@ def _verify_baseline(connection: sqlite3.Connection) -> None:
             "initialise_database() bootstrap on a new database before migrations."
         )
 
-    missing_columns: dict[str, list[str]] = {}
-    for table, expected in _BASELINE_COLUMNS.items():
-        missing = expected - _columns(connection, table)
-        if missing:
-            missing_columns[table] = sorted(missing)
-    if missing_columns:
+    expected_column_info = {
+        "farms": {
+            "id": ("INTEGER", 0, None, 1),
+            "farm_name": ("TEXT", 1, None, 0),
+            "farmer_name": ("TEXT", 1, None, 0),
+            "location": ("TEXT", 0, None, 0),
+            "phone": ("TEXT", 0, None, 0),
+            "email": ("TEXT", 0, None, 0),
+            "production_type": ("TEXT", 0, None, 0),
+            "created_at": ("TEXT", 1, "CURRENT_TIMESTAMP", 0),
+            "updated_at": ("TEXT", 1, "CURRENT_TIMESTAMP", 0),
+        },
+        "flocks": {
+            "id": ("INTEGER", 0, None, 1),
+            "farm_id": ("INTEGER", 1, None, 0),
+            "flock_name": ("TEXT", 1, None, 0),
+            "species": ("TEXT", 1, None, 0),
+            "production_type": ("TEXT", 0, None, 0),
+            "breed": ("TEXT", 0, None, 0),
+            "initial_count": ("INTEGER", 1, None, 0),
+            "stocking_date": ("TEXT", 0, None, 0),
+            "status": ("TEXT", 1, "'active'", 0),
+            "created_at": ("TEXT", 1, "CURRENT_TIMESTAMP", 0),
+            "updated_at": ("TEXT", 1, "CURRENT_TIMESTAMP", 0),
+        },
+        "daily_records": {
+            "id": ("INTEGER", 0, None, 1),
+            "flock_id": ("INTEGER", 1, None, 0),
+            "record_date": ("TEXT", 1, None, 0),
+            "feed_kg": ("REAL", 0, None, 0),
+            "water_litres": ("REAL", 0, None, 0),
+            "mortality": ("INTEGER", 1, "0", 0),
+            "average_weight_kg": ("REAL", 0, None, 0),
+            "temperature_c": ("REAL", 0, None, 0),
+            "humidity_percent": ("REAL", 0, None, 0),
+            "notes": ("TEXT", 0, None, 0),
+            "created_at": ("TEXT", 1, "CURRENT_TIMESTAMP", 0),
+        },
+    }
+    schema_differences: dict[str, dict[str, object]] = {}
+    for table, expected in expected_column_info.items():
+        actual = _column_info(connection, table)
+        if actual != expected:
+            schema_differences[table] = {
+                "missing": sorted(set(expected) - set(actual)),
+                "extra": sorted(set(actual) - set(expected)),
+                "mismatched": sorted(
+                    column
+                    for column in set(actual) & set(expected)
+                    if actual[column] != expected[column]
+                ),
+            }
+    if schema_differences:
         raise BaselineSchemaError(
-            f"Baseline schema is incomplete; missing columns: {missing_columns}."
+            f"Baseline columns/types/nullability/defaults differ: {schema_differences}."
         )
 
     required_foreign_keys = {
@@ -186,10 +242,10 @@ def _verify_baseline(connection: sqlite3.Connection) -> None:
 
     for table, expected in required_foreign_keys.items():
         actual = _foreign_keys(connection, table)
-        if not expected.issubset(actual):
+        if expected != actual:
             raise BaselineSchemaError(
                 f"Baseline foreign keys for {table} do not match the supported "
-                f"schema. Expected at least {sorted(expected)}, got {sorted(actual)}."
+                f"schema. Expected {sorted(expected)}, got {sorted(actual)}."
             )
 
     violations = connection.execute("PRAGMA foreign_key_check").fetchall()
