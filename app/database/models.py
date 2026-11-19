@@ -35,7 +35,7 @@ class DailyRecord:
     humidity_percent: float | None = None
     notes: str | None = None
 
-@dataclass
+@dataclass(frozen=True)
 class MeasurementObservation:
     """An immutable, provenance-aware observation of one flock metric."""
 
@@ -43,7 +43,7 @@ class MeasurementObservation:
     flock_id: int
     record_date: str
     metric_name: str
-    value_numeric: float | None
+    value_numeric: int | float | None
     unit: str
     recorded_at: str
     daily_record_id: int | None = None
