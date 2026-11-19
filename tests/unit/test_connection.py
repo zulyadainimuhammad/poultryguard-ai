@@ -68,14 +68,13 @@ def test_connection_rolls_back_and_closes_when_context_raises(tmp_path, monkeypa
             raise RuntimeError("force rollback")
 
     with sqlite3.connect(database_path) as verification:
-        count = verification.execute("SELECT COUNT(*) FROM connection_test").fetchone()[
-            0
-        ]
+        count = verification.execute(
+            "SELECT COUNT(*) FROM connection_test"
+        ).fetchone()[0]
 
     assert count == 0
     with pytest.raises(sqlite3.ProgrammingError, match="closed"):
         connection.execute("SELECT 1")
-
 
 
 def test_foreign_key_constraint_rejects_invalid_reference(tmp_path, monkeypatch):
