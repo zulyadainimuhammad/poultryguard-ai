@@ -151,6 +151,50 @@ def test_migration_adopts_baseline_and_applies_schema_once(
         assert ledger[1][3].endswith("Z")
 
 
+def test_registered_follow_on_migration_can_extend_adopted_baseline(
+    tmp_path, monkeypatch
+):
+    _initialised_database(tmp_path, monkeypatch)
+
+    with _connect() as connection:
+        runner.migrate(connection)
+
+    original = runner.MIGRATIONS
+
+    def add_farm_timezone(connection):
+        connection.execute("ALTER TABLE farms ADD COLUMN timezone TEXT")
+
+    def validate_farm_timezone(connection):
+        columns = {
+            row[1]
+            for row in connection.execute("PRAGMA table_info('farms')").fetchall()
+        }
+        if "timezone" not in columns:
+            raise RuntimeError("Follow-on farm timezone migration did not apply.")
+
+    runner.MIGRATIONS = (
+        *original,
+        runner.Migration(
+            version="0002",
+            name="add_farm_timezone",
+            checksum="2" * 64,
+            upgrade=add_farm_timezone,
+            validate=validate_farm_timezone,
+        ),
+    )
+    try:
+        with _connect() as connection:
+            assert runner.migrate(connection) == ["0002"]
+            assert "timezone" in {
+                row[1]
+                for row in connection.execute(
+                    "PRAGMA table_info('farms')"
+                ).fetchall()
+            }
+    finally:
+        runner.MIGRATIONS = original
+
+
 def test_populated_legacy_database_is_preserved_without_backfill(
     tmp_path, monkeypatch
 ):
