@@ -113,9 +113,7 @@ def test_apply_does_not_overwrite_existing_backup_or_migrate(
         assert not runner._table_exists(connection, "measurement_observations")
 
 
-def test_status_command_does_not_initialise_a_blank_database(
-    tmp_path, capsys
-):
+def test_status_command_does_not_initialise_a_blank_database(tmp_path, capsys):
     database_path = tmp_path / "blank.db"
     with sqlite3.connect(database_path):
         pass
