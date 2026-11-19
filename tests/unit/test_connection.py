@@ -2,9 +2,8 @@
 
 import sqlite3
 
-import pytest
-
 import app.database.connection as database_connection
+import pytest
 
 
 def _use_temporary_database(tmp_path, monkeypatch):
