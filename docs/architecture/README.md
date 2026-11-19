@@ -12,6 +12,7 @@ This directory documents both the **currently implemented local MVP** and the **
 | [rag_design.md](rag_design.md) | Markdown chunking, embeddings, FAISS indexing and retrieval |
 | [model_selection.md](model_selection.md) | Current local embedding model and remote answer-generation provider |
 | [deployment.md](deployment.md) | Supported local developer setup and production-readiness gaps |
+| [sqlite_migrations.md](sqlite_migrations.md) | Explicit SQLite migration runner, baseline adoption, backup-protected CLI and schema migration operations |
 | [sqlite_unit_of_work.md](sqlite_unit_of_work.md) | Shared SQLite connection/transaction lifecycle and current daily-record integration |
 | [measurement_observation_schema_migration_design.md](measurement_observation_schema_migration_design.md) | Proposed additive observation table, constraints, correction-chain safeguards, migration ledger and backfill rehearsal design (not approved for implementation) |
 | [measurement_provenance.md](measurement_provenance.md) | Measurement dictionary, provenance model, observation-time semantics, missing-value rules, correction and audit model, proposed data contract and future architecture (Stage 3.2.2 design specification) |
