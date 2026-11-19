@@ -61,4 +61,12 @@ class UnitOfWork:
         if connection is None:
             return False
 
-        return connection.__exit__(exc_type, exc_value, traceback)
+        try:
+            if exc_type is None:
+                connection.commit()
+            else:
+                connection.rollback()
+        finally:
+            connection.close()
+
+        return False
