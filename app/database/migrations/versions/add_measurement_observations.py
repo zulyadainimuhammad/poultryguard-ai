@@ -291,10 +291,11 @@ def validate(connection: sqlite3.Connection) -> None:
             "PRAGMA table_info('measurement_observations')"
         ).fetchall()
     }
-    if not expected_columns.issubset(actual_columns):
+    if expected_columns != actual_columns:
         raise RuntimeError(
-            "Observation schema is missing columns: "
-            f"{sorted(expected_columns - actual_columns)}."
+            "Observation schema columns differ from the expected contract: "
+            f"missing={sorted(expected_columns - actual_columns)}, "
+            f"extra={sorted(actual_columns - expected_columns)}."
         )
 
     required_foreign_keys = {
@@ -307,6 +308,9 @@ def validate(connection: sqlite3.Connection) -> None:
             "observation_id",
             "RESTRICT",
         ),
+        ("measurement_observations", "flock_id", "flock_id", "RESTRICT"),
+        ("measurement_observations", "metric_name", "metric_name", "RESTRICT"),
+        ("measurement_observations", "record_date", "record_date", "RESTRICT"),
     }
     actual_foreign_keys = {
         (row[2], row[3], row[4], row[6].upper())
@@ -314,10 +318,11 @@ def validate(connection: sqlite3.Connection) -> None:
             "PRAGMA foreign_key_list('measurement_observations')"
         ).fetchall()
     }
-    if not required_foreign_keys.issubset(actual_foreign_keys):
+    if required_foreign_keys != actual_foreign_keys:
         raise RuntimeError(
             "Observation schema foreign-key validation failed: "
-            f"missing {sorted(required_foreign_keys - actual_foreign_keys)}."
+            f"missing={sorted(required_foreign_keys - actual_foreign_keys)}, "
+            f"extra={sorted(actual_foreign_keys - required_foreign_keys)}."
         )
 
     normalised_table_sql = "".join((table[0] or "").lower().split())
@@ -329,24 +334,72 @@ def validate(connection: sqlite3.Connection) -> None:
     if any(fragment not in normalised_table_sql for fragment in required_constraints):
         raise RuntimeError("Observation schema is missing required CHECK constraints.")
 
-    indexes = {
-        row[0]
-        for row in connection.execute(
-            "SELECT name FROM sqlite_master WHERE type = 'index'"
-        ).fetchall()
-    }
-    triggers = {
-        row[0]
-        for row in connection.execute(
-            "SELECT name FROM sqlite_master WHERE type = 'trigger'"
-        ).fetchall()
-    }
+    def normalise(sql: str | None) -> str:
+        return "".join((sql or "").lower().split()).rstrip(";")
 
-    missing_indexes = expected_indexes - indexes
-    missing_triggers = expected_triggers - triggers
-    if missing_indexes or missing_triggers:
+    expected_index_sql = {
+        "uq_daily_records_id_flock": (
+            "CREATE UNIQUE INDEX uq_daily_records_id_flock "
+            "ON daily_records (id, flock_id)"
+        ),
+        "ix_measurement_observations_flock_metric_date": (
+            "CREATE INDEX ix_measurement_observations_flock_metric_date "
+            "ON measurement_observations (flock_id, metric_name, record_date)"
+        ),
+        "ix_measurement_observations_flock_metric_observed_at": (
+            "CREATE INDEX ix_measurement_observations_flock_metric_observed_at "
+            "ON measurement_observations (flock_id, metric_name, observed_at)"
+        ),
+        "ix_measurement_observations_daily_record": (
+            "CREATE INDEX ix_measurement_observations_daily_record "
+            "ON measurement_observations (daily_record_id)"
+        ),
+        "uq_measurement_observations_accepted_successor": (
+            "CREATE UNIQUE INDEX uq_measurement_observations_accepted_successor "
+            "ON measurement_observations (supersedes_observation_id) "
+            "WHERE supersedes_observation_id IS NOT NULL"
+        ),
+    }
+    actual_index_sql = {
+        row[0]: row[1]
+        for row in connection.execute(
+            "SELECT name, sql FROM sqlite_master WHERE type = 'index'"
+        ).fetchall()
+        if row[1] is not None
+    }
+    mismatched_indexes = [
+        name
+        for name, expected_sql in expected_index_sql.items()
+        if normalise(actual_index_sql.get(name)) != normalise(expected_sql)
+    ]
+
+    expected_trigger_sql = {
+        "trg_measurement_observations_no_update": (
+            "CREATE TRIGGER trg_measurement_observations_no_update "
+            "BEFORE UPDATE ON measurement_observations BEGIN "
+            "SELECT RAISE(ABORT, 'measurement observations are append-only'); END"
+        ),
+        "trg_measurement_observations_no_delete": (
+            "CREATE TRIGGER trg_measurement_observations_no_delete "
+            "BEFORE DELETE ON measurement_observations BEGIN "
+            "SELECT RAISE(ABORT, 'measurement observations are append-only'); END"
+        ),
+    }
+    actual_trigger_sql = {
+        row[0]: row[1]
+        for row in connection.execute(
+            "SELECT name, sql FROM sqlite_master WHERE type = 'trigger'"
+        ).fetchall()
+    }
+    mismatched_triggers = [
+        name
+        for name, expected_sql in expected_trigger_sql.items()
+        if normalise(actual_trigger_sql.get(name)) != normalise(expected_sql)
+    ]
+
+    if mismatched_indexes or mismatched_triggers:
         raise RuntimeError(
             "Observation schema validation failed: "
-            f"missing indexes={sorted(missing_indexes)}, "
-            f"missing triggers={sorted(missing_triggers)}."
+            f"mismatched indexes={mismatched_indexes}, "
+            f"mismatched triggers={mismatched_triggers}."
         )
