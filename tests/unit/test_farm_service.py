@@ -85,13 +85,18 @@ def service(db_conn):
     patcher = patch(
         "app.database.repositories.get_connection", side_effect=lambda: db_conn
     )
+    uow_patcher = patch(
+        "app.database.unit_of_work.get_connection", side_effect=lambda: db_conn
+    )
     patcher.start()
+    uow_patcher.start()
     svc = FarmService(
         farm_repository=farm_repo,
         flock_repository=flock_repo,
         daily_record_repository=record_repo,
     )
     yield svc
+    uow_patcher.stop()
     patcher.stop()
 
 
