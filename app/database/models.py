@@ -61,4 +61,3 @@ class MeasurementObservation:
     supersedes_observation_id: str | None = None
     correction_reason: str | None = None
     notes: str | None = None
-
