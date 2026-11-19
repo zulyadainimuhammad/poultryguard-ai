@@ -149,10 +149,27 @@ def _normalise_sql(sql: str | None) -> str:
     return re.sub(r"\s+", "", sql or "").lower()
 
 
-def _verify_baseline(connection: sqlite3.Connection) -> None:
+def _verify_required_tables(connection: sqlite3.Connection) -> None:
     missing_tables = {
         table for table in _BASELINE_COLUMNS if not _table_exists(connection, table)
     }
+    if missing_tables:
+        raise BaselineSchemaError(
+            "Database is missing required PoultryGuard tables: "
+            f"{sorted(missing_tables)}."
+        )
+
+
+def _verify_foreign_key_integrity(connection: sqlite3.Connection) -> None:
+    violations = connection.execute("PRAGMA foreign_key_check").fetchall()
+    if violations:
+        raise MigrationError(
+            f"Database contains foreign-key violations: {len(violations)}."
+        )
+
+
+def _verify_baseline(connection: sqlite3.Connection) -> None:
+    _verify_required_tables(connection)
     if missing_tables:
         raise BaselineSchemaError(
             "Database is not initialised with the PoultryGuard baseline schema; "
@@ -248,11 +265,6 @@ def _verify_baseline(connection: sqlite3.Connection) -> None:
                 f"schema. Expected {sorted(expected)}, got {sorted(actual)}."
             )
 
-    violations = connection.execute("PRAGMA foreign_key_check").fetchall()
-    if violations:
-        raise BaselineSchemaError(
-            f"Baseline database contains foreign-key violations: {len(violations)}."
-        )
 
 
 def _create_ledger(connection: sqlite3.Connection) -> None:
@@ -399,7 +411,9 @@ def migrate(connection: sqlite3.Connection) -> list[str]:
             )
         _verify_baseline(connection)
     else:
-        _verify_baseline(connection)
+        _verify_required_tables(connection)
+        _verify_foreign_key_integrity(connection)
+        _verify_ledger(connection)
 
     applied_now: list[str] = []
     try:
@@ -457,15 +471,17 @@ def migrate(connection: sqlite3.Connection) -> list[str]:
 
 
 def migration_status(connection: sqlite3.Connection) -> dict[str, object]:
-    """Return read-only migration status after validating the baseline/ledger."""
-    _verify_baseline(connection)
+    """Return read-only migration status after validating baseline or ledger."""
     if not _table_exists(connection, LEDGER_TABLE):
+        _verify_baseline(connection)
         return {
             "baseline_adoption_required": True,
             "applied_versions": [],
             "pending_versions": [migration.version for migration in MIGRATIONS],
         }
 
+    _verify_required_tables(connection)
+    _verify_foreign_key_integrity(connection)
     rows = _verify_ledger(connection)
     applied = sorted(rows)
     pending = [
