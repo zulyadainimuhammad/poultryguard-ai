@@ -1,16 +1,34 @@
 import sqlite3
 from pathlib import Path
 
+
+class _ClosingSQLiteConnection(sqlite3.Connection):
+    """SQLite connection that closes after its context manager exits."""
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        try:
+            return super().__exit__(exc_type, exc_value, traceback)
+        finally:
+            self.close()
+
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 DATA_DIR = PROJECT_ROOT / "data"
 DATABASE_PATH = DATA_DIR / "poultryguard.db"
 
 
 def get_connection() -> sqlite3.Connection:
-    """Create and return a SQLite database connection."""
+    """Create a SQLite connection with foreign keys enabled.
+
+    Use the returned connection as a context manager. On exit, SQLite commits
+    or rolls back the transaction and the connection is then closed.
+    """
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-    connection = sqlite3.connect(DATABASE_PATH)
+    connection = sqlite3.connect(
+        DATABASE_PATH,
+        factory=_ClosingSQLiteConnection,
+    )
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
 
