@@ -14,9 +14,10 @@ This directory documents both the **currently implemented local MVP** and the **
 | [deployment.md](deployment.md) | Supported local developer setup and production-readiness gaps |
 | [sqlite_migrations.md](sqlite_migrations.md) | Explicit SQLite migration runner, baseline adoption, backup-protected CLI and schema migration operations |
 | [sqlite_unit_of_work.md](sqlite_unit_of_work.md) | Shared SQLite connection/transaction lifecycle and current daily-record integration |
-| [measurement_observation_schema_migration_design.md](measurement_observation_schema_migration_design.md) | Proposed additive observation table, constraints, correction-chain safeguards, migration ledger and backfill rehearsal design (not approved for implementation) |
+| [measurement_observation_service.md](measurement_observation_service.md) | Implemented manual-only observation model, repository, validation rules, queries and explicit exclusions |
+| [measurement_observation_schema_migration_design.md](measurement_observation_schema_migration_design.md) | Original design proposal for the additive observation schema and migration safeguards; use the implementation documents below for current behaviour |
 | [measurement_provenance.md](measurement_provenance.md) | Measurement dictionary, provenance model, observation-time semantics, missing-value rules, correction and audit model, proposed data contract and future architecture (Stage 3.2.2 design specification) |
-| [measurement_provenance_implementation_plan.md](measurement_provenance_implementation_plan.md) | Proposed Stage 3.2.3 implementation sequence, migration safeguards, repository/service boundaries, testing and release gates |
+| [measurement_provenance_implementation_plan.md](measurement_provenance_implementation_plan.md) | Stage 3.2.3 implementation sequence and release gates; schema and the first manual observation service increments are implemented, while integration and backfill remain deferred |
 | [adr_v2_2_correction_report.md](adr_v2_2_correction_report.md) | Source correction report for five architecture issues; legacy ADR numbering remains subject to reconciliation |
 | [architecture_decision_register_v2_2_draft.md](architecture_decision_register_v2_2_draft.md) | Consolidated architecture register draft; not approved for implementation |
 | [repository_assessment_2026-11-19.md](repository_assessment_2026-11-19.md) | Read-only inspection of the current committed repository baseline |
@@ -41,10 +42,11 @@ This directory documents both the **currently implemented local MVP** and the **
 2. [Target architecture](target_architecture.md) — understand the full product vision and Cloud Engineering foundation.
 3. [Software architecture](software_architecture.md) — understand code and dependency boundaries.
 4. [Data flow](data_flow.md) — understand current data movement and planned flows.
-5. [Measurement provenance](measurement_provenance.md) — understand measurement definitions, provenance, timestamps and the proposed data contract.
-6. [RAG design](rag_design.md) — understand knowledge indexing and retrieval.
-7. [Model and provider selection](model_selection.md) — understand the active AI providers.
-8. [Development and deployment](deployment.md) — run the local MVP and understand production gaps.
+5. [Measurement provenance](measurement_provenance.md) — understand measurement definitions, provenance, timestamps and the data contract.
+6. [Measurement observation service](measurement_observation_service.md) — understand the implemented manual observation write/read boundary.
+7. [RAG design](rag_design.md) — understand knowledge indexing and retrieval.
+8. [Model and provider selection](model_selection.md) — understand the active AI providers.
+9. [Development and deployment](deployment.md) — run the local MVP and understand production gaps.
 
 ## Architecture principles
 
