@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from datetime import date, datetime, timezone
+from typing import Any
 from uuid import uuid4
 
 from app.database import (
@@ -34,7 +36,7 @@ class MeasurementObservationService:
     def __init__(
         self,
         repository: MeasurementObservationRepository | None = None,
-        unit_of_work_factory=UnitOfWork,
+        unit_of_work_factory: Callable[[], UnitOfWork] = UnitOfWork,
     ) -> None:
         self.repository = repository or MeasurementObservationRepository()
         self.unit_of_work_factory = unit_of_work_factory
@@ -67,7 +69,8 @@ class MeasurementObservationService:
 
         if notes is not None and not isinstance(notes, str):
             raise ValueError("Notes must be text or None.")
-        notes_text = notes.strip() or None if notes is not None else None
+        notes_text = notes.strip() if notes is not None else None
+        notes_text = notes_text or None
 
         observation = MeasurementObservation(
             observation_id=str(uuid4()),
@@ -110,16 +113,18 @@ class MeasurementObservationService:
 
             return unit_of_work.measurement_observations.create(observation)
 
-    def get_observation(self, observation_id: str) -> dict | None:
+    def get_observation(self, observation_id: str) -> dict[str, Any] | None:
         """Return an observation by ID."""
         return self.repository.get_by_id(observation_id)
 
-    def list_flock_observations(self, flock_id: int) -> list[dict]:
+    def list_flock_observations(self, flock_id: int) -> list[dict[str, Any]]:
         """Return a flock's observation history."""
         self._validate_positive_id(flock_id, "Flock ID")
         return self.repository.get_by_flock(flock_id)
 
-    def list_daily_record_observations(self, daily_record_id: int) -> list[dict]:
+    def list_daily_record_observations(
+        self, daily_record_id: int
+    ) -> list[dict[str, Any]]:
         """Return observations associated with a legacy daily-record row."""
         self._validate_positive_id(daily_record_id, "Daily record ID")
         return self.repository.get_by_daily_record(daily_record_id)
@@ -131,7 +136,7 @@ class MeasurementObservationService:
         metric_name: str,
         start_date: date | str,
         end_date: date | str,
-    ) -> list[dict]:
+    ) -> list[dict[str, Any]]:
         """Return a metric's observations over an inclusive reporting period."""
         self._validate_positive_id(flock_id, "Flock ID")
         self._metric_unit(metric_name)
@@ -177,7 +182,11 @@ class MeasurementObservationService:
     def _validate_value(metric_name: str, value: int | float) -> int | float:
         if isinstance(value, bool) or not isinstance(value, (int, float)):
             raise ValueError("Observation value must be a finite number.")
-        if not math.isfinite(value):
+        try:
+            numeric_value = float(value)
+        except OverflowError:
+            raise ValueError("Observation value must be a finite number.") from None
+        if not math.isfinite(numeric_value):
             raise ValueError("Observation value must be a finite number.")
 
         if metric_name == "mortality":
@@ -185,6 +194,8 @@ class MeasurementObservationService:
                 raise ValueError("Mortality must be a whole-number count of birds.")
             if value < 0:
                 raise ValueError("Mortality cannot be negative.")
+            if value > 2**63 - 1:
+                raise ValueError("Mortality exceeds SQLite's supported integer range.")
         elif metric_name in {"feed_kg", "water_litres"} and value < 0:
             raise ValueError(f"{metric_name} cannot be negative.")
         elif metric_name == "average_weight_kg" and value <= 0:
@@ -193,7 +204,7 @@ class MeasurementObservationService:
             raise ValueError("Humidity must be between 0 and 100 percent.")
         # Temperature intentionally has no new biological range restriction.
 
-        return value if isinstance(value, int) else float(value)
+        return value if metric_name == "mortality" else numeric_value
 
     @staticmethod
     def _normalise_observed_at(value: datetime | str | None) -> str | None:
