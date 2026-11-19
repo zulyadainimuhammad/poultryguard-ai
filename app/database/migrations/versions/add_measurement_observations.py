@@ -216,6 +216,26 @@ CREATE_APPEND_ONLY_TRIGGERS_SQL = (
         SELECT RAISE(ABORT, 'measurement observations are append-only');
     END
     """,
+    """
+    CREATE TRIGGER trg_measurement_observations_no_replace
+    BEFORE INSERT ON measurement_observations
+    WHEN EXISTS (
+        SELECT 1
+        FROM measurement_observations
+        WHERE observation_id = NEW.observation_id
+    )
+    OR (
+        NEW.supersedes_observation_id IS NOT NULL
+        AND EXISTS (
+            SELECT 1
+            FROM measurement_observations
+            WHERE supersedes_observation_id = NEW.supersedes_observation_id
+        )
+    )
+    BEGIN
+        SELECT RAISE(ABORT, 'measurement observations are append-only');
+    END
+    """,
 )
 
 MIGRATION_SQL = "\n".join(
@@ -371,6 +391,16 @@ def validate(connection: sqlite3.Connection) -> None:
             "CREATE TRIGGER trg_measurement_observations_no_delete "
             "BEFORE DELETE ON measurement_observations BEGIN "
             "SELECT RAISE(ABORT, 'measurement observations are append-only'); END"
+        ),
+        "trg_measurement_observations_no_replace": (
+            "CREATE TRIGGER trg_measurement_observations_no_replace "
+            "BEFORE INSERT ON measurement_observations "
+            "WHEN EXISTS (SELECT 1 FROM measurement_observations "
+            "WHERE observation_id = NEW.observation_id) OR "
+            "(NEW.supersedes_observation_id IS NOT NULL AND EXISTS "
+            "(SELECT 1 FROM measurement_observations "
+            "WHERE supersedes_observation_id = NEW.supersedes_observation_id)) "
+            "BEGIN SELECT RAISE(ABORT, 'measurement observations are append-only'); END"
         ),
     }
     actual_trigger_sql = {
