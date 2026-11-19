@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import UTC, datetime
 import hashlib
 import re
 import sqlite3
-from typing import Callable
+from collections.abc import Callable
+from dataclasses import dataclass
+from datetime import UTC, datetime
 
 from .versions import add_measurement_observations
 
@@ -354,7 +354,8 @@ def _verify_ledger(connection: sqlite3.Connection) -> dict[str, tuple[str, str]]
             continue
         if recorded != (migration.name, migration.checksum):
             raise MigrationChecksumError(
-                f"Applied migration {version} does not match its recorded name/checksum."
+                f"Applied migration {version} does not match its recorded "
+                "name/checksum."
             )
         migration.validate(connection)
 
