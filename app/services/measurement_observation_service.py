@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Callable
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from typing import Any
 from uuid import uuid4
 
@@ -226,12 +226,12 @@ class MeasurementObservationService:
 
         if parsed.tzinfo is None or parsed.utcoffset() is None:
             raise ValueError("Observed-at timestamp must include a timezone.")
-        return parsed.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+        return parsed.astimezone(UTC).isoformat().replace("+00:00", "Z")
 
     @staticmethod
     def _utc_now() -> str:
         return (
-            datetime.now(timezone.utc)
+            datetime.now(UTC)
             .replace(microsecond=0)
             .isoformat()
             .replace("+00:00", "Z")
