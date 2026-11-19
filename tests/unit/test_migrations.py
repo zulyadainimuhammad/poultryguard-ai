@@ -77,10 +77,12 @@ def _insert_observation(
     quality_status="observed",
     supersedes_observation_id=None,
     correction_reason=None,
+    replace=False,
 ):
+    insert_verb = "INSERT OR REPLACE" if replace else "INSERT"
     return connection.execute(
-        """
-        INSERT INTO measurement_observations (
+        f"""
+        {insert_verb} INTO measurement_observations (
             observation_id,
             flock_id,
             daily_record_id,
@@ -371,6 +373,16 @@ def test_migration_ledger_is_append_only(tmp_path, monkeypatch):
             connection.execute(
                 "DELETE FROM schema_migrations WHERE version = '0001'"
             )
+        with pytest.raises(sqlite3.IntegrityError, match="append-only"):
+            connection.execute(
+                """
+                INSERT OR REPLACE INTO schema_migrations (
+                    version, name, checksum, applied_at
+                )
+                VALUES ('0001', 'tampered', ?, '2026-11-19T12:00:00Z')
+                """,
+                ("0" * 64,),
+            )
 
 
 def test_observation_schema_accepts_zero_and_explicit_missing_status(
@@ -554,6 +566,28 @@ def test_correction_chain_is_linear_and_append_only(
                 value_numeric=28.0,
                 supersedes_observation_id="original",
                 correction_reason="Another attempt against an old value",
+            )
+
+        with pytest.raises(sqlite3.IntegrityError, match="append-only"):
+            _insert_observation(
+                connection,
+                flock_id=flock_id,
+                daily_record_id=record_id,
+                observation_id="replace-branch",
+                value_numeric=27.0,
+                supersedes_observation_id="original",
+                correction_reason="REPLACE must not branch history",
+                replace=True,
+            )
+
+        with pytest.raises(sqlite3.IntegrityError, match="append-only"):
+            _insert_observation(
+                connection,
+                flock_id=flock_id,
+                daily_record_id=record_id,
+                observation_id="original",
+                value_numeric=15.0,
+                replace=True,
             )
 
         _insert_observation(
