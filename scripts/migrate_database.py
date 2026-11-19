@@ -131,15 +131,17 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     backup_path = args.backup_to.expanduser()
+    backup_created = False
     try:
         if status["pending_versions"] or status["baseline_adoption_required"]:
             _create_verified_backup(database_path, backup_path)
+            backup_created = True
             print(f"Verified SQLite backup created: {backup_path}")
 
         applied = runner.migrate(connection)
     except Exception as exc:
         print(f"Migration failed: {exc}", file=sys.stderr)
-        if backup_path.exists():
+        if backup_created:
             print(f"Preserve the verified backup for recovery: {backup_path}")
         connection.close()
         return 1
