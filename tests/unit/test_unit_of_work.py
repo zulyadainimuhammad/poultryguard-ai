@@ -105,3 +105,15 @@ def test_unit_of_work_rejects_nested_entry(tmp_path, monkeypatch):
     with UnitOfWork() as unit_of_work:
         with pytest.raises(RuntimeError, match="already active"):
             unit_of_work.__enter__()
+
+
+def test_unit_of_work_closes_factory_connection():
+    connection = sqlite3.connect(":memory:")
+    unit_of_work = UnitOfWork(connection_factory=lambda: connection)
+
+    with unit_of_work:
+        assert unit_of_work.connection is connection
+        assert connection.in_transaction
+
+    with pytest.raises(sqlite3.ProgrammingError, match="closed"):
+        connection.execute("SELECT 1")
