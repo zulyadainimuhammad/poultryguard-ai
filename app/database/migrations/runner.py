@@ -260,7 +260,6 @@ def _verify_baseline(connection: sqlite3.Connection) -> None:
             )
 
 
-
 def _create_ledger(connection: sqlite3.Connection) -> None:
     connection.execute(
         f"""
