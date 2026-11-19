@@ -9,7 +9,6 @@ from pathlib import Path
 
 from app.database.migrations import runner
 
-
 BASELINE_TABLES = ("farms", "flocks", "daily_records")
 
 
