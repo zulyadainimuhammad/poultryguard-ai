@@ -259,6 +259,8 @@ def _verify_baseline(connection: sqlite3.Connection) -> None:
                 f"schema. Expected {sorted(expected)}, got {sorted(actual)}."
             )
 
+    _verify_foreign_key_integrity(connection)
+
 
 def _create_ledger(connection: sqlite3.Connection) -> None:
     connection.execute(
