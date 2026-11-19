@@ -253,6 +253,36 @@ def test_unrecognised_baseline_fails_without_creating_ledger(tmp_path, monkeypat
         assert not runner._table_exists(connection, "measurement_observations")
 
 
+def test_baseline_with_foreign_key_violations_fails_closed(
+    tmp_path, monkeypatch
+):
+    database_path = _initialised_database(tmp_path, monkeypatch)
+
+    connection = sqlite3.connect(database_path)
+    try:
+        connection.execute("PRAGMA foreign_keys = OFF")
+        connection.execute(
+            """
+            INSERT INTO flocks (farm_id, flock_name, species, initial_count)
+            VALUES (999999, 'Orphan flock', 'Chicken', 10)
+            """
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    with _connect() as connection:
+        with pytest.raises(
+            runner.MigrationError,
+            match="foreign-key violations",
+        ):
+            runner.migrate(connection)
+
+    with _connect() as connection:
+        assert not runner._table_exists(connection, runner.LEDGER_TABLE)
+        assert not runner._table_exists(connection, "measurement_observations")
+
+
 def test_baseline_with_missing_check_constraint_fails_closed(tmp_path, monkeypatch):
     _initialised_database(tmp_path, monkeypatch)
 
@@ -508,6 +538,16 @@ def test_observation_rejects_metric_unit_and_status_value_mismatch(
                 metric_name="mortality",
                 value_numeric=1.5,
                 unit="birds",
+            )
+
+        with pytest.raises(sqlite3.IntegrityError):
+            _insert_observation(
+                connection,
+                observation_id="obs-nonnumeric",
+                flock_id=flock_id,
+                metric_name="temperature_c",
+                value_numeric="not-a-number",
+                unit="degrees_celsius",
             )
 
 
