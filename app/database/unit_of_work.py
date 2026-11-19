@@ -13,7 +13,7 @@ class UnitOfWork:
     The Unit-of-Work owns the connection it creates. Repositories receive that
     connection but never commit or close it. Exiting the Unit-of-Work commits
     when the body succeeds and rolls back when the body raises, then closes the
-    connection through the project's connection context-manager contract.
+    connection explicitly at transaction exit.
 
     A write-oriented transaction starts with BEGIN IMMEDIATE so concurrent
     writers do not both validate against the same pre-write state.
