@@ -13,6 +13,7 @@ This directory documents both the **currently implemented local MVP** and the **
 | [model_selection.md](model_selection.md) | Current local embedding model and remote answer-generation provider |
 | [deployment.md](deployment.md) | Supported local developer setup and production-readiness gaps |
 | [sqlite_unit_of_work.md](sqlite_unit_of_work.md) | Shared SQLite connection/transaction lifecycle and current daily-record integration |
+| [measurement_observation_schema_migration_design.md](measurement_observation_schema_migration_design.md) | Proposed additive observation table, constraints, correction-chain safeguards, migration ledger and backfill rehearsal design (not approved for implementation) |
 | [measurement_provenance.md](measurement_provenance.md) | Measurement dictionary, provenance model, observation-time semantics, missing-value rules, correction and audit model, proposed data contract and future architecture (Stage 3.2.2 design specification) |
 | [measurement_provenance_implementation_plan.md](measurement_provenance_implementation_plan.md) | Proposed Stage 3.2.3 implementation sequence, migration safeguards, repository/service boundaries, testing and release gates |
 | [adr_v2_2_correction_report.md](adr_v2_2_correction_report.md) | Source correction report for five architecture issues; legacy ADR numbering remains subject to reconciliation |
