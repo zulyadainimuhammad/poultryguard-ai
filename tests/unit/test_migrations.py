@@ -221,11 +221,20 @@ def test_baseline_with_missing_check_constraint_fails_closed(
         connection.execute(
             """
             CREATE TABLE daily_records (
-                id INTEGER PRIMARY KEY,
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 flock_id INTEGER NOT NULL,
                 record_date TEXT NOT NULL,
+                feed_kg REAL,
+                water_litres REAL,
                 mortality INTEGER NOT NULL DEFAULT 0,
-                FOREIGN KEY (flock_id) REFERENCES flocks(id) ON DELETE CASCADE
+                average_weight_kg REAL,
+                temperature_c REAL,
+                humidity_percent REAL,
+                notes TEXT,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (flock_id)
+                    REFERENCES flocks(id)
+                    ON DELETE CASCADE
             )
             """
         )
