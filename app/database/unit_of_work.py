@@ -4,7 +4,12 @@ import sqlite3
 from collections.abc import Callable
 
 from .connection import get_connection
-from .repositories import DailyRecordRepository, FarmRepository, FlockRepository
+from .repositories import (
+    DailyRecordRepository,
+    FarmRepository,
+    FlockRepository,
+    MeasurementObservationRepository,
+)
 
 
 class UnitOfWork:
@@ -29,6 +34,7 @@ class UnitOfWork:
         self.farms: FarmRepository
         self.flocks: FlockRepository
         self.daily_records: DailyRecordRepository
+        self.measurement_observations: MeasurementObservationRepository
 
     @property
     def connection(self) -> sqlite3.Connection:
@@ -52,6 +58,9 @@ class UnitOfWork:
         self.farms = FarmRepository(connection=connection)
         self.flocks = FlockRepository(connection=connection)
         self.daily_records = DailyRecordRepository(connection=connection)
+        self.measurement_observations = MeasurementObservationRepository(
+            connection=connection
+        )
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> bool | None:
