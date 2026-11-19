@@ -13,9 +13,7 @@ def _use_temporary_database(tmp_path, monkeypatch):
     return database_path
 
 
-def test_get_connection_enables_foreign_keys_and_closes(
-    tmp_path, monkeypatch
-):
+def test_get_connection_enables_foreign_keys_and_closes(tmp_path, monkeypatch):
     database_path = _use_temporary_database(tmp_path, monkeypatch)
 
     connection = database_connection.get_connection()
@@ -46,9 +44,7 @@ def test_get_connection_enables_foreign_keys_and_closes(
         connection.execute("SELECT 1")
 
 
-def test_connection_rolls_back_and_closes_when_context_raises(
-    tmp_path, monkeypatch
-):
+def test_connection_rolls_back_and_closes_when_context_raises(tmp_path, monkeypatch):
     database_path = _use_temporary_database(tmp_path, monkeypatch)
 
     with sqlite3.connect(database_path) as setup_connection:
@@ -72,9 +68,9 @@ def test_connection_rolls_back_and_closes_when_context_raises(
             raise RuntimeError("force rollback")
 
     with sqlite3.connect(database_path) as verification:
-        count = verification.execute(
-            "SELECT COUNT(*) FROM connection_test"
-        ).fetchone()[0]
+        count = verification.execute("SELECT COUNT(*) FROM connection_test").fetchone()[
+            0
+        ]
 
     assert count == 0
     with pytest.raises(sqlite3.ProgrammingError, match="closed"):
