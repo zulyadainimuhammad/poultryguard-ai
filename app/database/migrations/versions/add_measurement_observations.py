@@ -98,6 +98,11 @@ CREATE TABLE measurement_observations (
     ),
 
     CHECK (
+        value_numeric IS NULL
+        OR typeof(value_numeric) IN ('integer', 'real')
+    ),
+
+    CHECK (
         quality_status <> 'observed'
         OR (
             metric_name <> 'mortality'
@@ -337,6 +342,7 @@ def validate(connection: sqlite3.Connection) -> None:
     required_constraints = (
         "metric_name='mortality'andunit='birds'",
         "quality_statusin('observed','invalid','pending_validation')",
+        "typeof(value_numeric)in('integer','real')",
         "supersedes_observation_idisnotnull",
     )
     if any(fragment not in normalised_table_sql for fragment in required_constraints):
