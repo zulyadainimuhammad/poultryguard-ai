@@ -1,12 +1,11 @@
-"""Tests for FarmService — uses isolated in-memory databases."""
+"""Tests for FarmService — uses isolated temporary SQLite databases."""
 
 from __future__ import annotations
 
-import sqlite3
 from datetime import date
-from unittest.mock import patch
 
 import pytest
+import app.database.connection as database_connection
 from app.database import (
     DailyRecordRepository,
     FarmRepository,
@@ -20,84 +19,25 @@ from app.services.farm_service import DuplicateRecordError, FarmService
 
 
 @pytest.fixture()
-def db_conn():
-    conn = sqlite3.connect(":memory:")
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    conn.executescript(
-        """
-        CREATE TABLE farms (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            farm_name TEXT NOT NULL,
-            farmer_name TEXT NOT NULL,
-            location TEXT,
-            phone TEXT,
-            email TEXT,
-            production_type TEXT,
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-        );
-        CREATE TABLE flocks (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            farm_id INTEGER NOT NULL,
-            flock_name TEXT NOT NULL,
-            species TEXT NOT NULL,
-            production_type TEXT,
-            breed TEXT,
-            initial_count INTEGER NOT NULL CHECK (initial_count > 0),
-            stocking_date TEXT,
-            status TEXT NOT NULL DEFAULT 'active',
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (farm_id) REFERENCES farms(id) ON DELETE CASCADE
-        );
-        CREATE TABLE daily_records (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            flock_id INTEGER NOT NULL,
-            record_date TEXT NOT NULL,
-            feed_kg REAL,
-            water_litres REAL,
-            mortality INTEGER NOT NULL DEFAULT 0,
-            average_weight_kg REAL,
-            temperature_c REAL,
-            humidity_percent REAL,
-            notes TEXT,
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (flock_id) REFERENCES flocks(id) ON DELETE CASCADE,
-            CHECK (mortality >= 0),
-            CHECK (
-                humidity_percent IS NULL
-                OR (humidity_percent >= 0 AND humidity_percent <= 100)
-            )
-        );
-        """
-    )
-    yield conn
-    conn.close()
+def database_path(tmp_path, monkeypatch):
+    database_path = tmp_path / "farm-service-test.db"
+    monkeypatch.setattr(database_connection, "DATA_DIR", tmp_path)
+    monkeypatch.setattr(database_connection, "DATABASE_PATH", database_path)
+    database_connection.initialise_database()
+    return database_path
 
 
 @pytest.fixture()
-def service(db_conn):
+def service(database_path):
     farm_repo = FarmRepository()
     flock_repo = FlockRepository()
     record_repo = DailyRecordRepository()
 
-    patcher = patch(
-        "app.database.repositories.get_connection", side_effect=lambda: db_conn
-    )
-    uow_patcher = patch(
-        "app.database.unit_of_work.get_connection", side_effect=lambda: db_conn
-    )
-    patcher.start()
-    uow_patcher.start()
-    svc = FarmService(
+    return FarmService(
         farm_repository=farm_repo,
         flock_repository=flock_repo,
         daily_record_repository=record_repo,
     )
-    yield svc
-    uow_patcher.stop()
-    patcher.stop()
 
 
 @pytest.fixture()
