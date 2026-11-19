@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+from dataclasses import FrozenInstanceError
 from datetime import date
 
 import app.database.connection as database_connection
 import pytest
+from app.database import MeasurementObservation
 from app.database.migrations import runner
 from app.services.measurement_observation_service import (
     MeasurementObservationService,
@@ -303,3 +305,17 @@ def test_repository_exposes_no_update_or_delete_methods(observation_context):
     repository = observation_context["service"].repository
     assert not hasattr(repository, "update")
     assert not hasattr(repository, "delete")
+
+
+def test_measurement_observation_dataclass_is_frozen():
+    observation = MeasurementObservation(
+        observation_id="obs-test",
+        flock_id=1,
+        record_date="2026-11-19",
+        metric_name="feed_kg",
+        value_numeric=1.0,
+        unit="kg",
+        recorded_at="2026-11-19T12:00:00Z",
+    )
+    with pytest.raises(FrozenInstanceError):
+        observation.value_numeric = 2.0
