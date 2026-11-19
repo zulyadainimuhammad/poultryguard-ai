@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from datetime import date
 
-import pytest
 import app.database.connection as database_connection
+import pytest
 from app.database import (
     DailyRecordRepository,
     FarmRepository,
