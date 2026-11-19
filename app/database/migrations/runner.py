@@ -210,6 +210,24 @@ def _create_ledger(connection: sqlite3.Connection) -> None:
         )
         """
     )
+    connection.execute(
+        """
+        CREATE TRIGGER trg_schema_migrations_no_update
+        BEFORE UPDATE ON schema_migrations
+        BEGIN
+            SELECT RAISE(ABORT, 'schema migration history is append-only');
+        END
+        """
+    )
+    connection.execute(
+        """
+        CREATE TRIGGER trg_schema_migrations_no_delete
+        BEFORE DELETE ON schema_migrations
+        BEGIN
+            SELECT RAISE(ABORT, 'schema migration history is append-only');
+        END
+        """
+    )
 
 
 def _ledger_rows(connection: sqlite3.Connection) -> dict[str, tuple[str, str]]:
@@ -241,6 +259,19 @@ def _verify_ledger(connection: sqlite3.Connection) -> dict[str, tuple[str, str]]
         raise MigrationError(
             f"Migration ledger is malformed; expected columns {sorted(required)}."
         )
+
+    ledger_triggers = {
+        row[0]
+        for row in connection.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'trigger'"
+        ).fetchall()
+    }
+    required_triggers = {
+        "trg_schema_migrations_no_update",
+        "trg_schema_migrations_no_delete",
+    }
+    if not required_triggers.issubset(ledger_triggers):
+        raise MigrationError("Migration ledger append-only triggers are missing.")
 
     rows = _ledger_rows(connection)
     baseline = rows.get(BASELINE_VERSION)
