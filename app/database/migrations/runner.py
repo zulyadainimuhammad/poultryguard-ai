@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import UTC, datetime
+import hashlib
+import re
 import sqlite3
 from typing import Callable
 
@@ -12,11 +14,7 @@ from .versions import add_measurement_observations
 LEDGER_TABLE = "schema_migrations"
 BASELINE_VERSION = "0000"
 BASELINE_NAME = "existing_farms_flocks_daily_records"
-BASELINE_CHECKSUM = (
-    "sha256:"
-    "a4c0f25d1ef4f9cde0d0f2e1a09b97c3"
-    "0d4e5dcaa32c85cb7f1b4f0c1a0d5f12"
-)
+_CHECKSUM_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 
 
 class MigrationError(RuntimeError):
@@ -121,6 +119,27 @@ def _foreign_keys(
     }
 
 
+def _baseline_checksum(connection: sqlite3.Connection) -> str:
+    """Fingerprint the baseline table DDL at the time it is first adopted."""
+    rows = connection.execute(
+        """
+        SELECT name, sql
+        FROM sqlite_master
+        WHERE type = 'table'
+          AND name IN ('farms', 'flocks', 'daily_records')
+        ORDER BY name
+        """
+    ).fetchall()
+    payload = "\n".join(
+        f"{row[0]}:{' '.join((row[1] or '').split()).lower()}" for row in rows
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _normalise_sql(sql: str | None) -> str:
+    return re.sub(r"\s+", "", sql or "").lower()
+
+
 def _verify_baseline(connection: sqlite3.Connection) -> None:
     missing_tables = {
         table for table in _BASELINE_COLUMNS if not _table_exists(connection, table)
@@ -146,6 +165,25 @@ def _verify_baseline(connection: sqlite3.Connection) -> None:
         "flocks": {("farms", "farm_id", "id", "CASCADE")},
         "daily_records": {("flocks", "flock_id", "id", "CASCADE")},
     }
+    required_checks = {
+        "flocks": ("check(initial_count>0)",),
+        "daily_records": (
+            "check(mortality>=0)",
+            "check(humidity_percentisnullor(humidity_percent>=0andhumidity_percent<=100))",
+        ),
+    }
+    for table, fragments in required_checks.items():
+        definition = connection.execute(
+            "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?",
+            (table,),
+        ).fetchone()[0]
+        normalised = _normalise_sql(definition)
+        missing = [fragment for fragment in fragments if fragment not in normalised]
+        if missing:
+            raise BaselineSchemaError(
+                f"Baseline table {table} is missing required constraints: {missing}."
+            )
+
     for table, expected in required_foreign_keys.items():
         actual = _foreign_keys(connection, table)
         if not expected.issubset(actual):
@@ -206,10 +244,14 @@ def _verify_ledger(connection: sqlite3.Connection) -> dict[str, tuple[str, str]]
 
     rows = _ledger_rows(connection)
     baseline = rows.get(BASELINE_VERSION)
-    if baseline != (BASELINE_NAME, BASELINE_CHECKSUM):
+    if (
+        baseline is None
+        or baseline[0] != BASELINE_NAME
+        or not _CHECKSUM_PATTERN.fullmatch(baseline[1])
+    ):
         raise MigrationError(
-            "Migration ledger does not contain the recognised PoultryGuard "
-            "baseline marker. Stop and inspect this database; do not auto-adopt it."
+            "Migration ledger does not contain a valid PoultryGuard baseline "
+            "fingerprint. Stop and inspect this database; do not auto-adopt it."
         )
 
     known = {migration.version: migration for migration in MIGRATIONS}
@@ -264,14 +306,15 @@ def migrate(connection: sqlite3.Connection) -> list[str]:
 
         if not ledger_exists:
             _create_ledger(connection)
+            baseline_checksum = _baseline_checksum(connection)
             _record_migration(
                 connection,
                 BASELINE_VERSION,
                 BASELINE_NAME,
-                BASELINE_CHECKSUM,
+                baseline_checksum,
             )
             rows: dict[str, tuple[str, str]] = {
-                BASELINE_VERSION: (BASELINE_NAME, BASELINE_CHECKSUM)
+                BASELINE_VERSION: (BASELINE_NAME, baseline_checksum)
             }
         else:
             rows = _verify_ledger(connection)
