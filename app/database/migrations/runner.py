@@ -284,6 +284,18 @@ def _create_ledger(connection: sqlite3.Connection) -> None:
         END
         """
     )
+    connection.execute(
+        """
+        CREATE TRIGGER trg_schema_migrations_no_replace
+        BEFORE INSERT ON schema_migrations
+        WHEN EXISTS (
+            SELECT 1 FROM schema_migrations WHERE version = NEW.version
+        )
+        BEGIN
+            SELECT RAISE(ABORT, 'schema migration history is append-only');
+        END
+        """
+    )
 
 
 def _ledger_rows(connection: sqlite3.Connection) -> dict[str, tuple[str, str]]:
@@ -325,6 +337,7 @@ def _verify_ledger(connection: sqlite3.Connection) -> dict[str, tuple[str, str]]
     required_triggers = {
         "trg_schema_migrations_no_update",
         "trg_schema_migrations_no_delete",
+        "trg_schema_migrations_no_replace",
     }
     if not required_triggers.issubset(ledger_triggers):
         raise MigrationError("Migration ledger append-only triggers are missing.")
