@@ -241,7 +241,10 @@ def test_unrecognised_baseline_fails_without_creating_ledger(tmp_path, monkeypat
         connection.execute("DROP TABLE flocks")
 
     with _connect() as connection:
-        with pytest.raises(runner.BaselineSchemaError, match="missing tables"):
+        with pytest.raises(
+            runner.BaselineSchemaError,
+            match="missing required PoultryGuard tables",
+        ):
             runner.migrate(connection)
 
     with _connect() as connection:
