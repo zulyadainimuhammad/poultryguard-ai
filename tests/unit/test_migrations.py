@@ -253,9 +253,7 @@ def test_unrecognised_baseline_fails_without_creating_ledger(tmp_path, monkeypat
         assert not runner._table_exists(connection, "measurement_observations")
 
 
-def test_baseline_with_foreign_key_violations_fails_closed(
-    tmp_path, monkeypatch
-):
+def test_baseline_with_foreign_key_violations_fails_closed(tmp_path, monkeypatch):
     database_path = _initialised_database(tmp_path, monkeypatch)
 
     connection = sqlite3.connect(database_path)
