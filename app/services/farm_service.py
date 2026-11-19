@@ -21,7 +21,13 @@ _VALID_STATUSES = {"active", "closed", "sold"}
 
 
 class FarmService:
-    """Application service for farm, flock and daily-record operations."""
+    """Application service for farm, flock and daily-record operations.
+
+    Standalone repository dependencies support ordinary reads and CRUD.
+    Daily-record creation uses the Unit-of-Work factory so its validation
+    reads and insert share one transaction. Custom database adapters should
+    provide a Unit-of-Work factory targeting the same database.
+    """
 
     def __init__(
         self,
