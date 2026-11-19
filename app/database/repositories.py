@@ -20,7 +20,7 @@ class _BaseRepository:
             yield self._connection
             return
 
-        with self._connection_scope() as connection:
+        with get_connection() as connection:
             yield connection
 
 
