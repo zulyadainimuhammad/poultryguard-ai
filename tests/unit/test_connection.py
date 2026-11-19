@@ -25,7 +25,12 @@ def test_get_connection_enables_foreign_keys_and_closes(
 
     with connection as active_connection:
         active_connection.execute(
-            "CREATE TABLE connection_test (id INTEGER PRIMARY KEY, value TEXT NOT NULL)"
+            """
+            CREATE TABLE connection_test (
+                id INTEGER PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+            """
         )
         active_connection.execute(
             "INSERT INTO connection_test (value) VALUES (?)",
@@ -49,7 +54,12 @@ def test_connection_rolls_back_and_closes_when_context_raises(
 
     with sqlite3.connect(database_path) as setup_connection:
         setup_connection.execute(
-            "CREATE TABLE connection_test (id INTEGER PRIMARY KEY, value TEXT NOT NULL)"
+            """
+            CREATE TABLE connection_test (
+                id INTEGER PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+            """
         )
 
     connection = database_connection.get_connection()
