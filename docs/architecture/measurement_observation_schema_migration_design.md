@@ -1,10 +1,10 @@
 # PoultryGuard AI — Measurement Observation Schema and Migration Design
 
-**Status:** Proposed technical design; approval required before implementation  
-**Stage:** 3.2.3 — schema and migration design gate  
-**Reviewed baseline:** `main` at `22be530e7f3f0ac7e34da1d3abefd4e3d78305ec`  
+**Status:** Historical design basis; initial schema/migration implementation merged in PR #21; the manual observation service is under review in PR #22  
+**Stage:** 3.2.3 — schema, migration and first application-service increments  
+**Reviewed baseline:** `main` at `a3794b8e031523439b5a30e003b1ae720d2e8a3e`  
 **Source specifications:** `measurement_provenance.md` (Stage 3.2.2) and `measurement_provenance_implementation_plan.md`  
-**Scope:** Documentation only. No migration, schema change, local database inspection or application code change is authorised by this document.
+**Scope:** Records the design rationale and remaining decision gates. Current runtime behaviour is documented in `sqlite_migrations.md` and `measurement_observation_service.md`.
 
 ## 1. Executive recommendation
 
@@ -14,7 +14,7 @@ Keep the existing daily-record layer as the farmer-facing operational summary an
 
 Use the merged SQLite Unit-of-Work for future daily-record/observation dual-writes. The daily record and every required observation must commit or roll back together.
 
-**No migration should be written or applied until this design's open decisions are reviewed and the migration runner's existing-database adoption behaviour is specified.** In particular, mortality-zero semantics and the correction/review lifecycle must be resolved before any historical backfill or correction writer is enabled.
+The migration runner and additive observation schema have since been implemented and merged in PR #21. The first manual-entry observation model, repository and service are proposed separately in PR #22. The unresolved mortality-zero semantics and correction/review lifecycle still gate daily-record dual-write, historical backfill and correction writers. A live database migration remains a separate approval step.
 
 ## 2. Source-derived requirements
 
@@ -33,7 +33,7 @@ The Stage 3.2.2 specification and Stage 3.2.3 implementation plan establish the 
 11. Keep current analytics on `daily_records` until a separate parity-tested analytics migration is approved.
 12. Backfill is additive and must be deterministic/restart-safe. Do not automatically convert historical mortality zero to an observed zero until its meaning is resolved.
 
-These are source requirements, not claims that the current runtime already supports them.
+The schema migration in PR #21 implements the observation table, constraints and append-only protections. The manual-only model/service implementation in PR #22 is under review. Dual-write, backfill, corrections, review events, sensor/import writers and analytics cutover remain unimplemented.
 
 ## 3. Current repository facts affecting the design
 
@@ -320,23 +320,23 @@ These are not approved by this document:
 2. **Correction request and quality-review schema:** Which append-only request/event tables and effective-status query will be used? The recommendation is to separate rejected/pending attempts from accepted supersession links.
 3. **Parent deletion/archive policy:** Once observations exist, should farms/flocks/daily records be archived and hard deletion blocked? The recommended immediate protection is RESTRICT/NO ACTION, but the product policy needs approval.
 4. **Historical backfill:** Should it run as a separate controlled maintenance command after table creation? Recommended: yes; no automatic startup backfill.
-5. **Migration runner:** The custom runner is recommended, but adoption and checksum behaviour require review.
+5. **Migration runner:** The custom runner, strict baseline adoption, checksum verification and backup-protected explicit CLI are implemented and documented in `sqlite_migrations.md`. Any future migration changes remain subject to review.
 6. **Quality review:** Are `pending_validation` observations excluded from analytics until an append-only review event accepts them? Recommended: exclude until accepted.
 7. **Farm timezone storage:** The long-term design specifies an IANA timezone such as `Africa/Lagos`; adding a farm timezone column is outside this additive observation migration.
 8. **Observation identifiers:** UUIDv4 for new rows and deterministic UUIDv5 for legacy backfill is recommended, subject to approval.
 
-## 14. Explicit safety boundary
+## 14. Implementation status and safety boundary
 
-This is a documentation-only design proposal. It does not:
+The repository now has the following implemented or reviewable increments:
 
-- create a migration runner or ledger;
-- create `measurement_observations` in any database;
-- open, inspect, back up, migrate or write to the user's local SQLite database;
-- backfill existing daily records;
-- add observation services, UI, sensor ingestion or analytics;
-- approve the correction workflow, deletion policy, migration tool or mortality semantics.
+- PR #21 merged the explicit migration runner, ledger, baseline-adoption checks and additive `measurement_observations` schema.
+- PR #22 proposes the frozen observation model, insert/read-only repository, Unit-of-Work wiring and validated manual-entry service. It remains subject to review and CI.
+- Current analytics continue to read `daily_records`; no dual-write or analytics cutover is included.
+- No historical daily records are backfilled.
+- No correction-request, quality-review, sensor, import, system-generated or UI workflow is included.
+- Mortality-zero semantics, the correction/review model and the parent archive/deletion policy remain unresolved.
 
-The first implementation work must remain on a feature branch and use temporary/duplicated databases for automated migration tests. Any operation against the user's local database is a later, separate approval gate.
+Automated migration and service tests use temporary SQLite databases. Neither PR #21 nor PR #22 authorises opening, inspecting, backing up, migrating or writing to the user's local `data/poultryguard.db`. A live migration and any backfill require a separate populated-copy rehearsal, verified backup and explicit owner approval.
 
 ---
 *End of proposed design.*
