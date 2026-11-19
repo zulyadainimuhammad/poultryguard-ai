@@ -262,6 +262,73 @@ def validate(connection: sqlite3.Connection) -> None:
     if table is None or table[0] is None:
         raise RuntimeError("measurement_observations table is missing.")
 
+    expected_columns = {
+        "observation_id",
+        "flock_id",
+        "daily_record_id",
+        "record_date",
+        "metric_name",
+        "value_numeric",
+        "unit",
+        "observed_at",
+        "recorded_at",
+        "source_type",
+        "entered_by_user_id",
+        "device_id",
+        "import_batch_id",
+        "source_reference",
+        "calibration_reference",
+        "calculation_method",
+        "calculation_version",
+        "quality_status",
+        "supersedes_observation_id",
+        "correction_reason",
+        "notes",
+    }
+    actual_columns = {
+        row[1]
+        for row in connection.execute(
+            "PRAGMA table_info('measurement_observations')"
+        ).fetchall()
+    }
+    if not expected_columns.issubset(actual_columns):
+        raise RuntimeError(
+            "Observation schema is missing columns: "
+            f"{sorted(expected_columns - actual_columns)}."
+        )
+
+    required_foreign_keys = {
+        ("flocks", "flock_id", "id", "RESTRICT"),
+        ("daily_records", "daily_record_id", "id", "RESTRICT"),
+        ("daily_records", "flock_id", "flock_id", "RESTRICT"),
+        (
+            "measurement_observations",
+            "supersedes_observation_id",
+            "observation_id",
+            "RESTRICT",
+        ),
+    }
+    actual_foreign_keys = {
+        (row[2], row[3], row[4], row[6].upper())
+        for row in connection.execute(
+            "PRAGMA foreign_key_list('measurement_observations')"
+        ).fetchall()
+    }
+    if not required_foreign_keys.issubset(actual_foreign_keys):
+        raise RuntimeError(
+            "Observation schema foreign-key validation failed: "
+            f"missing {sorted(required_foreign_keys - actual_foreign_keys)}."
+        )
+
+    normalised_table_sql = "".join((table[0] or "").lower().split())
+    required_constraints = (
+        "metric_name='mortality'andunit='birds'",
+        "quality_statusin('observed','invalid','pending_validation')",
+        "supersedes_observation_idisnotnull",
+    )
+    if any(fragment not in normalised_table_sql for fragment in required_constraints):
+        raise RuntimeError("Observation schema is missing required CHECK constraints.")
+
     indexes = {
         row[0]
         for row in connection.execute(
