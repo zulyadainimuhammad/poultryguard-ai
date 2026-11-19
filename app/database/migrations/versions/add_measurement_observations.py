@@ -243,18 +243,6 @@ def upgrade(connection: sqlite3.Connection) -> None:
 
 def validate(connection: sqlite3.Connection) -> None:
     """Fail when the expected table, indexes, triggers or constraints are absent."""
-    expected_indexes = {
-        "uq_daily_records_id_flock",
-        "ix_measurement_observations_flock_metric_date",
-        "ix_measurement_observations_flock_metric_observed_at",
-        "ix_measurement_observations_daily_record",
-        "uq_measurement_observations_accepted_successor",
-    }
-    expected_triggers = {
-        "trg_measurement_observations_no_update",
-        "trg_measurement_observations_no_delete",
-    }
-
     table = connection.execute(
         "SELECT sql FROM sqlite_master WHERE type = 'table' "
         "AND name = 'measurement_observations'"
