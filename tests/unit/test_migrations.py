@@ -480,8 +480,9 @@ def test_daily_record_reference_must_belong_to_same_flock(
             """,
             (flock_id,),
         ).lastrowid
-        runner.migrate(connection)
 
+    with _connect() as connection:
+        runner.migrate(connection)
         with pytest.raises(sqlite3.IntegrityError):
             _insert_observation(
                 connection,
