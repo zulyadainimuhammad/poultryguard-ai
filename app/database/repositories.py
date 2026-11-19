@@ -352,6 +352,7 @@ class DailyRecordRepository(_BaseRepository):
                 (record_id,),
             )
 
+
 class MeasurementObservationRepository(_BaseRepository):
     """Insert and query append-only measurement observations.
 
