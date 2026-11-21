@@ -1,8 +1,8 @@
 # PoultryGuard AI — Measurement Correction Requests and Quality Review Design
 
-**Status:** Workflow decisions reviewed; implementation remains a separate feature-branch change<br>
+**Status:** Workflow decisions reviewed; implementation remains a separate feature-branch change  
 **Stage:** 3.2.4 — correction and measurement-quality workflow design  
-**Base:** `main` at `a0ada899bc9e2fec7a815528d8ef9bcc135fcacc`  
+**Base:** `main` at `be7668b3aace98392739a69719b1b8ec4b9e9ba7`  
 **Depends on:** PR #21 (merged schema migration) and PR #22 (merged manual observation model/repository/service)  
 **Scope:** Append-only workflow design, logical data model, state semantics, transaction boundaries, query rules and acceptance tests. No schema migration, runtime service, UI, or live database operation.
 
@@ -109,10 +109,10 @@ At submission, the service must:
 2. Load the target observation inside a `BEGIN IMMEDIATE` Unit-of-Work transaction.
 3. Confirm the target exists, has `source_type = 'manual_entry'`, has effective accepted status (`observed`, either raw or accepted by review), and has no accepted successor.
 4. Validate the proposed value using the target metric's canonical validation rules.
-6. Reject a proposed value exactly equal to the target's existing numeric value: a no-op is not a correction.
-7. Require a non-empty correction reason and required request ID/timestamp fields.
-8. Create one immutable request with a generated UUID and UTC `requested_at`.
-9. Commit without inserting a new observation and without changing the current accepted value.
+5. Reject a proposed value numerically equal to the target's existing value after canonical numeric parsing: a no-op is not a correction.
+6. Require a non-empty correction reason and required request ID/timestamp fields.
+7. Create one immutable request with a generated UUID and UTC `requested_at`.
+8. Commit without inserting a new observation and without changing the current accepted value.
 
 A request can exist while the original observation remains the current accepted value. Request submission alone must not affect analytics.
 
