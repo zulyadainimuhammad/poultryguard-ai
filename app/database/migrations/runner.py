@@ -9,7 +9,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
-from .versions import add_measurement_observations
+from .versions import add_correction_quality_review, add_measurement_observations
 
 LEDGER_TABLE = "schema_migrations"
 BASELINE_VERSION = "0000"
@@ -45,6 +45,13 @@ MIGRATIONS: tuple[Migration, ...] = (
         checksum=add_measurement_observations.CHECKSUM,
         upgrade=add_measurement_observations.upgrade,
         validate=add_measurement_observations.validate,
+    ),
+    Migration(
+        version=add_correction_quality_review.VERSION,
+        name=add_correction_quality_review.NAME,
+        checksum=add_correction_quality_review.CHECKSUM,
+        upgrade=add_correction_quality_review.upgrade,
+        validate=add_correction_quality_review.validate,
     ),
 )
 

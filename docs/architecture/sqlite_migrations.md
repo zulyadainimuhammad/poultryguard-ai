@@ -1,7 +1,7 @@
 # SQLite Schema Migration Operations
 
-**Status:** Implemented on the feature branch; review and merge required  
-**Scope:** Migration runner and the initial additive `measurement_observations` schema only
+**Status:** Migration `0001` is on `main`; migration `0002` is under review on a feature branch<br>
+**Scope:** Explicit migration runner and additive measurement observation/correction-review schemas
 
 ## 1. Operating principles
 
@@ -63,7 +63,21 @@ The initial observation table supports only an already-accepted correction link:
 
 Pending/rejected correction requests and quality-review transitions are not implemented by this migration. They must be represented separately in a later append-only request/review model so rejected attempts do not consume the accepted supersession link.
 
-## 6. Testing boundary
+## 6. Correction and quality-review migration `0002`
+
+Migration `0002` (`add_correction_quality_review`) adds three append-only tables:
+
+- `measurement_correction_requests` stores a finite, metric-valid proposed value against one exact observation ID. Multiple requests may target the same observation; the schema does not add uniqueness over flock, metric and reporting date.
+- `measurement_correction_request_events` stores one terminal `approved`, `rejected` or `invalidated` outcome per request. Approval requires a linked correction observation; rejection and invalidation require no observation.
+- `measurement_quality_review_events` stores one `accepted` or `rejected` decision per pending candidate observation.
+
+All foreign keys use `ON DELETE RESTRICT`. Constraints and insert triggers validate required IDs, reasons, UTC timestamps, enum values, finite numbers and metric-specific request values. Approval linkage is checked against the request's exact target, including the correction observation's supersession, metric, date, unit, observation time, source, value and reason. The existing partial unique index on accepted successors remains the guard against branching corrections.
+
+Each new table has UPDATE/DELETE rejection triggers and a `BEFORE INSERT` replacement guard for every primary/unique conflict key, including request-terminal and review-target uniqueness conflicts. Rejected requests do not consume an accepted-successor slot, and no same-date observation winner is selected.
+
+This migration adds no writer service, review/query workflow, UI, dual-write, backfill or analytics cutover. It is registered after `0001` and runs only through the explicit migration runner/CLI. Tests apply it only to isolated temporary SQLite databases.
+
+## 7. Testing boundary
 
 Automated tests use temporary SQLite files and cover:
 
@@ -75,9 +89,10 @@ Automated tests use temporary SQLite files and cover:
 - Metric/unit and quality/value compatibility.
 - Same-flock daily-record references and parent-delete restrictions.
 - Linear correction chains and append-only triggers.
+- Correction-request and quality-review schema constraints, exact-target approval links, all unique-conflict replacement guards and restricted deletion relationships.
 - Read-only status, required backup path and backup refusal/verification in the CLI.
 
 The tests must never locate or open the user's real `data/poultryguard.db`. No application startup path invokes the migration runner.
 
 ---
-*This document describes the implementation on the feature branch. It does not authorise a live migration or historical backfill.*
+*This document describes the registered schema migrations. It does not authorise a live migration or historical backfill.*
