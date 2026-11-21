@@ -1,6 +1,6 @@
 # Measurement Observation Service
 
-**Status:** Implemented on a feature branch; review and merge required  
+**Status:** Implemented and merged in PR #22; locally verified with 171 passing tests  
 **Scope:** Observation data model, append-only repository, Unit-of-Work wiring, and the first manual-entry service
 
 ## 1. Purpose

@@ -1,6 +1,6 @@
 # PoultryGuard AI — Stage 3.2.3 Measurement Provenance Implementation Plan
 
-**Document status:** Proposed implementation plan — planning milestone only  
+**Document status:** Historical implementation plan with current execution status recorded in Section 1.1  
 **Stage:** 3.2.3  
 **Depends on:** Stage 3.2.2 — Measurement Provenance and Data Semantics  
 **Source architecture specification:** `docs/architecture/measurement_provenance.md`  
@@ -15,7 +15,27 @@ Stage 3.2.2 approved the measurement provenance and data semantics contract. Sta
 
 The implementation must add a traceable observation layer while preserving the existing `farms`, `flocks` and `daily_records` data and the behaviour of the current Streamlit MVP.
 
-**This document does not implement the schema, migrations, services, UI or runtime behaviour.** It is a technical plan and a review gate. Implementation should begin only after the repository structure, existing transaction behaviour and local database have been inspected.
+**This document is the original technical plan, not a statement that every proposed work package has been implemented or approved.** Its initial broad scope has since been split into smaller, separately gated deliverables. Current execution status and the revised safe sequence are recorded below.
+
+### 1.1 Implementation status and revised staging (21 November 2026)
+
+This section reconciles the original proposal with the merged repository state:
+
+| Work package | Status |
+|---|---|
+| PR #21 — versioned SQLite migration runner and additive observation schema | Merged |
+| PR #22 — frozen observation model, insert/read repository, Unit-of-Work wiring and manual-only validated service | Merged; local verification: 171 tests passed, Ruff lint passed, 174 files formatted |
+| Correction-request and quality-review event model | Design proposed in `measurement_correction_and_quality_review_design.md`; not implemented |
+| Correction services and quality-review services | Not implemented |
+| Daily-record/observation dual-write | Deferred; mortality-zero semantics and parent deletion policy remain open |
+| Historical backfill | Deferred; requires populated-copy rehearsal and explicit approval |
+| Analytics cutover from `daily_records` | Not implemented; existing analytics remain unchanged |
+| Streamlit correction/review interface | Not implemented |
+| Live local SQLite migration | Not authorised or performed |
+
+**Revised sequencing:** complete and review the correction/quality-review design first; implement the request/event schema and services in small PRs; then separately design daily-record dual-write, resolve mortality-zero semantics, rehearse any backfill against a populated copy, and consider analytics integration only after parity tests.
+
+The earlier sections describing backfill, dual-write and accepted correction support as part of one first implementation increment are historical proposals. They do not authorise combining those operations into the already merged PR #22 or running them against the user's local database.
 
 ## 2. Desired outcome
 
