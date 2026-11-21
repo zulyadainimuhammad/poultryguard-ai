@@ -7,7 +7,10 @@ import sqlite3
 import app.database.connection as database_connection
 import pytest
 from app.database.migrations import runner
-from app.database.migrations.versions import add_measurement_observations
+from app.database.migrations.versions import (
+    add_correction_quality_review,
+    add_measurement_observations,
+)
 
 
 def _initialised_database(tmp_path, monkeypatch):
@@ -115,6 +118,114 @@ def _insert_observation(
     )
 
 
+def _insert_correction_request(
+    connection,
+    *,
+    request_id="request-001",
+    target_observation_id="obs-001",
+    proposed_value_numeric=2.0,
+    correction_reason="Corrected transcription",
+    requested_at="2026-11-20T12:00:00Z",
+    requested_by_user_id=None,
+    replace=False,
+):
+    verb = "INSERT OR REPLACE" if replace else "INSERT"
+    return connection.execute(
+        f"""
+        {verb} INTO measurement_correction_requests (
+            request_id,
+            target_observation_id,
+            proposed_value_numeric,
+            correction_reason,
+            requested_by_user_id,
+            requested_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (
+            request_id,
+            target_observation_id,
+            proposed_value_numeric,
+            correction_reason,
+            requested_by_user_id,
+            requested_at,
+        ),
+    )
+
+
+def _insert_correction_event(
+    connection,
+    *,
+    event_id="correction-event-001",
+    request_id="request-001",
+    outcome="rejected",
+    outcome_reason="Reviewed",
+    event_at="2026-11-20T13:00:00Z",
+    created_observation_id=None,
+    reviewed_by_user_id=None,
+    replace=False,
+):
+    verb = "INSERT OR REPLACE" if replace else "INSERT"
+    return connection.execute(
+        f"""
+        {verb} INTO measurement_correction_request_events (
+            event_id,
+            request_id,
+            outcome,
+            outcome_reason,
+            reviewed_by_user_id,
+            event_at,
+            created_observation_id
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            event_id,
+            request_id,
+            outcome,
+            outcome_reason,
+            reviewed_by_user_id,
+            event_at,
+            created_observation_id,
+        ),
+    )
+
+
+def _insert_quality_review_event(
+    connection,
+    *,
+    event_id="quality-event-001",
+    observation_id="candidate-001",
+    decision="accepted",
+    review_reason="Evidence checked",
+    reviewed_at="2026-11-20T13:00:00Z",
+    reviewed_by_user_id=None,
+    replace=False,
+):
+    verb = "INSERT OR REPLACE" if replace else "INSERT"
+    return connection.execute(
+        f"""
+        {verb} INTO measurement_quality_review_events (
+            event_id,
+            observation_id,
+            decision,
+            review_reason,
+            reviewed_by_user_id,
+            reviewed_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (
+            event_id,
+            observation_id,
+            decision,
+            review_reason,
+            reviewed_by_user_id,
+            reviewed_at,
+        ),
+    )
+
+
 def test_migration_adopts_baseline_and_applies_schema_once(tmp_path, monkeypatch):
     _initialised_database(tmp_path, monkeypatch)
 
@@ -122,17 +233,17 @@ def test_migration_adopts_baseline_and_applies_schema_once(tmp_path, monkeypatch
         assert runner.migration_status(connection) == {
             "baseline_adoption_required": True,
             "applied_versions": [],
-            "pending_versions": ["0001"],
+            "pending_versions": ["0001", "0002"],
         }
 
     with _connect() as connection:
-        assert runner.migrate(connection) == ["0001"]
+        assert runner.migrate(connection) == ["0001", "0002"]
 
     with _connect() as connection:
         assert runner.migrate(connection) == []
         status = runner.migration_status(connection)
         assert status["baseline_adoption_required"] is False
-        assert status["applied_versions"] == ["0000", "0001"]
+        assert status["applied_versions"] == ["0000", "0001", "0002"]
         assert status["pending_versions"] == []
 
         ledger = connection.execute(
@@ -142,9 +253,10 @@ def test_migration_adopts_baseline_and_applies_schema_once(tmp_path, monkeypatch
             ORDER BY version
             """
         ).fetchall()
-        assert [row[0] for row in ledger] == ["0000", "0001"]
+        assert [row[0] for row in ledger] == ["0000", "0001", "0002"]
         assert len(ledger[0][2]) == 64
         assert ledger[1][2] == add_measurement_observations.CHECKSUM
+        assert ledger[2][2] == add_correction_quality_review.CHECKSUM
         assert ledger[0][3].endswith("Z")
         assert ledger[1][3].endswith("Z")
 
@@ -173,7 +285,7 @@ def test_registered_follow_on_migration_can_extend_adopted_baseline(
     runner.MIGRATIONS = (
         *original,
         runner.Migration(
-            version="0002",
+            version="0003",
             name="add_farm_timezone",
             checksum="2" * 64,
             upgrade=add_farm_timezone,
@@ -182,7 +294,7 @@ def test_registered_follow_on_migration_can_extend_adopted_baseline(
     )
     try:
         with _connect() as connection:
-            assert runner.migrate(connection) == ["0002"]
+            assert runner.migrate(connection) == ["0003"]
             assert "timezone" in {
                 row[1]
                 for row in connection.execute("PRAGMA table_info('farms')").fetchall()
@@ -206,7 +318,7 @@ def test_populated_legacy_database_is_preserved_without_backfill(tmp_path, monke
                 """
             ).fetchall()
         ]
-        assert runner.migrate(connection) == ["0001"]
+        assert runner.migrate(connection) == ["0001", "0002"]
 
     with _connect() as connection:
         after = [
@@ -375,6 +487,7 @@ def test_applied_migration_checksum_mismatch_is_rejected(tmp_path, monkeypatch):
             upgrade=add_measurement_observations.upgrade,
             validate=add_measurement_observations.validate,
         ),
+        *original[1:],
     )
     try:
         with _connect() as connection:
@@ -398,7 +511,7 @@ def test_failure_rolls_back_schema_and_ledger(tmp_path, monkeypatch):
     runner.MIGRATIONS = (
         *original,
         runner.Migration(
-            version="0002",
+            version="0003",
             name="injected_failure",
             checksum="1" * 64,
             upgrade=fail_upgrade,
@@ -692,3 +805,876 @@ def test_correction_chain_is_linear_and_append_only(tmp_path, monkeypatch):
         ]
 
     assert ids == ["correction-1", "correction-2", "original"]
+
+
+def test_correction_review_migration_preserves_populated_legacy_and_observation_rows(
+    tmp_path, monkeypatch
+):
+    _initialised_database(tmp_path, monkeypatch)
+    _, flock_id, record_id = _seed_legacy_rows()
+    registered_migrations = runner.MIGRATIONS
+
+    try:
+        runner.MIGRATIONS = registered_migrations[:1]
+        with _connect() as connection:
+            runner.migrate(connection)
+            _insert_observation(
+                connection,
+                observation_id="preserved-observation",
+                flock_id=flock_id,
+                daily_record_id=record_id,
+                value_numeric=4.5,
+            )
+
+        runner.MIGRATIONS = registered_migrations
+        with _connect() as connection:
+            assert runner.migrate(connection) == ["0002"]
+            assert connection.execute("SELECT COUNT(*) FROM farms").fetchone()[0] == 1
+            assert connection.execute("SELECT COUNT(*) FROM flocks").fetchone()[0] == 1
+            assert (
+                connection.execute(
+                    "SELECT COUNT(*) FROM daily_records WHERE id = ? AND flock_id = ?",
+                    (record_id, flock_id),
+                ).fetchone()[0]
+                == 1
+            )
+            assert tuple(
+                connection.execute(
+                    """
+                SELECT value_numeric, daily_record_id
+                FROM measurement_observations
+                WHERE observation_id = 'preserved-observation'
+                """
+                ).fetchone()
+            ) == (4.5, record_id)
+            assert add_correction_quality_review.validate(connection) is None
+    finally:
+        runner.MIGRATIONS = registered_migrations
+
+
+def test_correction_review_migration_registers_tables_indexes_and_restrict_fks(
+    tmp_path, monkeypatch
+):
+    _initialised_database(tmp_path, monkeypatch)
+    _seed_legacy_rows()
+
+    with _connect() as connection:
+        assert runner.migrate(connection) == ["0001", "0002"]
+        expected_columns = {
+            "measurement_correction_requests": {
+                "request_id",
+                "target_observation_id",
+                "proposed_value_numeric",
+                "correction_reason",
+                "requested_by_user_id",
+                "requested_at",
+            },
+            "measurement_correction_request_events": {
+                "event_id",
+                "request_id",
+                "outcome",
+                "outcome_reason",
+                "reviewed_by_user_id",
+                "event_at",
+                "created_observation_id",
+            },
+            "measurement_quality_review_events": {
+                "event_id",
+                "observation_id",
+                "decision",
+                "review_reason",
+                "reviewed_by_user_id",
+                "reviewed_at",
+            },
+        }
+        for table_name, columns in expected_columns.items():
+            assert {
+                row[1]
+                for row in connection.execute(
+                    f"PRAGMA table_info('{table_name}')"
+                ).fetchall()
+            } == columns
+            table_sql = connection.execute(
+                "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?",
+                (table_name,),
+            ).fetchone()[0]
+            assert table_sql.upper().rstrip("; \n").endswith("WITHOUT ROWID")
+
+        indexes = {
+            row[0]
+            for row in connection.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'index'"
+            ).fetchall()
+        }
+        assert {
+            "ix_measurement_correction_requests_target_requested_at",
+            "ix_measurement_correction_requests_requested_at",
+            "ix_measurement_correction_events_event_at",
+            "ix_measurement_quality_review_events_reviewed_at",
+        }.issubset(indexes)
+
+        expected_foreign_keys = {
+            "measurement_correction_requests": {
+                ("measurement_observations", "target_observation_id", "RESTRICT"),
+            },
+            "measurement_correction_request_events": {
+                ("measurement_correction_requests", "request_id", "RESTRICT"),
+                ("measurement_observations", "created_observation_id", "RESTRICT"),
+            },
+            "measurement_quality_review_events": {
+                ("measurement_observations", "observation_id", "RESTRICT"),
+            },
+        }
+        for table_name, expected in expected_foreign_keys.items():
+            actual = {
+                (row[2], row[3], row[6].upper())
+                for row in connection.execute(
+                    f"PRAGMA foreign_key_list('{table_name}')"
+                ).fetchall()
+            }
+            assert actual == expected
+
+
+def test_multiple_requests_per_target_and_same_date_observations_are_allowed(
+    tmp_path, monkeypatch
+):
+    _initialised_database(tmp_path, monkeypatch)
+    _, flock_id, record_id = _seed_legacy_rows()
+
+    with _connect() as connection:
+        runner.migrate(connection)
+        _insert_observation(
+            connection,
+            observation_id="observation-a",
+            flock_id=flock_id,
+            daily_record_id=record_id,
+            value_numeric=1.0,
+        )
+        _insert_observation(
+            connection,
+            observation_id="observation-b",
+            flock_id=flock_id,
+            daily_record_id=record_id,
+            value_numeric=5.0,
+        )
+        _insert_correction_request(
+            connection,
+            request_id="request-a1",
+            target_observation_id="observation-a",
+            proposed_value_numeric=2.0,
+        )
+        _insert_correction_request(
+            connection,
+            request_id="request-a2",
+            target_observation_id="observation-a",
+            proposed_value_numeric=3.0,
+        )
+        _insert_correction_request(
+            connection,
+            request_id="request-b1",
+            target_observation_id="observation-b",
+            proposed_value_numeric=6.0,
+        )
+
+        assert (
+            connection.execute(
+                "SELECT COUNT(*) FROM measurement_correction_requests"
+            ).fetchone()[0]
+            == 3
+        )
+        assert (
+            connection.execute(
+                """
+            SELECT COUNT(*) FROM measurement_observations
+            WHERE flock_id = ? AND metric_name = 'feed_kg' AND record_date = ?
+            """,
+                (flock_id, "2026-11-19"),
+            ).fetchone()[0]
+            == 2
+        )
+
+
+def test_quality_reviewed_pending_manual_observation_can_be_requested(
+    tmp_path, monkeypatch
+):
+    _initialised_database(tmp_path, monkeypatch)
+    _, flock_id, record_id = _seed_legacy_rows()
+
+    with _connect() as connection:
+        runner.migrate(connection)
+        _insert_observation(
+            connection,
+            observation_id="candidate-accepted",
+            flock_id=flock_id,
+            daily_record_id=record_id,
+            value_numeric=1.0,
+            quality_status="pending_validation",
+        )
+        _insert_quality_review_event(connection, observation_id="candidate-accepted")
+        _insert_correction_request(
+            connection,
+            target_observation_id="candidate-accepted",
+            proposed_value_numeric=2.0,
+        )
+
+        assert (
+            connection.execute(
+                "SELECT COUNT(*) FROM measurement_correction_requests"
+            ).fetchone()[0]
+            == 1
+        )
+
+
+@pytest.mark.parametrize(
+    "value",
+    [float("inf"), float("-inf"), float("nan"), -0.1],
+)
+def test_correction_request_rejects_nonfinite_and_negative_values(
+    tmp_path, monkeypatch, value
+):
+    _initialised_database(tmp_path, monkeypatch)
+    _, flock_id, record_id = _seed_legacy_rows()
+
+    with _connect() as connection:
+        runner.migrate(connection)
+        _insert_observation(
+            connection, flock_id=flock_id, daily_record_id=record_id, value_numeric=1.0
+        )
+        with pytest.raises(sqlite3.IntegrityError):
+            _insert_correction_request(connection, proposed_value_numeric=value)
+
+
+@pytest.mark.parametrize(
+    ("metric_name", "value", "unit", "proposal"),
+    [
+        ("mortality", 2.0, "birds", 2.5),
+        ("average_weight_kg", 1.0, "kg_per_bird", 0.0),
+        ("humidity_percent", 50.0, "percent_relative_humidity", 100.1),
+    ],
+)
+def test_correction_request_enforces_target_metric_value_rules(
+    tmp_path, monkeypatch, metric_name, value, unit, proposal
+):
+    _initialised_database(tmp_path, monkeypatch)
+    _, flock_id, _ = _seed_legacy_rows()
+
+    with _connect() as connection:
+        runner.migrate(connection)
+        _insert_observation(
+            connection,
+            flock_id=flock_id,
+            observation_id="metric-target",
+            metric_name=metric_name,
+            value_numeric=value,
+            unit=unit,
+        )
+        with pytest.raises(sqlite3.IntegrityError):
+            _insert_correction_request(
+                connection,
+                target_observation_id="metric-target",
+                proposed_value_numeric=proposal,
+            )
+
+
+def test_correction_request_rejects_noop_and_ineligible_targets(tmp_path, monkeypatch):
+    _initialised_database(tmp_path, monkeypatch)
+    _, flock_id, _ = _seed_legacy_rows()
+
+    with _connect() as connection:
+        runner.migrate(connection)
+        _insert_observation(
+            connection,
+            observation_id="target",
+            flock_id=flock_id,
+            value_numeric=1.0,
+        )
+        with pytest.raises(sqlite3.IntegrityError, match="not eligible"):
+            _insert_correction_request(
+                connection,
+                target_observation_id="target",
+                proposed_value_numeric=1.0,
+            )
+
+        _insert_observation(
+            connection,
+            observation_id="accepted-successor",
+            flock_id=flock_id,
+            value_numeric=2.0,
+            supersedes_observation_id="target",
+            correction_reason="Accepted correction",
+        )
+        with pytest.raises(sqlite3.IntegrityError, match="not eligible"):
+            _insert_correction_request(
+                connection,
+                request_id="stale-request",
+                target_observation_id="target",
+                proposed_value_numeric=3.0,
+            )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("request_id", " "),
+        ("target_observation_id", " "),
+        ("correction_reason", "  "),
+        ("requested_at", "2026-11-20 12:00:00"),
+        ("requested_by_user_id", " "),
+    ],
+)
+def test_correction_request_rejects_empty_required_values_and_invalid_timestamp(
+    tmp_path, monkeypatch, field, value
+):
+    _initialised_database(tmp_path, monkeypatch)
+    _, flock_id, _ = _seed_legacy_rows()
+
+    with _connect() as connection:
+        runner.migrate(connection)
+        _insert_observation(connection, flock_id=flock_id, value_numeric=1.0)
+        with pytest.raises(sqlite3.IntegrityError):
+            _insert_correction_request(connection, **{field: value})
+
+
+def test_correction_events_enforce_outcomes_linkage_and_single_terminal_event(
+    tmp_path, monkeypatch
+):
+    _initialised_database(tmp_path, monkeypatch)
+    _, flock_id, _ = _seed_legacy_rows()
+
+    with _connect() as connection:
+        runner.migrate(connection)
+        _insert_observation(
+            connection,
+            observation_id="target",
+            flock_id=flock_id,
+            value_numeric=1.0,
+        )
+        _insert_correction_request(
+            connection,
+            target_observation_id="target",
+            proposed_value_numeric=2.0,
+        )
+
+        with pytest.raises(sqlite3.IntegrityError):
+            _insert_correction_event(
+                connection,
+                outcome="approved",
+                created_observation_id=None,
+            )
+        with pytest.raises(sqlite3.IntegrityError):
+            _insert_correction_event(
+                connection,
+                outcome="rejected",
+                created_observation_id="target",
+            )
+        with pytest.raises(sqlite3.IntegrityError):
+            _insert_correction_event(connection, outcome="unknown")
+
+        _insert_correction_event(
+            connection,
+            outcome="rejected",
+            outcome_reason="Value was not supported",
+        )
+        with pytest.raises(sqlite3.IntegrityError):
+            _insert_correction_event(
+                connection,
+                event_id="second-event",
+                outcome="invalidated",
+                outcome_reason="Already rejected",
+            )
+
+        _insert_correction_request(
+            connection,
+            request_id="request-after-rejection",
+            target_observation_id="target",
+            proposed_value_numeric=3.0,
+        )
+        with pytest.raises(sqlite3.IntegrityError, match="stale target"):
+            _insert_correction_event(
+                connection,
+                event_id="premature-invalidation",
+                request_id="request-after-rejection",
+                outcome="invalidated",
+                outcome_reason="Target became stale",
+            )
+        _insert_observation(
+            connection,
+            observation_id="target-successor",
+            flock_id=flock_id,
+            value_numeric=3.0,
+            supersedes_observation_id="target",
+            correction_reason="Corrected transcription",
+        )
+        _insert_correction_event(
+            connection,
+            event_id="invalidated-event",
+            request_id="request-after-rejection",
+            outcome="invalidated",
+            outcome_reason="Target became stale",
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("event_id", " "),
+        ("request_id", " "),
+        ("outcome_reason", "  "),
+        ("event_at", "2026-11-20T12:00:00+00:00"),
+        ("reviewed_by_user_id", " "),
+    ],
+)
+def test_correction_events_reject_empty_required_values_and_invalid_timestamp(
+    tmp_path, monkeypatch, field, value
+):
+    _initialised_database(tmp_path, monkeypatch)
+    _, flock_id, _ = _seed_legacy_rows()
+
+    with _connect() as connection:
+        runner.migrate(connection)
+        _insert_observation(connection, flock_id=flock_id, value_numeric=1.0)
+        _insert_correction_request(connection, proposed_value_numeric=2.0)
+        with pytest.raises(sqlite3.IntegrityError):
+            _insert_correction_event(
+                connection,
+                **{field: value},
+            )
+
+
+def test_approved_event_must_point_to_observation_superseding_exact_request_target(
+    tmp_path, monkeypatch
+):
+    _initialised_database(tmp_path, monkeypatch)
+    _, flock_id, _ = _seed_legacy_rows()
+
+    with _connect() as connection:
+        runner.migrate(connection)
+        for observation_id, value in (("target-a", 1.0), ("target-b", 5.0)):
+            _insert_observation(
+                connection,
+                observation_id=observation_id,
+                flock_id=flock_id,
+                value_numeric=value,
+            )
+        _insert_correction_request(
+            connection,
+            target_observation_id="target-a",
+            proposed_value_numeric=2.0,
+            correction_reason="Target A correction",
+        )
+        _insert_observation(
+            connection,
+            observation_id="wrong-successor",
+            flock_id=flock_id,
+            value_numeric=2.0,
+            supersedes_observation_id="target-b",
+            correction_reason="Target A correction",
+        )
+
+        with pytest.raises(
+            sqlite3.IntegrityError, match="matching successor of its target"
+        ):
+            _insert_correction_event(
+                connection,
+                outcome="approved",
+                outcome_reason="Approved",
+                created_observation_id="wrong-successor",
+            )
+
+        _insert_observation(
+            connection,
+            observation_id="correct-successor",
+            flock_id=flock_id,
+            value_numeric=2.0,
+            supersedes_observation_id="target-a",
+            correction_reason="Target A correction",
+        )
+        _insert_correction_event(
+            connection,
+            outcome="approved",
+            outcome_reason="Approved",
+            created_observation_id="correct-successor",
+        )
+        with pytest.raises(sqlite3.IntegrityError):
+            connection.execute(
+                "DELETE FROM measurement_observations "
+                "WHERE observation_id = 'correct-successor'"
+            )
+
+
+def test_quality_review_event_constraints_and_pending_status_guard(
+    tmp_path, monkeypatch
+):
+    _initialised_database(tmp_path, monkeypatch)
+    _, flock_id, _ = _seed_legacy_rows()
+
+    with _connect() as connection:
+        runner.migrate(connection)
+        _insert_observation(
+            connection,
+            observation_id="candidate",
+            flock_id=flock_id,
+            value_numeric=1.0,
+            quality_status="pending_validation",
+        )
+        with pytest.raises(sqlite3.IntegrityError):
+            _insert_quality_review_event(
+                connection, observation_id="candidate", decision="other"
+            )
+        with pytest.raises(sqlite3.IntegrityError):
+            _insert_quality_review_event(
+                connection, observation_id="candidate", review_reason=" "
+            )
+
+        _insert_quality_review_event(
+            connection, observation_id="candidate", decision="rejected"
+        )
+        with pytest.raises(sqlite3.IntegrityError):
+            _insert_quality_review_event(
+                connection,
+                event_id="second-review",
+                observation_id="candidate",
+                decision="accepted",
+            )
+
+        _insert_observation(
+            connection,
+            observation_id="observed-row",
+            flock_id=flock_id,
+            value_numeric=1.0,
+        )
+        with pytest.raises(sqlite3.IntegrityError, match="pending_validation"):
+            _insert_quality_review_event(
+                connection,
+                event_id="review-observed-row",
+                observation_id="observed-row",
+            )
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("event_id", " "),
+        ("observation_id", " "),
+        ("review_reason", "  "),
+        ("reviewed_at", "2026-11-20 13:00:00"),
+        ("reviewed_by_user_id", " "),
+    ],
+)
+def test_quality_review_events_reject_empty_required_values_and_invalid_timestamp(
+    tmp_path, monkeypatch, field, value
+):
+    _initialised_database(tmp_path, monkeypatch)
+    _, flock_id, _ = _seed_legacy_rows()
+
+    with _connect() as connection:
+        runner.migrate(connection)
+        _insert_observation(
+            connection,
+            observation_id="candidate",
+            flock_id=flock_id,
+            value_numeric=1.0,
+            quality_status="pending_validation",
+        )
+        event_values = {"observation_id": "candidate", field: value}
+        with pytest.raises(sqlite3.IntegrityError):
+            _insert_quality_review_event(connection, **event_values)
+
+
+def test_append_only_tables_reject_update_delete_and_replace_conflicts(
+    tmp_path, monkeypatch
+):
+    _initialised_database(tmp_path, monkeypatch)
+    _, flock_id, _ = _seed_legacy_rows()
+
+    with _connect() as connection:
+        runner.migrate(connection)
+        _insert_observation(
+            connection,
+            observation_id="target-a",
+            flock_id=flock_id,
+            value_numeric=1.0,
+        )
+        _insert_observation(
+            connection,
+            observation_id="target-b",
+            flock_id=flock_id,
+            value_numeric=5.0,
+        )
+        _insert_observation(
+            connection,
+            observation_id="candidate",
+            flock_id=flock_id,
+            value_numeric=1.0,
+            quality_status="pending_validation",
+        )
+        _insert_correction_request(
+            connection,
+            request_id="request-a",
+            target_observation_id="target-a",
+            proposed_value_numeric=2.0,
+        )
+        _insert_correction_request(
+            connection,
+            request_id="request-b",
+            target_observation_id="target-b",
+            proposed_value_numeric=6.0,
+        )
+        _insert_correction_event(
+            connection,
+            request_id="request-a",
+            outcome="rejected",
+            outcome_reason="Rejected",
+        )
+        _insert_quality_review_event(connection, observation_id="candidate")
+
+        for sql in (
+            "UPDATE measurement_correction_requests "
+            "SET correction_reason = 'edited' WHERE request_id = 'request-a'",
+            "DELETE FROM measurement_correction_requests "
+            "WHERE request_id = 'request-a'",
+            "UPDATE measurement_correction_request_events "
+            "SET outcome_reason = 'edited' WHERE request_id = 'request-a'",
+            "DELETE FROM measurement_correction_request_events "
+            "WHERE request_id = 'request-a'",
+            "UPDATE measurement_quality_review_events "
+            "SET decision = 'rejected' WHERE observation_id = 'candidate'",
+            "DELETE FROM measurement_quality_review_events "
+            "WHERE observation_id = 'candidate'",
+        ):
+            with pytest.raises(sqlite3.IntegrityError, match="append-only"):
+                connection.execute(sql)
+
+        with pytest.raises(sqlite3.IntegrityError, match="append-only"):
+            _insert_correction_request(
+                connection,
+                request_id="request-a",
+                target_observation_id="target-b",
+                proposed_value_numeric=7.0,
+                replace=True,
+            )
+        with pytest.raises(sqlite3.IntegrityError, match="append-only"):
+            _insert_correction_event(
+                connection,
+                event_id="replacement-event-id",
+                request_id="request-a",
+                outcome="rejected",
+                outcome_reason="Replace unique request conflict",
+                replace=True,
+            )
+        with pytest.raises(sqlite3.IntegrityError, match="append-only"):
+            _insert_correction_event(
+                connection,
+                event_id="correction-event-001",
+                request_id="request-b",
+                outcome="rejected",
+                outcome_reason="Replace primary key conflict",
+                replace=True,
+            )
+        _insert_observation(
+            connection,
+            observation_id="approved-correction",
+            flock_id=flock_id,
+            value_numeric=6.0,
+            supersedes_observation_id="target-b",
+            correction_reason="Corrected transcription",
+        )
+        _insert_correction_event(
+            connection,
+            event_id="approved-event",
+            request_id="request-b",
+            outcome="approved",
+            created_observation_id="approved-correction",
+        )
+        _insert_observation(
+            connection,
+            observation_id="target-c",
+            flock_id=flock_id,
+            value_numeric=10.0,
+        )
+        _insert_correction_request(
+            connection,
+            request_id="request-c",
+            target_observation_id="target-c",
+            proposed_value_numeric=11.0,
+        )
+        with pytest.raises(sqlite3.IntegrityError, match="append-only"):
+            _insert_correction_event(
+                connection,
+                event_id="replacement-created-observation",
+                request_id="request-c",
+                outcome="approved",
+                created_observation_id="approved-correction",
+                replace=True,
+            )
+        with pytest.raises(sqlite3.IntegrityError, match="append-only"):
+            _insert_quality_review_event(
+                connection,
+                event_id="replacement-review-id",
+                observation_id="candidate",
+                replace=True,
+            )
+        _insert_observation(
+            connection,
+            observation_id="candidate-two",
+            flock_id=flock_id,
+            value_numeric=2.0,
+            quality_status="pending_validation",
+        )
+        with pytest.raises(sqlite3.IntegrityError, match="append-only"):
+            _insert_quality_review_event(
+                connection,
+                event_id="quality-event-001",
+                observation_id="candidate-two",
+                replace=True,
+            )
+
+
+def test_without_rowid_tables_reject_rowid_replacement_and_preserve_rows(
+    tmp_path, monkeypatch
+):
+    _initialised_database(tmp_path, monkeypatch)
+    _, flock_id, _ = _seed_legacy_rows()
+
+    with _connect() as connection:
+        runner.migrate(connection)
+        for observation_id, value, status in (
+            ("target-a", 1.0, "observed"),
+            ("target-b", 5.0, "observed"),
+            ("candidate-a", 2.0, "pending_validation"),
+            ("candidate-b", 3.0, "pending_validation"),
+        ):
+            _insert_observation(
+                connection,
+                observation_id=observation_id,
+                flock_id=flock_id,
+                value_numeric=value,
+                quality_status=status,
+            )
+        _insert_correction_request(
+            connection,
+            request_id="request-a",
+            target_observation_id="target-a",
+            proposed_value_numeric=2.0,
+        )
+        _insert_correction_request(
+            connection,
+            request_id="request-b",
+            target_observation_id="target-b",
+            proposed_value_numeric=6.0,
+        )
+        _insert_correction_event(
+            connection,
+            request_id="request-a",
+            outcome="rejected",
+            outcome_reason="Keep original event",
+        )
+        _insert_quality_review_event(
+            connection,
+            observation_id="candidate-a",
+            review_reason="Keep original review",
+        )
+
+        tables_and_queries = {
+            "measurement_correction_requests": (
+                "SELECT * FROM measurement_correction_requests "
+                "WHERE request_id = 'request-a'",
+                """
+                INSERT OR REPLACE INTO measurement_correction_requests (
+                    rowid, request_id, target_observation_id,
+                    proposed_value_numeric, correction_reason,
+                    requested_by_user_id, requested_at
+                ) VALUES (
+                    1, 'rowid-request', 'target-b', 7,
+                    'Attempt rowid replacement', NULL, '2026-11-21T12:00:00Z'
+                )
+                """,
+            ),
+            "measurement_correction_request_events": (
+                "SELECT * FROM measurement_correction_request_events "
+                "WHERE request_id = 'request-a'",
+                """
+                INSERT OR REPLACE INTO measurement_correction_request_events (
+                    rowid, event_id, request_id, outcome, outcome_reason,
+                    reviewed_by_user_id, event_at, created_observation_id
+                ) VALUES (
+                    1, 'rowid-correction-event', 'request-b', 'rejected',
+                    'Attempt rowid replacement', NULL,
+                    '2026-11-21T12:00:00Z', NULL
+                )
+                """,
+            ),
+            "measurement_quality_review_events": (
+                "SELECT * FROM measurement_quality_review_events "
+                "WHERE observation_id = 'candidate-a'",
+                """
+                INSERT OR REPLACE INTO measurement_quality_review_events (
+                    rowid, event_id, observation_id, decision, review_reason,
+                    reviewed_by_user_id, reviewed_at
+                ) VALUES (
+                    1, 'rowid-quality-event', 'candidate-b', 'accepted',
+                    'Attempt rowid replacement', NULL,
+                    '2026-11-21T12:00:00Z'
+                )
+                """,
+            ),
+        }
+
+        original_rows = {
+            table_name: tuple(connection.execute(select_sql).fetchone())
+            for table_name, (select_sql, _) in tables_and_queries.items()
+        }
+
+        for table_name, (_, replace_sql) in tables_and_queries.items():
+            with pytest.raises(sqlite3.OperationalError, match="no column named rowid"):
+                connection.execute(replace_sql)
+            select_sql = tables_and_queries[table_name][0]
+            assert (
+                tuple(connection.execute(select_sql).fetchone())
+                == original_rows[table_name]
+            )
+
+
+def test_restrict_foreign_keys_protect_requests_and_decision_history(
+    tmp_path, monkeypatch
+):
+    _initialised_database(tmp_path, monkeypatch)
+    _, flock_id, _ = _seed_legacy_rows()
+
+    with _connect() as connection:
+        runner.migrate(connection)
+        _insert_observation(
+            connection,
+            observation_id="target",
+            flock_id=flock_id,
+            value_numeric=1.0,
+        )
+        _insert_observation(
+            connection,
+            observation_id="candidate",
+            flock_id=flock_id,
+            value_numeric=2.0,
+            quality_status="pending_validation",
+        )
+        _insert_correction_request(
+            connection,
+            target_observation_id="target",
+            proposed_value_numeric=2.0,
+        )
+        _insert_correction_event(connection, outcome="rejected")
+        _insert_quality_review_event(connection, observation_id="candidate")
+
+        with pytest.raises(sqlite3.IntegrityError):
+            connection.execute(
+                "DELETE FROM measurement_correction_requests "
+                "WHERE request_id = 'request-001'"
+            )
+        with pytest.raises(sqlite3.IntegrityError):
+            connection.execute(
+                "DELETE FROM measurement_observations WHERE observation_id = 'target'"
+            )
+        with pytest.raises(sqlite3.IntegrityError):
+            connection.execute(
+                "DELETE FROM measurement_observations "
+                "WHERE observation_id = 'candidate'"
+            )
