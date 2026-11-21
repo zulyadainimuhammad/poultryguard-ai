@@ -1,8 +1,8 @@
 # PoultryGuard AI — Measurement Observation Schema and Migration Design
 
-**Status:** Historical design basis; initial schema/migration implementation merged in PR #21; the manual observation service is under review in PR #22  
+**Status:** Historical design basis; schema/migration merged in PR #21; manual observation service merged in PR #22  
 **Stage:** 3.2.3 — schema, migration and first application-service increments  
-**Reviewed baseline:** `main` at `a3794b8e031523439b5a30e003b1ae720d2e8a3e`  
+**Reviewed baseline:** `main` at `a0ada899bc9e2fec7a815528d8ef9bcc135fcacc`  
 **Source specifications:** `measurement_provenance.md` (Stage 3.2.2) and `measurement_provenance_implementation_plan.md`  
 **Scope:** Records the design rationale and remaining decision gates. Current runtime behaviour is documented in `sqlite_migrations.md` and `measurement_observation_service.md`.
 
@@ -14,7 +14,7 @@ Keep the existing daily-record layer as the farmer-facing operational summary an
 
 Use the merged SQLite Unit-of-Work for future daily-record/observation dual-writes. The daily record and every required observation must commit or roll back together.
 
-The migration runner and additive observation schema have since been implemented and merged in PR #21. The first manual-entry observation model, repository and service are proposed separately in PR #22. The unresolved mortality-zero semantics and correction/review lifecycle still gate daily-record dual-write, historical backfill and correction writers. A live database migration remains a separate approval step.
+The migration runner and additive observation schema were implemented and merged in PR #21. The frozen manual-entry observation model, repository and service were implemented and merged in PR #22; local verification reported 171 passing tests, Ruff lint passed and 174 files were formatted. The unresolved mortality-zero semantics and correction/review lifecycle still gate daily-record dual-write, historical backfill and correction writers. A live database migration remains a separate approval step.
 
 ## 2. Source-derived requirements
 
@@ -330,7 +330,7 @@ These are not approved by this document:
 The repository now has the following implemented or reviewable increments:
 
 - PR #21 merged the explicit migration runner, ledger, baseline-adoption checks and additive `measurement_observations` schema.
-- PR #22 proposes the frozen observation model, insert/read-only repository, Unit-of-Work wiring and validated manual-entry service. It remains subject to review and CI.
+- PR #22 merged the frozen observation model, insert/read-only repository, Unit-of-Work wiring and validated manual-entry service.
 - Current analytics continue to read `daily_records`; no dual-write or analytics cutover is included.
 - No historical daily records are backfilled.
 - No correction-request, quality-review, sensor, import, system-generated or UI workflow is included.
