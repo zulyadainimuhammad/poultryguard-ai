@@ -4,7 +4,14 @@ from contextlib import contextmanager
 from typing import Any
 
 from .connection import get_connection
-from .models import DailyRecord, Farm, Flock, MeasurementObservation
+from .models import (
+    DailyRecord,
+    Farm,
+    Flock,
+    MeasurementCorrectionRequest,
+    MeasurementCorrectionRequestEvent,
+    MeasurementObservation,
+)
 
 
 class _BaseRepository:
@@ -479,3 +486,130 @@ class MeasurementObservationRepository(_BaseRepository):
                 (flock_id, metric_name, start_date, end_date),
             ).fetchall()
             return [dict(row) for row in rows]
+
+
+class MeasurementCorrectionRequestRepository(_BaseRepository):
+    """Insert and query immutable correction requests."""
+
+    def create(self, request: MeasurementCorrectionRequest) -> str:
+        with self._connection_scope() as connection:
+            connection.execute(
+                """
+                INSERT INTO measurement_correction_requests (
+                    request_id,
+                    target_observation_id,
+                    proposed_value_numeric,
+                    correction_reason,
+                    requested_by_user_id,
+                    requested_at
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    request.request_id,
+                    request.target_observation_id,
+                    request.proposed_value_numeric,
+                    request.correction_reason,
+                    request.requested_by_user_id,
+                    request.requested_at,
+                ),
+            )
+        return request.request_id
+
+    def get_by_id(self, request_id: str) -> dict[str, Any] | None:
+        with self._connection_scope() as connection:
+            row = connection.execute(
+                """
+                SELECT * FROM measurement_correction_requests
+                WHERE request_id = ?
+                """,
+                (request_id,),
+            ).fetchone()
+            return dict(row) if row else None
+
+    def get_pending_by_target(self, target_observation_id: str) -> list[dict[str, Any]]:
+        with self._connection_scope() as connection:
+            rows = connection.execute(
+                """
+                SELECT request.*
+                FROM measurement_correction_requests AS request
+                LEFT JOIN measurement_correction_request_events AS event
+                  ON event.request_id = request.request_id
+                WHERE request.target_observation_id = ?
+                  AND event.request_id IS NULL
+                ORDER BY request.requested_at, request.request_id
+                """,
+                (target_observation_id,),
+            ).fetchall()
+            return [dict(row) for row in rows]
+
+    def get_eligible_target(self, observation_id: str) -> dict[str, Any] | None:
+        """Return the exact target if it is accepted and has no successor."""
+        with self._connection_scope() as connection:
+            row = connection.execute(
+                """
+                SELECT target.*
+                FROM measurement_observations AS target
+                WHERE target.observation_id = ?
+                  AND target.source_type = 'manual_entry'
+                  AND (
+                      target.quality_status = 'observed'
+                      OR (
+                          target.quality_status = 'pending_validation'
+                          AND EXISTS (
+                              SELECT 1
+                              FROM measurement_quality_review_events AS review
+                              WHERE review.observation_id = target.observation_id
+                                AND review.decision = 'accepted'
+                          )
+                      )
+                  )
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM measurement_observations AS successor
+                      WHERE successor.supersedes_observation_id = target.observation_id
+                  )
+                """,
+                (observation_id,),
+            ).fetchone()
+            return dict(row) if row else None
+
+
+class MeasurementCorrectionRequestEventRepository(_BaseRepository):
+    """Insert and query immutable correction decision events."""
+
+    def create(self, event: MeasurementCorrectionRequestEvent) -> str:
+        with self._connection_scope() as connection:
+            connection.execute(
+                """
+                INSERT INTO measurement_correction_request_events (
+                    event_id,
+                    request_id,
+                    outcome,
+                    outcome_reason,
+                    reviewed_by_user_id,
+                    event_at,
+                    created_observation_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    event.event_id,
+                    event.request_id,
+                    event.outcome,
+                    event.outcome_reason,
+                    event.reviewed_by_user_id,
+                    event.event_at,
+                    event.created_observation_id,
+                ),
+            )
+        return event.event_id
+
+    def get_by_request_id(self, request_id: str) -> dict[str, Any] | None:
+        with self._connection_scope() as connection:
+            row = connection.execute(
+                """
+                SELECT * FROM measurement_correction_request_events
+                WHERE request_id = ?
+                """,
+                (request_id,),
+            ).fetchone()
+            return dict(row) if row else None
