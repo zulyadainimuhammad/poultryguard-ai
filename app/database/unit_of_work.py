@@ -8,6 +8,8 @@ from .repositories import (
     DailyRecordRepository,
     FarmRepository,
     FlockRepository,
+    MeasurementCorrectionRequestEventRepository,
+    MeasurementCorrectionRequestRepository,
     MeasurementObservationRepository,
 )
 
@@ -35,6 +37,10 @@ class UnitOfWork:
         self.flocks: FlockRepository
         self.daily_records: DailyRecordRepository
         self.measurement_observations: MeasurementObservationRepository
+        self.measurement_correction_requests: MeasurementCorrectionRequestRepository
+        self.measurement_correction_request_events: (
+            MeasurementCorrectionRequestEventRepository
+        )
 
     @property
     def connection(self) -> sqlite3.Connection:
@@ -60,6 +66,12 @@ class UnitOfWork:
         self.daily_records = DailyRecordRepository(connection=connection)
         self.measurement_observations = MeasurementObservationRepository(
             connection=connection
+        )
+        self.measurement_correction_requests = MeasurementCorrectionRequestRepository(
+            connection=connection
+        )
+        self.measurement_correction_request_events = (
+            MeasurementCorrectionRequestEventRepository(connection=connection)
         )
         return self
 

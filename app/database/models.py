@@ -61,3 +61,37 @@ class MeasurementObservation:
     supersedes_observation_id: str | None = None
     correction_reason: str | None = None
     notes: str | None = None
+
+
+@dataclass(frozen=True)
+class MeasurementCorrectionRequest:
+    """An immutable proposal to correct one exact observation."""
+
+    request_id: str
+    target_observation_id: str
+    proposed_value_numeric: int | float
+    correction_reason: str
+    requested_at: str
+    requested_by_user_id: str | None = None
+
+
+@dataclass(frozen=True)
+class MeasurementCorrectionRequestEvent:
+    """One immutable terminal decision on a correction request."""
+
+    event_id: str
+    request_id: str
+    outcome: str
+    outcome_reason: str
+    event_at: str
+    created_observation_id: str | None = None
+    reviewed_by_user_id: str | None = None
+
+
+@dataclass(frozen=True)
+class CorrectionDecisionResult:
+    """The terminal result of approving, rejecting or invalidating a request."""
+
+    outcome: str
+    event_id: str
+    created_observation_id: str | None = None
