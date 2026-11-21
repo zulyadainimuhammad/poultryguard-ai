@@ -894,6 +894,11 @@ def test_correction_review_migration_registers_tables_indexes_and_restrict_fks(
                     f"PRAGMA table_info('{table_name}')"
                 ).fetchall()
             } == columns
+            table_sql = connection.execute(
+                "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?",
+                (table_name,),
+            ).fetchone()[0]
+            assert table_sql.upper().rstrip("; \n").endswith("WITHOUT ROWID")
 
         indexes = {
             row[0]
@@ -1005,7 +1010,7 @@ def test_quality_reviewed_pending_manual_observation_can_be_requested(
             value_numeric=1.0,
             quality_status="pending_validation",
         )
-        _insert_quality_review_event(connection)
+        _insert_quality_review_event(connection, observation_id="candidate-accepted")
         _insert_correction_request(
             connection,
             target_observation_id="candidate-accepted",
@@ -1266,7 +1271,9 @@ def test_approved_event_must_point_to_observation_superseding_exact_request_targ
             correction_reason="Target A correction",
         )
 
-        with pytest.raises(sqlite3.IntegrityError, match="exact target"):
+        with pytest.raises(
+            sqlite3.IntegrityError, match="matching successor of its target"
+        ):
             _insert_correction_event(
                 connection,
                 outcome="approved",
@@ -1311,15 +1318,22 @@ def test_quality_review_event_constraints_and_pending_status_guard(
             quality_status="pending_validation",
         )
         with pytest.raises(sqlite3.IntegrityError):
-            _insert_quality_review_event(connection, decision="other")
+            _insert_quality_review_event(
+                connection, observation_id="candidate", decision="other"
+            )
         with pytest.raises(sqlite3.IntegrityError):
-            _insert_quality_review_event(connection, review_reason=" ")
+            _insert_quality_review_event(
+                connection, observation_id="candidate", review_reason=" "
+            )
 
-        _insert_quality_review_event(connection, decision="rejected")
+        _insert_quality_review_event(
+            connection, observation_id="candidate", decision="rejected"
+        )
         with pytest.raises(sqlite3.IntegrityError):
             _insert_quality_review_event(
                 connection,
                 event_id="second-review",
+                observation_id="candidate",
                 decision="accepted",
             )
 
@@ -1362,8 +1376,9 @@ def test_quality_review_events_reject_empty_required_values_and_invalid_timestam
             value_numeric=1.0,
             quality_status="pending_validation",
         )
+        event_values = {"observation_id": "candidate", field: value}
         with pytest.raises(sqlite3.IntegrityError):
-            _insert_quality_review_event(connection, **{field: value})
+            _insert_quality_review_event(connection, **event_values)
 
 
 def test_append_only_tables_reject_update_delete_and_replace_conflicts(
@@ -1411,7 +1426,7 @@ def test_append_only_tables_reject_update_delete_and_replace_conflicts(
             outcome="rejected",
             outcome_reason="Rejected",
         )
-        _insert_quality_review_event(connection)
+        _insert_quality_review_event(connection, observation_id="candidate")
 
         for sql in (
             "UPDATE measurement_correction_requests "
@@ -1512,6 +1527,111 @@ def test_append_only_tables_reject_update_delete_and_replace_conflicts(
                 event_id="quality-event-001",
                 observation_id="candidate-two",
                 replace=True,
+            )
+
+
+def test_without_rowid_tables_reject_rowid_replacement_and_preserve_rows(
+    tmp_path, monkeypatch
+):
+    _initialised_database(tmp_path, monkeypatch)
+    _, flock_id, _ = _seed_legacy_rows()
+
+    with _connect() as connection:
+        runner.migrate(connection)
+        for observation_id, value, status in (
+            ("target-a", 1.0, "observed"),
+            ("target-b", 5.0, "observed"),
+            ("candidate-a", 2.0, "pending_validation"),
+            ("candidate-b", 3.0, "pending_validation"),
+        ):
+            _insert_observation(
+                connection,
+                observation_id=observation_id,
+                flock_id=flock_id,
+                value_numeric=value,
+                quality_status=status,
+            )
+        _insert_correction_request(
+            connection,
+            request_id="request-a",
+            target_observation_id="target-a",
+            proposed_value_numeric=2.0,
+        )
+        _insert_correction_request(
+            connection,
+            request_id="request-b",
+            target_observation_id="target-b",
+            proposed_value_numeric=6.0,
+        )
+        _insert_correction_event(
+            connection,
+            request_id="request-a",
+            outcome="rejected",
+            outcome_reason="Keep original event",
+        )
+        _insert_quality_review_event(
+            connection,
+            observation_id="candidate-a",
+            review_reason="Keep original review",
+        )
+
+        tables_and_queries = {
+            "measurement_correction_requests": (
+                "SELECT * FROM measurement_correction_requests "
+                "WHERE request_id = 'request-a'",
+                """
+                INSERT OR REPLACE INTO measurement_correction_requests (
+                    rowid, request_id, target_observation_id,
+                    proposed_value_numeric, correction_reason,
+                    requested_by_user_id, requested_at
+                ) VALUES (
+                    1, 'rowid-request', 'target-b', 7,
+                    'Attempt rowid replacement', NULL, '2026-11-21T12:00:00Z'
+                )
+                """,
+            ),
+            "measurement_correction_request_events": (
+                "SELECT * FROM measurement_correction_request_events "
+                "WHERE request_id = 'request-a'",
+                """
+                INSERT OR REPLACE INTO measurement_correction_request_events (
+                    rowid, event_id, request_id, outcome, outcome_reason,
+                    reviewed_by_user_id, event_at, created_observation_id
+                ) VALUES (
+                    1, 'rowid-correction-event', 'request-b', 'rejected',
+                    'Attempt rowid replacement', NULL,
+                    '2026-11-21T12:00:00Z', NULL
+                )
+                """,
+            ),
+            "measurement_quality_review_events": (
+                "SELECT * FROM measurement_quality_review_events "
+                "WHERE observation_id = 'candidate-a'",
+                """
+                INSERT OR REPLACE INTO measurement_quality_review_events (
+                    rowid, event_id, observation_id, decision, review_reason,
+                    reviewed_by_user_id, reviewed_at
+                ) VALUES (
+                    1, 'rowid-quality-event', 'candidate-b', 'accepted',
+                    'Attempt rowid replacement', NULL,
+                    '2026-11-21T12:00:00Z'
+                )
+                """,
+            ),
+        }
+
+        original_rows = {
+            table_name: tuple(connection.execute(select_sql).fetchone())
+            for table_name, (select_sql, _) in tables_and_queries.items()
+        }
+
+        for table_name, (_, replace_sql) in tables_and_queries.items():
+            with pytest.raises(sqlite3.OperationalError, match="no column named rowid"):
+                connection.execute(replace_sql)
+            select_sql = tables_and_queries[table_name][0]
+            assert (
+                tuple(connection.execute(select_sql).fetchone())
+                == original_rows[table_name]
             )
 
 

@@ -41,7 +41,7 @@ CREATE TABLE measurement_correction_requests (
     FOREIGN KEY (target_observation_id)
         REFERENCES measurement_observations(observation_id)
         ON DELETE RESTRICT
-)
+) WITHOUT ROWID
 """
 
 CREATE_CORRECTION_EVENTS_SQL = f"""
@@ -80,7 +80,7 @@ CREATE TABLE measurement_correction_request_events (
     FOREIGN KEY (created_observation_id)
         REFERENCES measurement_observations(observation_id)
         ON DELETE RESTRICT
-)
+) WITHOUT ROWID
 """
 
 CREATE_QUALITY_REVIEW_EVENTS_SQL = f"""
@@ -104,7 +104,7 @@ CREATE TABLE measurement_quality_review_events (
     FOREIGN KEY (observation_id)
         REFERENCES measurement_observations(observation_id)
         ON DELETE RESTRICT
-)
+) WITHOUT ROWID
 """
 
 CREATE_INDEX_SQL = (

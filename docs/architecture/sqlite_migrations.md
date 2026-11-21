@@ -73,7 +73,7 @@ Migration `0002` (`add_correction_quality_review`) adds three append-only tables
 
 All foreign keys use `ON DELETE RESTRICT`. Constraints and insert triggers validate required IDs, reasons, UTC timestamps, enum values, finite numbers and metric-specific request values. Approval linkage is checked against the request's exact target, including the correction observation's supersession, metric, date, unit, observation time, source, value and reason. The existing partial unique index on accepted successors remains the guard against branching corrections.
 
-Each new table has UPDATE/DELETE rejection triggers and a `BEFORE INSERT` replacement guard for every primary/unique conflict key, including request-terminal and review-target uniqueness conflicts. Rejected requests do not consume an accepted-successor slot, and no same-date observation winner is selected.
+Each new table is `WITHOUT ROWID`, uses its existing text primary key as the storage key, and has UPDATE/DELETE rejection triggers and a `BEFORE INSERT` replacement guard for every primary/unique conflict key, including request-terminal and review-target uniqueness conflicts. Rejected requests do not consume an accepted-successor slot, and no same-date observation winner is selected.
 
 This migration adds no writer service, review/query workflow, UI, dual-write, backfill or analytics cutover. It is registered after `0001` and runs only through the explicit migration runner/CLI. Tests apply it only to isolated temporary SQLite databases.
 
