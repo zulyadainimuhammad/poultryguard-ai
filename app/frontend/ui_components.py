@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from contextlib import contextmanager
 from html import escape
-from typing import Iterator
 
 import streamlit as st
 
@@ -137,7 +137,10 @@ def apply_design_system() -> None:
             overflow: hidden;
         }}
         [data-testid="stWidgetLabel"] p {{ color: var(--pg-charcoal); }}
-        :focus-visible {{ outline: 3px solid var(--pg-focus) !important; outline-offset: 2px; }}
+        :focus-visible {{
+            outline: 3px solid var(--pg-focus) !important;
+            outline-offset: 2px;
+        }}
         .pg-brand {{ display: flex; align-items: center; gap: 0.65rem; }}
         .pg-brand-mark {{
             display: inline-flex; align-items: center; justify-content: center;
@@ -145,39 +148,132 @@ def apply_design_system() -> None:
             background: var(--pg-mint); color: var(--pg-forest);
             font-size: 0.95rem; font-weight: 800; letter-spacing: -0.04em;
         }}
-        .pg-brand-name {{ color: var(--pg-white); font-size: 1.08rem; font-weight: 750; }}
-        .pg-brand-tagline {{ color: var(--pg-forest-muted); font-size: 0.76rem; margin-top: 0.12rem; }}
+        .pg-brand-name {{
+            color: var(--pg-white);
+            font-size: 1.08rem;
+            font-weight: 750;
+        }}
+        .pg-brand-tagline {{
+            color: var(--pg-forest-muted);
+            font-size: 0.76rem;
+            margin-top: 0.12rem;
+        }}
         .pg-app-header {{
             display: flex; justify-content: space-between; align-items: center;
             gap: 1rem; flex-wrap: wrap; background: var(--pg-white);
             border: 1px solid var(--pg-border); border-radius: 0.9rem;
             padding: 0.85rem 1.1rem; margin: 0 0 1.4rem;
         }}
-        .pg-app-header-title {{ color: var(--pg-forest); font-size: 0.9rem; font-weight: 700; }}
-        .pg-app-header-context {{ color: var(--pg-slate); font-size: 0.82rem; margin-top: 0.15rem; }}
+        .pg-app-header-title {{
+            color: var(--pg-forest);
+            font-size: 0.9rem;
+            font-weight: 700;
+        }}
+        .pg-app-header-context {{
+            color: var(--pg-slate);
+            font-size: 0.82rem;
+            margin-top: 0.15rem;
+        }}
         .pg-context-pill {{
             display: inline-flex; align-items: center; gap: 0.4rem;
             background: var(--pg-mint); color: var(--pg-forest);
             border: 1px solid var(--pg-mint-border); border-radius: 99px;
             padding: 0.42rem 0.75rem; font-size: 0.82rem; font-weight: 650;
         }}
-        .pg-page-title {{ color: var(--pg-forest); font-size: clamp(1.75rem, 3vw, 2.35rem); font-weight: 750; letter-spacing: -0.035em; margin: 0 0 0.35rem; }}
-        .pg-page-subtitle {{ color: var(--pg-slate); font-size: 1rem; line-height: 1.55; margin: 0 0 1.3rem; }}
-        .pg-section-title {{ color: var(--pg-forest); font-size: 1.2rem; font-weight: 700; margin: 0.4rem 0 0.3rem; }}
-        .pg-section-help {{ color: var(--pg-slate); font-size: 0.88rem; margin: 0 0 0.75rem; }}
-        .pg-kpi {{ background: var(--pg-white); border: 1px solid var(--pg-border); border-radius: 0.85rem; padding: 1rem 1.1rem; min-height: 6.2rem; }}
-        .pg-kpi-label {{ color: var(--pg-slate); font-size: 0.82rem; font-weight: 600; }}
-        .pg-kpi-value {{ color: var(--pg-forest); font-size: 1.55rem; font-weight: 750; letter-spacing: -0.025em; margin-top: 0.42rem; }}
-        .pg-kpi-detail {{ color: var(--pg-slate); font-size: 0.78rem; line-height: 1.4; margin-top: 0.2rem; }}
-        .pg-empty {{ background: var(--pg-white); border: 1px dashed var(--pg-border-strong); border-radius: 0.85rem; padding: 1rem 1.1rem; }}
-        .pg-empty-title {{ color: var(--pg-forest); font-weight: 700; margin-bottom: 0.2rem; }}
-        .pg-empty-body {{ color: var(--pg-slate); font-size: 0.9rem; line-height: 1.5; }}
-        .pg-status {{ display: inline-block; border-radius: 99px; padding: 0.2rem 0.6rem; font-size: 0.78rem; font-weight: 650; }}
-        .pg-status-success {{ background: var(--pg-success-surface); color: var(--pg-success-text); }}
-        .pg-status-warning {{ background: var(--pg-warning-surface); color: var(--pg-warning-text); }}
-        .pg-status-error {{ background: var(--pg-error-surface); color: var(--pg-error-text); }}
-        .pg-status-neutral {{ background: var(--pg-neutral-surface); color: var(--pg-neutral-text); }}
-        .pg-footer {{ color: var(--pg-slate); font-size: 0.78rem; border-top: 1px solid var(--pg-border); padding-top: 0.7rem; }}
+        .pg-page-title {{
+            color: var(--pg-forest);
+            font-size: clamp(1.75rem, 3vw, 2.35rem);
+            font-weight: 750;
+            letter-spacing: -0.035em;
+            margin: 0 0 0.35rem;
+        }}
+        .pg-page-subtitle {{
+            color: var(--pg-slate);
+            font-size: 1rem;
+            line-height: 1.55;
+            margin: 0 0 1.3rem;
+        }}
+        .pg-section-title {{
+            color: var(--pg-forest);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin: 0.4rem 0 0.3rem;
+        }}
+        .pg-section-help {{
+            color: var(--pg-slate);
+            font-size: 0.88rem;
+            margin: 0 0 0.75rem;
+        }}
+        .pg-kpi {{
+            background: var(--pg-white);
+            border: 1px solid var(--pg-border);
+            border-radius: 0.85rem;
+            padding: 1rem 1.1rem;
+            min-height: 6.2rem;
+        }}
+        .pg-kpi-label {{
+            color: var(--pg-slate);
+            font-size: 0.82rem;
+            font-weight: 600;
+        }}
+        .pg-kpi-value {{
+            color: var(--pg-forest);
+            font-size: 1.55rem;
+            font-weight: 750;
+            letter-spacing: -0.025em;
+            margin-top: 0.42rem;
+        }}
+        .pg-kpi-detail {{
+            color: var(--pg-slate);
+            font-size: 0.78rem;
+            line-height: 1.4;
+            margin-top: 0.2rem;
+        }}
+        .pg-empty {{
+            background: var(--pg-white);
+            border: 1px dashed var(--pg-border-strong);
+            border-radius: 0.85rem;
+            padding: 1rem 1.1rem;
+        }}
+        .pg-empty-title {{
+            color: var(--pg-forest);
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }}
+        .pg-empty-body {{
+            color: var(--pg-slate);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }}
+        .pg-status {{
+            display: inline-block;
+            border-radius: 99px;
+            padding: 0.2rem 0.6rem;
+            font-size: 0.78rem;
+            font-weight: 650;
+        }}
+        .pg-status-success {{
+            background: var(--pg-success-surface);
+            color: var(--pg-success-text);
+        }}
+        .pg-status-warning {{
+            background: var(--pg-warning-surface);
+            color: var(--pg-warning-text);
+        }}
+        .pg-status-error {{
+            background: var(--pg-error-surface);
+            color: var(--pg-error-text);
+        }}
+        .pg-status-neutral {{
+            background: var(--pg-neutral-surface);
+            color: var(--pg-neutral-text);
+        }}
+        .pg-footer {{
+            color: var(--pg-slate);
+            font-size: 0.78rem;
+            border-top: 1px solid var(--pg-border);
+            padding-top: 0.7rem;
+        }}
         @media (max-width: 640px) {{
             [data-testid="stMainBlockContainer"] {{ padding: 1rem 1rem 1.5rem; }}
             [data-testid="stHorizontalBlock"] {{ flex-direction: column; }}
@@ -203,7 +299,9 @@ def render_sidebar_brand() -> None:
           <span class="pg-brand-mark" aria-hidden="true">PG</span>
           <div>
             <div class="pg-brand-name">PoultryGuard AI</div>
-            <div class="pg-brand-tagline">Intelligent Poultry Farming. Better Decisions.</div>
+            <div class="pg-brand-tagline">
+              Intelligent Poultry Farming. Better Decisions.
+            </div>
           </div>
         </div>
         """,
@@ -229,7 +327,9 @@ def render_app_header(section: str, active_farm: str | None = None) -> None:
         <header class="pg-app-header">
           <div>
             <div class="pg-app-header-title">{escape(section)}</div>
-            <div class="pg-app-header-context">Intelligent Poultry Farming. Better Decisions.</div>
+            <div class="pg-app-header-context">
+              Intelligent Poultry Farming. Better Decisions.
+            </div>
           </div>
           <div class="pg-context-pill">{context}</div>
         </header>
