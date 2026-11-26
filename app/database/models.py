@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
@@ -116,3 +117,14 @@ class EffectiveMeasurementQualityStatus:
     observation_id: str
     raw_quality_status: str
     effective_quality_status: str
+
+
+@dataclass(frozen=True)
+class MeasurementAuditHistory:
+    """Structured read-only audit data for one correction chain."""
+
+    queried_observation_id: str
+    observations: tuple[dict[str, Any], ...]
+    correction_requests: tuple[dict[str, Any], ...]
+    correction_events: tuple[dict[str, Any], ...]
+    quality_review_events: tuple[dict[str, Any], ...]

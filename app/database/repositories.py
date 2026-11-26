@@ -653,3 +653,226 @@ class MeasurementQualityReviewEventRepository(_BaseRepository):
                 (observation_id,),
             ).fetchone()
             return dict(row) if row else None
+
+
+class MeasurementQueryRepository(_BaseRepository):
+    """Read-only queries for accepted measurements and correction audit data."""
+
+    def list_current_accepted(
+        self,
+        *,
+        flock_id: int,
+        metric_name: str,
+        record_date: str | None = None,
+        start_date: str | None = None,
+        end_date: str | None = None,
+    ) -> list[dict[str, Any]]:
+        if record_date is None:
+            if start_date is None or end_date is None:
+                raise ValueError("Specify either record_date or both range endpoints.")
+        elif start_date is not None or end_date is not None:
+            raise ValueError("Specify either record_date or both range endpoints.")
+
+        conditions = [
+            "observation.flock_id = ?",
+            "observation.metric_name = ?",
+            "(observation.quality_status = 'observed' OR ("
+            "observation.quality_status = 'pending_validation' AND "
+            "review.decision = 'accepted'))",
+            "NOT EXISTS ("
+            "SELECT 1 FROM measurement_observations AS successor "
+            "WHERE successor.supersedes_observation_id = observation.observation_id "
+            "AND (successor.quality_status = 'observed' OR ("
+            "successor.quality_status = 'pending_validation' AND EXISTS ("
+            "SELECT 1 FROM measurement_quality_review_events AS successor_review "
+            "WHERE successor_review.observation_id = successor.observation_id "
+            "AND successor_review.decision = 'accepted'))))",
+        ]
+        parameters: list[Any] = [flock_id, metric_name]
+        if record_date is not None:
+            conditions.append("observation.record_date = ?")
+            parameters.append(record_date)
+        else:
+            conditions.append("observation.record_date BETWEEN ? AND ?")
+            parameters.extend((start_date, end_date))
+
+        with self._connection_scope() as connection:
+            rows = connection.execute(
+                f"""
+                SELECT observation.*,
+                       CASE
+                           WHEN observation.quality_status = 'pending_validation'
+                                AND review.decision = 'accepted'
+                               THEN 'observed'
+                           WHEN observation.quality_status = 'pending_validation'
+                                AND review.decision = 'rejected'
+                               THEN 'invalid'
+                           ELSE observation.quality_status
+                       END AS effective_quality_status
+                FROM measurement_observations AS observation
+                LEFT JOIN measurement_quality_review_events AS review
+                  ON review.observation_id = observation.observation_id
+                WHERE {" AND ".join(conditions)}
+                ORDER BY observation.record_date,
+                         observation.recorded_at,
+                         observation.observation_id
+                """,
+                parameters,
+            ).fetchall()
+            return [dict(row) for row in rows]
+
+    def get_current_accepted_by_id(self, observation_id: str) -> dict[str, Any] | None:
+        with self._connection_scope() as connection:
+            row = connection.execute(
+                """
+                SELECT observation.*,
+                       CASE
+                           WHEN observation.quality_status = 'pending_validation'
+                                AND review.decision = 'accepted'
+                               THEN 'observed'
+                           WHEN observation.quality_status = 'pending_validation'
+                                AND review.decision = 'rejected'
+                               THEN 'invalid'
+                           ELSE observation.quality_status
+                       END AS effective_quality_status
+                FROM measurement_observations AS observation
+                LEFT JOIN measurement_quality_review_events AS review
+                  ON review.observation_id = observation.observation_id
+                WHERE observation.observation_id = ?
+                  AND (
+                      observation.quality_status = 'observed'
+                      OR (
+                          observation.quality_status = 'pending_validation'
+                          AND review.decision = 'accepted'
+                      )
+                  )
+                  AND NOT EXISTS (
+                      SELECT 1
+                      FROM measurement_observations AS successor
+                      WHERE successor.supersedes_observation_id =
+                            observation.observation_id
+                        AND (
+                            successor.quality_status = 'observed'
+                            OR (
+                                successor.quality_status = 'pending_validation'
+                                AND EXISTS (
+                                    SELECT 1
+                                    FROM measurement_quality_review_events AS sq_review
+                                    WHERE sq_review.observation_id =
+                                          successor.observation_id
+                                      AND sq_review.decision = 'accepted'
+                                )
+                            )
+                        )
+                  )
+                """,
+                (observation_id,),
+            ).fetchone()
+            return dict(row) if row else None
+
+    def get_correction_request_status(self, request_id: str) -> str | None:
+        with self._connection_scope() as connection:
+            row = connection.execute(
+                """
+                SELECT CASE
+                           WHEN event.request_id IS NULL THEN 'pending'
+                           ELSE event.outcome
+                       END AS request_status
+                FROM measurement_correction_requests AS request
+                LEFT JOIN measurement_correction_request_events AS event
+                  ON event.request_id = request.request_id
+                WHERE request.request_id = ?
+                """,
+                (request_id,),
+            ).fetchone()
+            return row["request_status"] if row else None
+
+    def get_connected_observation_chain(
+        self, observation_id: str
+    ) -> list[dict[str, Any]]:
+        """Return all observations connected by supersession from any chain node."""
+        with self._connection_scope() as connection:
+            rows = connection.execute(
+                """
+                WITH RECURSIVE chain(observation_id) AS (
+                    SELECT observation_id
+                    FROM measurement_observations
+                    WHERE observation_id = ?
+                    UNION
+                    SELECT related.observation_id
+                    FROM chain
+                    JOIN measurement_observations AS current
+                      ON current.observation_id = chain.observation_id
+                    JOIN measurement_observations AS related
+                      ON related.observation_id = current.supersedes_observation_id
+                      OR related.supersedes_observation_id = current.observation_id
+                )
+                SELECT observation.*,
+                       CASE
+                           WHEN observation.quality_status = 'pending_validation'
+                                AND review.decision = 'accepted'
+                               THEN 'observed'
+                           WHEN observation.quality_status = 'pending_validation'
+                                AND review.decision = 'rejected'
+                               THEN 'invalid'
+                           ELSE observation.quality_status
+                       END AS effective_quality_status
+                FROM chain
+                JOIN measurement_observations AS observation
+                  ON observation.observation_id = chain.observation_id
+                LEFT JOIN measurement_quality_review_events AS review
+                  ON review.observation_id = observation.observation_id
+                ORDER BY observation.recorded_at, observation.observation_id
+                """,
+                (observation_id,),
+            ).fetchall()
+            return [dict(row) for row in rows]
+
+    def get_correction_history_for_observations(
+        self, observation_ids: tuple[str, ...]
+    ) -> list[dict[str, Any]]:
+        if not observation_ids:
+            return []
+        placeholders = ", ".join("?" for _ in observation_ids)
+        with self._connection_scope() as connection:
+            rows = connection.execute(
+                f"""
+                SELECT request.*,
+                       CASE
+                           WHEN event.request_id IS NULL THEN 'pending'
+                           ELSE event.outcome
+                       END AS request_status,
+                       event.event_id AS terminal_event_id,
+                       event.outcome AS terminal_outcome,
+                       event.outcome_reason AS terminal_outcome_reason,
+                       event.reviewed_by_user_id AS terminal_reviewer_id,
+                       event.event_at AS terminal_event_at,
+                       event.created_observation_id
+                FROM measurement_correction_requests AS request
+                LEFT JOIN measurement_correction_request_events AS event
+                  ON event.request_id = request.request_id
+                WHERE request.target_observation_id IN ({placeholders})
+                ORDER BY request.requested_at, request.request_id,
+                         event.event_at, event.event_id
+                """,
+                observation_ids,
+            ).fetchall()
+            return [dict(row) for row in rows]
+
+    def get_quality_review_events_for_observations(
+        self, observation_ids: tuple[str, ...]
+    ) -> list[dict[str, Any]]:
+        if not observation_ids:
+            return []
+        placeholders = ", ".join("?" for _ in observation_ids)
+        with self._connection_scope() as connection:
+            rows = connection.execute(
+                f"""
+                SELECT *
+                FROM measurement_quality_review_events
+                WHERE observation_id IN ({placeholders})
+                ORDER BY reviewed_at, event_id
+                """,
+                observation_ids,
+            ).fetchall()
+            return [dict(row) for row in rows]
