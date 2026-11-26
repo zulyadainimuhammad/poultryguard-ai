@@ -1,0 +1,8 @@
+[theme]
+# Keep the primary action token aligned with app/frontend/ui_components.py.
+base = "light"
+primaryColor = "#177548"
+backgroundColor = "#F7F9F7"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#1F2933"
+font = "sans serif"

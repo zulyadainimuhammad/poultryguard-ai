@@ -15,6 +15,22 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from app.database import initialise_database  # noqa: E402
+from app.frontend.ui_components import (  # noqa: E402
+    CHART_COLORS,
+    apply_design_system,
+    form_columns,
+    loading_indicator,
+    render_app_header,
+    render_data_table,
+    render_empty_state,
+    render_feedback,
+    render_kpi_card,
+    render_page_header,
+    render_section_header,
+    render_sidebar_brand,
+    render_sidebar_navigation,
+    render_status_label,
+)
 from app.services.analytics_service import AnalyticsService  # noqa: E402
 from app.services.farm_service import DuplicateRecordError, FarmService  # noqa: E402
 
@@ -27,6 +43,8 @@ st.set_page_config(
     page_icon="🐔",
     layout="wide",
 )
+
+apply_design_system()
 
 # ---------------------------------------------------------------------------
 # Initialise database on first run
@@ -85,39 +103,65 @@ def _init_state() -> None:
 
 _init_state()
 
+
+def _selector_options(
+    items: list[dict[str, Any]], primary_key: str, detail_key: str
+) -> dict[str, int]:
+    """Build readable selector labels without collapsing duplicate names."""
+    counts: dict[str, int] = {}
+    for item in items:
+        primary = str(item.get(primary_key) or "Unnamed")
+        counts[primary] = counts.get(primary, 0) + 1
+
+    options: dict[str, int] = {}
+    for item in items:
+        primary = str(item.get(primary_key) or "Unnamed")
+        detail = str(item.get(detail_key) or "").strip()
+        label = f"{primary} · {detail}" if counts[primary] > 1 and detail else primary
+        if label in options:
+            label = f"{label} · #{item['id']}"
+        options[label] = item["id"]
+    return options
+
+
 # ---------------------------------------------------------------------------
 # Sidebar navigation
 # ---------------------------------------------------------------------------
 
+active_farm_name = None
 with st.sidebar:
-    st.markdown("# 🐔 PoultryGuard AI")
-    st.caption("Farm Intelligence MVP")
+    render_sidebar_brand()
     st.divider()
 
-    section = st.radio(
-        "Navigation",
-        ["Knowledge Assistant", "Farm Intelligence"],
-        key="nav_section",
-        label_visibility="collapsed",
+    section = render_sidebar_navigation(
+        ["Knowledge Assistant", "Farm Intelligence"], key="nav_section"
     )
 
     if section == "Farm Intelligence":
         st.divider()
         farms = get_farm_service().list_farms()
         if farms:
-            farm_options = {f["farm_name"]: f["id"] for f in farms}
+            farm_options = _selector_options(farms, "farm_name", "location")
             selected_name = st.selectbox(
-                "Active farm",
+                "Active farm context",
                 list(farm_options.keys()),
                 key="_sidebar_farm_select",
             )
             st.session_state.selected_farm_id = farm_options[selected_name]
+            active_farm_name = next(
+                (
+                    farm["farm_name"]
+                    for farm in farms
+                    if farm["id"] == st.session_state.selected_farm_id
+                ),
+                None,
+            )
 
             flocks = get_farm_service().list_flocks(st.session_state.selected_farm_id)
             if flocks:
-                flock_options = {f["flock_name"]: f["id"] for f in flocks}
+                flock_options = _selector_options(flocks, "flock_name", "species")
                 selected_flock = st.selectbox(
-                    "Active flock",
+                    "Active flock context",
                     list(flock_options.keys()),
                     key="_sidebar_flock_select",
                 )
@@ -130,15 +174,19 @@ with st.sidebar:
             st.session_state.selected_flock_id = None
             st.caption("No farms registered yet.")
 
+render_app_header(
+    section,
+    active_farm_name if section == "Farm Intelligence" else None,
+)
+
 # ---------------------------------------------------------------------------
 # SECTION: Knowledge Assistant
 # ---------------------------------------------------------------------------
 
 if section == "Knowledge Assistant":
-    st.title("🐔 PoultryGuard AI — Knowledge Assistant")
-    st.write(
-        "Ask questions about poultry farming, biosecurity, housing, "
-        "flock management and other topics covered by the knowledge base."
+    render_page_header(
+        "Knowledge Assistant",
+        "Evidence-informed poultry guidance from the curated knowledge base.",
     )
     st.info(
         "Answers are generated from retrieved knowledge-base passages. "
@@ -174,7 +222,7 @@ if section == "Knowledge Assistant":
             st.warning("Please enter a question.")
         else:
             try:
-                with st.spinner("Finding relevant evidence..."):
+                with loading_indicator("Finding relevant evidence..."):
                     passages = get_retriever().search(question.strip(), top_k=top_k)
 
                 if not passages:
@@ -183,14 +231,14 @@ if section == "Knowledge Assistant":
                         "your question or consult a poultry professional."
                     )
                 else:
-                    with st.spinner("Generating an evidence-based answer..."):
+                    with loading_indicator("Generating an evidence-based answer..."):
                         result = get_answer_generator().generate(
                             question=question.strip(), passages=passages
                         )
 
-                    st.subheader("Answer")
+                    render_section_header("Answer")
                     st.markdown(result.answer)
-                    st.subheader("Supporting sources")
+                    render_section_header("Supporting sources")
 
                     for number, source in enumerate(result.sources, start=1):
                         source_path = str(source.get("source", "Unknown source"))
@@ -207,23 +255,34 @@ if section == "Knowledge Assistant":
                             )
 
             except ValueError as exc:
-                st.error(str(exc))
+                render_feedback("error", str(exc))
             except Exception as exc:
-                st.error(
+                render_feedback(
+                    "error",
                     "PoultryGuard could not complete the request. "
-                    "Check your API access and terminal output, then try again."
+                    "Check your API access and terminal output, then try again.",
                 )
                 st.caption(f"{type(exc).__name__}: {exc}")
 
     st.divider()
-    st.caption("PoultryGuard AI | Local knowledge retrieval + Groq answer generation")
+    st.markdown(
+        (
+            '<div class="pg-footer">'
+            "Local knowledge retrieval · Groq answer generation"
+            "</div>"
+        ),
+        unsafe_allow_html=True,
+    )
 
 # ---------------------------------------------------------------------------
 # SECTION: Farm Intelligence
 # ---------------------------------------------------------------------------
 
 else:
-    st.title("🏡 Farm Intelligence")
+    render_page_header(
+        "Farm Intelligence",
+        "Manage farm records and understand flock performance.",
+    )
 
     tab_dashboard, tab_farms, tab_flocks, tab_records, tab_analytics = st.tabs(
         ["Dashboard", "Farm Profiles", "Flock Management", "Daily Records", "Analytics"]
@@ -234,13 +293,15 @@ else:
     # -----------------------------------------------------------------------
 
     with tab_dashboard:
-        st.subheader("Farm Dashboard")
+        render_section_header(
+            "Farm Dashboard", "A current overview of your farm and flocks."
+        )
 
         farms = get_farm_service().list_farms()
         if not farms:
-            st.info(
-                "No farms registered yet. "
-                "Go to **Farm Profiles** to register your first farm."
+            render_empty_state(
+                "No farms registered yet",
+                "Open Farm Profiles to register your first farm.",
             )
         else:
             farm_id = st.session_state.selected_farm_id
@@ -264,9 +325,9 @@ else:
                 st.divider()
                 flocks = get_farm_service().list_flocks(farm_id)
                 if not flocks:
-                    st.info(
-                        "No flocks registered for this farm. "
-                        "Go to **Flock Management** to add a flock."
+                    render_empty_state(
+                        "No flocks registered",
+                        "Open Flock Management to add a flock to this farm.",
                     )
                 else:
                     st.markdown(f"**{len(flocks)} flock(s) registered**")
@@ -276,35 +337,25 @@ else:
                         with cols[idx % 3]:
                             try:
                                 summary = analytics.get_flock_summary(flock["id"])
-                                status_icon = (
-                                    "🟢" if flock.get("status") == "active" else "⚪"
-                                )
-                                st.metric(
-                                    f"{status_icon} {flock['flock_name']}",
-                                    f"{int(summary['current_flock_size'])} birds",
-                                    delta=(
-                                        f"-{int(summary['total_mortality'])} mortality"
-                                    ),
-                                    delta_color="normal",
-                                )
-                                st.caption(
-                                    f"{summary['record_count']} record(s) | "
-                                    f"{summary['mortality_rate_percent']}%"
-                                    " mortality rate"
+                                render_kpi_card(
+                                    flock["flock_name"],
+                                    f"{int(summary['current_flock_size']):,} birds",
+                                    f"{summary['record_count']} records · "
+                                    f"{summary['mortality_rate_percent']}% mortality",
                                 )
                             except Exception:
-                                st.metric(flock["flock_name"], "—")
+                                render_kpi_card(flock["flock_name"], "Unavailable")
 
     # -----------------------------------------------------------------------
     # TAB: Farm Profiles
     # -----------------------------------------------------------------------
 
     with tab_farms:
-        st.subheader("Farm Profiles")
+        render_section_header("Farm Profiles", "Register and review farm details.")
 
         with st.expander("➕ Register a new farm", expanded=False):
             with st.form("register_farm_form", clear_on_submit=True):
-                col1, col2 = st.columns(2)
+                col1, col2 = form_columns(2)
                 with col1:
                     new_farm_name = st.text_input("Farm name *")
                     new_farmer_name = st.text_input("Farmer name *")
@@ -327,22 +378,27 @@ else:
                             phone=new_phone or None,
                             email=new_email or None,
                         )
-                        st.success(f"Farm registered successfully (ID: {farm_id}).")
+                        render_feedback(
+                            "success", f"Farm registered successfully (ID: {farm_id})."
+                        )
                         st.cache_resource.clear()
                         st.rerun()
                     except ValueError as exc:
-                        st.error(str(exc))
+                        render_feedback("error", str(exc))
 
         farms = get_farm_service().list_farms()
         if not farms:
-            st.info("No farms registered yet.")
+            render_empty_state(
+                "No farms registered yet",
+                "Register a farm to begin organizing records.",
+            )
         else:
             for farm in farms:
                 with st.expander(
-                    f"🏡 {farm['farm_name']} — {farm.get('location') or 'No location'}",
+                    f"{farm['farm_name']} — {farm.get('location') or 'No location'}",
                     expanded=False,
                 ):
-                    col1, col2 = st.columns(2)
+                    col1, col2 = form_columns(2)
                     with col1:
                         st.markdown(f"**Farmer:** {farm['farmer_name']}")
                         st.markdown(
@@ -360,7 +416,9 @@ else:
     # -----------------------------------------------------------------------
 
     with tab_flocks:
-        st.subheader("Flock Management")
+        render_section_header(
+            "Flock Management", "Keep each production group organized."
+        )
 
         farm_id = st.session_state.selected_farm_id
         if farm_id is None:
@@ -371,7 +429,7 @@ else:
 
             with st.expander("➕ Register a new flock", expanded=False):
                 with st.form("register_flock_form", clear_on_submit=True):
-                    col1, col2 = st.columns(2)
+                    col1, col2 = form_columns(2)
                     with col1:
                         new_flock_name = st.text_input("Flock name *")
                         new_species = st.selectbox(
@@ -420,26 +478,28 @@ else:
                                 stocking_date=new_stocking_date,
                                 status=new_flock_status,
                             )
-                            st.success(
-                                f"Flock registered successfully (ID: {flock_id})."
+                            render_feedback(
+                                "success",
+                                f"Flock registered successfully (ID: {flock_id}).",
                             )
                             st.cache_resource.clear()
                             st.rerun()
                         except ValueError as exc:
-                            st.error(str(exc))
+                            render_feedback("error", str(exc))
 
             flocks = get_farm_service().list_flocks(farm_id)
             if not flocks:
-                st.info("No flocks registered for this farm.")
+                render_empty_state(
+                    "No flocks registered", "Register a flock for the selected farm."
+                )
             else:
                 for flock in flocks:
-                    status_icon = "🟢" if flock.get("status") == "active" else "⚪"
                     with st.expander(
-                        f"{status_icon} {flock['flock_name']} — "
+                        f"{flock['flock_name']} — "
                         f"{flock['species']} | {flock['initial_count']} birds",
                         expanded=False,
                     ):
-                        col1, col2 = st.columns(2)
+                        col1, col2 = form_columns(2)
                         with col1:
                             st.markdown(f"**Species:** {flock['species']}")
                             prod = flock.get("production_type") or "—"
@@ -449,14 +509,17 @@ else:
                             st.markdown(f"**Initial count:** {flock['initial_count']}")
                             sd = flock.get("stocking_date") or "—"
                             st.markdown(f"**Stocking date:** {sd}")
-                            st.markdown(f"**Status:** {flock.get('status', '—')}")
+                            st.markdown("**Status**")
+                            render_status_label(flock.get("status", "unknown"))
 
     # -----------------------------------------------------------------------
     # TAB: Daily Records
     # -----------------------------------------------------------------------
 
     with tab_records:
-        st.subheader("Daily Farm Records")
+        render_section_header(
+            "Daily Farm Records", "Record daily production and housing conditions."
+        )
 
         flock_id = st.session_state.selected_flock_id
         if flock_id is None:
@@ -476,7 +539,7 @@ else:
                     "Enter zero only when zero was genuinely measured."
                 )
                 with st.form("daily_record_form", clear_on_submit=True):
-                    col1, col2, col3 = st.columns(3)
+                    col1, col2, col3 = form_columns(3)
                     with col1:
                         rec_date = st.date_input("Record date *", value=date.today())
                         rec_mortality = st.number_input(
@@ -542,20 +605,24 @@ else:
                                 humidity_percent=rec_humidity,
                                 notes=rec_notes.strip() or None,
                             )
-                            st.success(
-                                f"Daily record saved successfully (ID: {record_id})."
+                            render_feedback(
+                                "success",
+                                f"Daily record saved successfully (ID: {record_id}).",
                             )
                             st.rerun()
                         except DuplicateRecordError as exc:
-                            st.warning(str(exc))
+                            render_feedback("warning", str(exc))
                         except ValueError as exc:
-                            st.error(str(exc))
+                            render_feedback("error", str(exc))
 
             st.divider()
             st.markdown("**Recorded entries (most recent first)**")
             records = get_farm_service().get_daily_records(flock_id)
             if not records:
-                st.info("No daily records yet for this flock.")
+                render_empty_state(
+                    "No daily records yet",
+                    "Save a daily record to start this flock's history.",
+                )
             else:
                 display_records = list(reversed(records))
                 rows = []
@@ -576,14 +643,16 @@ else:
                             "Notes": r.get("notes") or "",
                         }
                     )
-                st.dataframe(rows, use_container_width=True, hide_index=True)
+                render_data_table(rows)
 
     # -----------------------------------------------------------------------
     # TAB: Analytics
     # -----------------------------------------------------------------------
 
     with tab_analytics:
-        st.subheader("Flock Analytics")
+        render_section_header(
+            "Flock Analytics", "Descriptive performance from recorded daily records."
+        )
 
         flock_id = st.session_state.selected_flock_id
         if flock_id is None:
@@ -606,57 +675,71 @@ else:
             )
             st.markdown(f"**{flock_label}**")
 
-            c1, c2, c3, c4, c5 = st.columns(5)
-            c1.metric("Initial birds", f"{summary['initial_count']:,}")
-            c2.metric(
-                "Current birds",
-                f"{int(summary['current_flock_size']):,}",
-                delta=f"-{int(summary['total_mortality'])}",
-                delta_color="normal",
-                help="Initial count minus total recorded mortality.",
+            kpi_columns = st.columns(5)
+            kpi_cards = (
+                (
+                    "Initial birds",
+                    f"{summary['initial_count']:,}",
+                    "Starting flock population",
+                ),
+                (
+                    "Current birds",
+                    f"{int(summary['current_flock_size']):,}",
+                    f"{int(summary['total_mortality'])} recorded mortality",
+                ),
+                (
+                    "Mortality rate",
+                    f"{summary['mortality_rate_percent']}%",
+                    "Recorded mortality ÷ initial count",
+                ),
+                (
+                    "Total feed",
+                    f"{summary['total_feed_kg']} kg",
+                    "Sum of recorded feed",
+                ),
+                (
+                    "Total water",
+                    f"{summary['total_water_litres']} L",
+                    "Sum of recorded water",
+                ),
             )
-            c3.metric(
-                "Mortality rate",
-                f"{summary['mortality_rate_percent']}%",
-                help="Total mortality ÷ initial count × 100.",
-            )
-            c4.metric(
-                "Total feed (kg)",
-                summary["total_feed_kg"],
-                help="Sum of all recorded feed_kg values.",
-            )
-            c5.metric(
-                "Total water (L)",
-                summary["total_water_litres"],
-                help="Sum of all recorded water_litres values.",
-            )
+            for column, card in zip(kpi_columns, kpi_cards, strict=True):
+                with column:
+                    render_kpi_card(*card)
 
-            c6, c7, c8, c9 = st.columns(4)
-            c6.metric(
-                "Avg weight (kg)",
-                summary["average_weight_kg"]
-                if summary["average_weight_kg"] is not None
-                else "—",
-                help="Mean of recorded average_weight_kg values.",
+            kpi_columns = st.columns(4)
+            kpi_cards = (
+                (
+                    "Average weight",
+                    f"{summary['average_weight_kg']} kg"
+                    if summary["average_weight_kg"] is not None
+                    else "Not recorded",
+                    "Mean of recorded average weights",
+                ),
+                (
+                    "Average temperature",
+                    f"{summary['average_temperature_c']} °C"
+                    if summary["average_temperature_c"] is not None
+                    else "Not recorded",
+                    None,
+                ),
+                (
+                    "Average humidity",
+                    f"{summary['average_humidity_percent']}%"
+                    if summary["average_humidity_percent"] is not None
+                    else "Not recorded",
+                    None,
+                ),
+                ("Daily records", summary["record_count"], None),
             )
-            c7.metric(
-                "Avg temp (°C)",
-                summary["average_temperature_c"]
-                if summary["average_temperature_c"] is not None
-                else "—",
-            )
-            c8.metric(
-                "Avg humidity (%)",
-                summary["average_humidity_percent"]
-                if summary["average_humidity_percent"] is not None
-                else "—",
-            )
-            c9.metric("Daily records", summary["record_count"])
+            for column, card in zip(kpi_columns, kpi_cards, strict=True):
+                with column:
+                    render_kpi_card(*card)
 
             if not metrics:
-                st.info(
-                    "No daily records yet. "
-                    "Add records in the **Daily Records** tab to see charts."
+                render_empty_state(
+                    "No analytics yet",
+                    "Add records in Daily Records to see this flock's charts.",
                 )
             else:
                 # ----------------------------------------------------------
@@ -783,7 +866,9 @@ else:
                 with col_a:
                     st.markdown("**Daily mortality** — birds lost per day")
                     st.altair_chart(
-                        _altair_chart(df, "mortality", "bar", "#e05c5c"),
+                        _altair_chart(
+                            df, "mortality", "bar", CHART_COLORS["mortality"]
+                        ),
                         use_container_width=True,
                     )
                 with col_b:
@@ -791,7 +876,12 @@ else:
                         "**Cumulative mortality** — running total of birds lost"
                     )
                     st.altair_chart(
-                        _altair_chart(df, "cumulative_mortality", "line", "#e05c5c"),
+                        _altair_chart(
+                            df,
+                            "cumulative_mortality",
+                            "line",
+                            CHART_COLORS["mortality"],
+                        ),
                         use_container_width=True,
                     )
 
@@ -802,7 +892,11 @@ else:
                 st.markdown("**Remaining flock population** — birds alive over time")
                 st.altair_chart(
                     _altair_chart(
-                        df, "current_flock_size", "line", "#4caf7d", zero_baseline=True
+                        df,
+                        "current_flock_size",
+                        "line",
+                        CHART_COLORS["population"],
+                        zero_baseline=True,
                     ),
                     use_container_width=True,
                 )
@@ -819,21 +913,29 @@ else:
                     feed_df = df[df["feed_kg"].notna()]
                     if not feed_df.empty:
                         st.altair_chart(
-                            _altair_chart(feed_df, "feed_kg", "bar", "#f4a261"),
+                            _altair_chart(
+                                feed_df, "feed_kg", "bar", CHART_COLORS["feed"]
+                            ),
                             use_container_width=True,
                         )
                     else:
-                        st.caption("No feed measurements recorded for this flock.")
+                        render_empty_state(
+                            "No feed measurements", "No feed values are recorded yet."
+                        )
                 with col_d:
                     st.markdown("**Water consumed (litres/day)**")
                     water_df = df[df["water_litres"].notna()]
                     if not water_df.empty:
                         st.altair_chart(
-                            _altair_chart(water_df, "water_litres", "bar", "#457b9d"),
+                            _altair_chart(
+                                water_df, "water_litres", "bar", CHART_COLORS["water"]
+                            ),
                             use_container_width=True,
                         )
                     else:
-                        st.caption("No water measurements recorded for this flock.")
+                        render_empty_state(
+                            "No water measurements", "No water values are recorded yet."
+                        )
 
                 # ----------------------------------------------------------
                 # Row 4: Weight, temperature, humidity
@@ -856,7 +958,10 @@ else:
                             )
                         st.altair_chart(
                             _altair_chart(
-                                wt_df, "average_weight_kg", "line", "#6a994e"
+                                wt_df,
+                                "average_weight_kg",
+                                "line",
+                                CHART_COLORS["weight"],
                             ),
                             use_container_width=True,
                         )
@@ -867,7 +972,12 @@ else:
                     tmp_df = df[df["temperature_c"].notna()]
                     if not tmp_df.empty:
                         st.altair_chart(
-                            _altair_chart(tmp_df, "temperature_c", "line", "#e76f51"),
+                            _altair_chart(
+                                tmp_df,
+                                "temperature_c",
+                                "line",
+                                CHART_COLORS["temperature"],
+                            ),
                             use_container_width=True,
                         )
                     else:
@@ -880,7 +990,10 @@ else:
                     if not hum_df.empty:
                         st.altair_chart(
                             _altair_chart(
-                                hum_df, "humidity_percent", "line", "#457b9d"
+                                hum_df,
+                                "humidity_percent",
+                                "line",
+                                CHART_COLORS["humidity"],
                             ),
                             use_container_width=True,
                         )
@@ -913,10 +1026,14 @@ else:
                     }
                     for _, row in df.iterrows()
                 ]
-                st.dataframe(table_rows, use_container_width=True, hide_index=True)
+                render_data_table(table_rows)
 
     st.divider()
-    st.caption(
-        "PoultryGuard AI | Farm Intelligence MVP | "
-        f"Data stored locally in SQLite | {datetime.now().strftime('%Y-%m-%d')}"
+    st.markdown(
+        (
+            '<div class="pg-footer">'
+            "Farm Intelligence · Local records are stored in SQLite · "
+            f"{datetime.now().strftime('%Y-%m-%d')}</div>"
+        ),
+        unsafe_allow_html=True,
     )
