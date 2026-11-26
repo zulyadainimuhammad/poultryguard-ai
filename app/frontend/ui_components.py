@@ -58,30 +58,30 @@ def apply_design_system() -> None:
         f"""
         <style>
         :root {{
-            --pg-forest: {COLORS['forest']};
-            --pg-emerald: {COLORS['emerald']};
-            --pg-teal: {COLORS['teal']};
-            --pg-mint: {COLORS['mint']};
-            --pg-canvas: {COLORS['canvas']};
-            --pg-charcoal: {COLORS['charcoal']};
-            --pg-slate: {COLORS['slate']};
-            --pg-amber: {COLORS['amber']};
-            --pg-red: {COLORS['red']};
-            --pg-white: {COLORS['white']};
-            --pg-border: {COLORS['border']};
-            --pg-border-strong: {COLORS['border_strong']};
-            --pg-mint-border: {COLORS['mint_border']};
-            --pg-on-forest: {COLORS['on_forest']};
-            --pg-forest-muted: {COLORS['forest_muted']};
-            --pg-focus: {COLORS['focus']};
-            --pg-success-surface: {COLORS['success_surface']};
-            --pg-success-text: {COLORS['success_text']};
-            --pg-warning-surface: {COLORS['warning_surface']};
-            --pg-warning-text: {COLORS['warning_text']};
-            --pg-error-surface: {COLORS['error_surface']};
-            --pg-error-text: {COLORS['error_text']};
-            --pg-neutral-surface: {COLORS['neutral_surface']};
-            --pg-neutral-text: {COLORS['neutral_text']};
+            --pg-forest: {COLORS["forest"]};
+            --pg-emerald: {COLORS["emerald"]};
+            --pg-teal: {COLORS["teal"]};
+            --pg-mint: {COLORS["mint"]};
+            --pg-canvas: {COLORS["canvas"]};
+            --pg-charcoal: {COLORS["charcoal"]};
+            --pg-slate: {COLORS["slate"]};
+            --pg-amber: {COLORS["amber"]};
+            --pg-red: {COLORS["red"]};
+            --pg-white: {COLORS["white"]};
+            --pg-border: {COLORS["border"]};
+            --pg-border-strong: {COLORS["border_strong"]};
+            --pg-mint-border: {COLORS["mint_border"]};
+            --pg-on-forest: {COLORS["on_forest"]};
+            --pg-forest-muted: {COLORS["forest_muted"]};
+            --pg-focus: {COLORS["focus"]};
+            --pg-success-surface: {COLORS["success_surface"]};
+            --pg-success-text: {COLORS["success_text"]};
+            --pg-warning-surface: {COLORS["warning_surface"]};
+            --pg-warning-text: {COLORS["warning_text"]};
+            --pg-error-surface: {COLORS["error_surface"]};
+            --pg-error-text: {COLORS["error_text"]};
+            --pg-neutral-surface: {COLORS["neutral_surface"]};
+            --pg-neutral-text: {COLORS["neutral_text"]};
         }}
         html, body, [class*="stApp"] {{
             font-family: Inter, ui-sans-serif, system-ui, -apple-system,
@@ -120,8 +120,8 @@ def apply_design_system() -> None:
         [data-testid="stMetricLabel"] p {{ color: var(--pg-slate); }}
         [data-testid="stMetricValue"] {{ color: var(--pg-forest); }}
         [data-testid="stBaseButton-primary"] {{
-            background: {COLORS['primary_action']};
-            border-color: {COLORS['primary_action']};
+            background: {COLORS["primary_action"]};
+            border-color: {COLORS["primary_action"]};
             color: var(--pg-white);
             border-radius: 0.6rem;
             font-weight: 650;
@@ -360,9 +360,7 @@ def render_section_header(title: str, help_text: str | None = None) -> None:
 
 def render_kpi_card(label: str, value: object, detail: str | None = None) -> None:
     """Render a semantic KPI card with optional explanatory detail."""
-    detail_html = (
-        f'<div class="pg-kpi-detail">{escape(detail)}</div>' if detail else ""
-    )
+    detail_html = f'<div class="pg-kpi-detail">{escape(detail)}</div>' if detail else ""
     st.markdown(
         f"""
         <div class="pg-kpi" role="group" aria-label="{escape(label)}">
