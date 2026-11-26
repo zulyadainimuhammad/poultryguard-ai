@@ -11,6 +11,7 @@ from .models import (
     MeasurementCorrectionRequest,
     MeasurementCorrectionRequestEvent,
     MeasurementObservation,
+    MeasurementQualityReviewEvent,
 )
 
 
@@ -611,5 +612,44 @@ class MeasurementCorrectionRequestEventRepository(_BaseRepository):
                 WHERE request_id = ?
                 """,
                 (request_id,),
+            ).fetchone()
+            return dict(row) if row else None
+
+
+class MeasurementQualityReviewEventRepository(_BaseRepository):
+    """Insert and retrieve immutable observation review events."""
+
+    def create(self, event: MeasurementQualityReviewEvent) -> str:
+        with self._connection_scope() as connection:
+            connection.execute(
+                """
+                INSERT INTO measurement_quality_review_events (
+                    event_id,
+                    observation_id,
+                    decision,
+                    review_reason,
+                    reviewed_by_user_id,
+                    reviewed_at
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                """,
+                (
+                    event.event_id,
+                    event.observation_id,
+                    event.decision,
+                    event.review_reason,
+                    event.reviewed_by_user_id,
+                    event.reviewed_at,
+                ),
+            )
+        return event.event_id
+
+    def get_by_observation_id(self, observation_id: str) -> dict[str, Any] | None:
+        with self._connection_scope() as connection:
+            row = connection.execute(
+                """
+                SELECT * FROM measurement_quality_review_events
+                WHERE observation_id = ?
+                """,
+                (observation_id,),
             ).fetchone()
             return dict(row) if row else None

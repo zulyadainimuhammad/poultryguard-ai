@@ -11,6 +11,7 @@ from .repositories import (
     MeasurementCorrectionRequestEventRepository,
     MeasurementCorrectionRequestRepository,
     MeasurementObservationRepository,
+    MeasurementQualityReviewEventRepository,
 )
 
 
@@ -41,6 +42,7 @@ class UnitOfWork:
         self.measurement_correction_request_events: (
             MeasurementCorrectionRequestEventRepository
         )
+        self.measurement_quality_review_events: MeasurementQualityReviewEventRepository
 
     @property
     def connection(self) -> sqlite3.Connection:
@@ -72,6 +74,9 @@ class UnitOfWork:
         )
         self.measurement_correction_request_events = (
             MeasurementCorrectionRequestEventRepository(connection=connection)
+        )
+        self.measurement_quality_review_events = (
+            MeasurementQualityReviewEventRepository(connection=connection)
         )
         return self
 
