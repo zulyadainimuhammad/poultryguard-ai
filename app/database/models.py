@@ -95,3 +95,24 @@ class CorrectionDecisionResult:
     outcome: str
     event_id: str
     created_observation_id: str | None = None
+
+
+@dataclass(frozen=True)
+class MeasurementQualityReviewEvent:
+    """An immutable accept/reject decision for one pending observation."""
+
+    event_id: str
+    observation_id: str
+    decision: str
+    review_reason: str
+    reviewed_at: str
+    reviewed_by_user_id: str | None = None
+
+
+@dataclass(frozen=True)
+class EffectiveMeasurementQualityStatus:
+    """Expose the immutable raw status separately from its derived status."""
+
+    observation_id: str
+    raw_quality_status: str
+    effective_quality_status: str

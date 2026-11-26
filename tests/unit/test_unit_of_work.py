@@ -29,6 +29,7 @@ def test_repositories_share_connection_and_success_commits(tmp_path, monkeypatch
         assert (
             unit_of_work.measurement_correction_request_events._connection is connection
         )
+        assert unit_of_work.measurement_quality_review_events._connection is connection
 
         farm_id = unit_of_work.farms.create(
             Farm(
