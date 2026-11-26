@@ -414,9 +414,7 @@ else:
                         st.markdown(f"**Registered:** {registered}")
 
                     render_section_header("Edit farm profile")
-                    with st.form(
-                        f"edit_farm_form_{farm_id}", clear_on_submit=False
-                    ):
+                    with st.form(f"edit_farm_form_{farm_id}", clear_on_submit=False):
                         col1, col2 = form_columns(2)
                         with col1:
                             edit_farm_name = st.text_input(
