@@ -16,6 +16,7 @@ This directory documents both the **currently implemented local MVP** and the **
 | [sqlite_unit_of_work.md](sqlite_unit_of_work.md) | Shared SQLite connection/transaction lifecycle and current daily-record integration |
 | [measurement_observation_service.md](measurement_observation_service.md) | Implemented manual-only observation model, repository, validation rules, queries and explicit exclusions |
 | [measurement_correction_and_quality_review_design.md](measurement_correction_and_quality_review_design.md) | Proposed append-only correction requests, terminal decision events, quality-review events, effective-status rules and implementation acceptance tests |
+| [measurement_queries_and_audit_history.md](measurement_queries_and_audit_history.md) | Implemented accepted-measurement query rules, explicit ambiguity handling, derived request status and structured audit history |
 | [measurement_observation_schema_migration_design.md](measurement_observation_schema_migration_design.md) | Original design proposal for the additive observation schema and migration safeguards; use the implementation documents below for current behaviour |
 | [measurement_provenance.md](measurement_provenance.md) | Measurement dictionary, provenance model, observation-time semantics, missing-value rules, correction and audit model, proposed data contract and future architecture (Stage 3.2.2 design specification) |
 | [measurement_provenance_implementation_plan.md](measurement_provenance_implementation_plan.md) | Stage 3.2.3 implementation sequence and release gates; schema and the first manual observation service increments are implemented, while integration and backfill remain deferred |
@@ -46,9 +47,10 @@ This directory documents both the **currently implemented local MVP** and the **
 5. [Measurement provenance](measurement_provenance.md) — understand measurement definitions, provenance, timestamps and the data contract.
 6. [Measurement observation service](measurement_observation_service.md) — understand the implemented manual observation write/read boundary.
 7. [Correction and quality review design](measurement_correction_and_quality_review_design.md) — understand the proposed next workflow, event model and release gates.
-8. [RAG design](rag_design.md) — understand knowledge indexing and retrieval.
-9. [Model and provider selection](model_selection.md) — understand the active AI providers.
-10. [Development and deployment](deployment.md) — run the local MVP and understand production gaps.
+8. [Measurement queries and audit history](measurement_queries_and_audit_history.md) — understand accepted leaves, ambiguity results and audit ordering.
+9. [RAG design](rag_design.md) — understand knowledge indexing and retrieval.
+10. [Model and provider selection](model_selection.md) — understand the active AI providers.
+11. [Development and deployment](deployment.md) — run the local MVP and understand production gaps.
 
 ## Architecture principles
 

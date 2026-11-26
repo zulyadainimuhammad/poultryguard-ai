@@ -12,6 +12,7 @@ from .repositories import (
     MeasurementCorrectionRequestRepository,
     MeasurementObservationRepository,
     MeasurementQualityReviewEventRepository,
+    MeasurementQueryRepository,
 )
 
 
@@ -43,6 +44,7 @@ class UnitOfWork:
             MeasurementCorrectionRequestEventRepository
         )
         self.measurement_quality_review_events: MeasurementQualityReviewEventRepository
+        self.measurement_queries: MeasurementQueryRepository
 
     @property
     def connection(self) -> sqlite3.Connection:
@@ -78,6 +80,7 @@ class UnitOfWork:
         self.measurement_quality_review_events = (
             MeasurementQualityReviewEventRepository(connection=connection)
         )
+        self.measurement_queries = MeasurementQueryRepository(connection=connection)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback) -> bool | None:

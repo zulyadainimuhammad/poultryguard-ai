@@ -5,6 +5,7 @@ from .models import (
     EffectiveMeasurementQualityStatus,
     Farm,
     Flock,
+    MeasurementAuditHistory,
     MeasurementCorrectionRequest,
     MeasurementCorrectionRequestEvent,
     MeasurementObservation,
@@ -18,6 +19,7 @@ from .repositories import (
     MeasurementCorrectionRequestRepository,
     MeasurementObservationRepository,
     MeasurementQualityReviewEventRepository,
+    MeasurementQueryRepository,
 )
 from .unit_of_work import UnitOfWork
 
@@ -29,6 +31,7 @@ __all__ = [
     "DailyRecord",
     "CorrectionDecisionResult",
     "EffectiveMeasurementQualityStatus",
+    "MeasurementAuditHistory",
     "MeasurementObservation",
     "MeasurementQualityReviewEvent",
     "MeasurementCorrectionRequest",
@@ -38,6 +41,7 @@ __all__ = [
     "DailyRecordRepository",
     "MeasurementObservationRepository",
     "MeasurementQualityReviewEventRepository",
+    "MeasurementQueryRepository",
     "MeasurementCorrectionRequestRepository",
     "MeasurementCorrectionRequestEventRepository",
     "UnitOfWork",
