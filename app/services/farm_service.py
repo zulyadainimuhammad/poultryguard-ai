@@ -81,6 +81,58 @@ class FarmService:
 
         return self.farm_repository.create(farm)
 
+    def update_farm(
+        self,
+        farm_id: int,
+        farm_name: str,
+        farmer_name: str,
+        location: str,
+        production_type: str | None = None,
+        phone: str | None = None,
+        email: str | None = None,
+    ) -> None:
+        """Validate and update an existing farm without changing its identity."""
+        if self.farm_repository.get_by_id(farm_id) is None:
+            raise ValueError(f"Farm with ID {farm_id} does not exist.")
+
+        farm_name = farm_name.strip() if isinstance(farm_name, str) else ""
+        farmer_name = farmer_name.strip() if isinstance(farmer_name, str) else ""
+        location = location.strip() if isinstance(location, str) else ""
+
+        if not farm_name:
+            raise ValueError("Farm name is required.")
+        if not farmer_name:
+            raise ValueError("Farmer name is required.")
+        if not location:
+            raise ValueError("Location is required.")
+
+        if production_type is not None and not isinstance(production_type, str):
+            raise ValueError("Production type must be text or None.")
+        if production_type is not None:
+            production_type = production_type.strip() or None
+
+        if phone is not None and not isinstance(phone, str):
+            raise ValueError("Phone number must be text or None.")
+        if phone is not None:
+            phone = phone.strip() or None
+
+        if email is not None and not isinstance(email, str):
+            raise ValueError("Email address must be text or None.")
+        if email is not None:
+            email = email.strip() or None
+        if email and not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+            raise ValueError("Email address is not valid.")
+
+        self.farm_repository.update(
+            farm_id,
+            farm_name=farm_name,
+            farmer_name=farmer_name,
+            location=location,
+            production_type=production_type,
+            phone=phone,
+            email=email,
+        )
+
     def get_farm(self, farm_id: int) -> dict[str, Any] | None:
         """Return a farm by ID."""
         return self.farm_repository.get_by_id(farm_id)

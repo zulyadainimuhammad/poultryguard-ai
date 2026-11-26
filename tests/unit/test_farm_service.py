@@ -145,6 +145,105 @@ def test_list_farms_returns_all(service):
     assert len(farms) == 2
 
 
+def test_update_farm_persists_values_and_preserves_id(service, farm_id, flock_id):
+    service.update_farm(
+        farm_id=farm_id,
+        farm_name="Updated Farm",
+        farmer_name="Updated Farmer",
+        location="Kaduna, Nigeria",
+        production_type="Layer",
+        phone="08098765432",
+        email="updated@example.com",
+    )
+
+    farm = service.get_farm(farm_id)
+    assert farm is not None
+    assert farm["id"] == farm_id
+    assert farm["farm_name"] == "Updated Farm"
+    assert farm["farmer_name"] == "Updated Farmer"
+    assert farm["location"] == "Kaduna, Nigeria"
+    assert farm["production_type"] == "Layer"
+    assert farm["phone"] == "08098765432"
+    assert farm["email"] == "updated@example.com"
+    flocks = service.list_flocks(farm_id)
+    assert [flock["id"] for flock in flocks] == [flock_id]
+    assert flocks[0]["farm_id"] == farm_id
+
+
+def test_update_farm_preserves_unchanged_fields(service):
+    farm_id = service.create_farm(
+        "Original Farm",
+        "Original Farmer",
+        "Kano",
+        "Broiler",
+        phone="08012345678",
+        email="farmer@example.com",
+    )
+    original = service.get_farm(farm_id)
+    assert original is not None
+
+    service.update_farm(
+        farm_id=farm_id,
+        farm_name="Renamed Farm",
+        farmer_name=original["farmer_name"],
+        location=original["location"],
+        production_type=original["production_type"],
+        phone=original["phone"],
+        email=original["email"],
+    )
+
+    updated = service.get_farm(farm_id)
+    assert updated is not None
+    assert updated["farm_name"] == "Renamed Farm"
+    for field in ("farmer_name", "location", "production_type", "phone", "email"):
+        assert updated[field] == original[field]
+
+
+def test_update_missing_farm_raises(service):
+    with pytest.raises(ValueError, match="Farm with ID 99999 does not exist"):
+        service.update_farm(
+            farm_id=99999,
+            farm_name="Farm",
+            farmer_name="Farmer",
+            location="Kano",
+            production_type="Broiler",
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("farm_name", "  ", "Farm name is required"),
+        ("farmer_name", "", "Farmer name is required"),
+        ("location", "  ", "Location is required"),
+    ],
+)
+def test_update_farm_rejects_empty_required_fields(
+    service, farm_id, field, value, message
+):
+    fields = {
+        "farm_name": "Updated Farm",
+        "farmer_name": "Updated Farmer",
+        "location": "Updated Location",
+        "production_type": "Broiler",
+    }
+    fields[field] = value
+
+    with pytest.raises(ValueError, match=message):
+        service.update_farm(farm_id=farm_id, **fields)
+
+
+def test_update_farm_rejects_invalid_email(service, farm_id):
+    with pytest.raises(ValueError, match="Email address is not valid"):
+        service.update_farm(
+            farm_id=farm_id,
+            farm_name="Farm",
+            farmer_name="Farmer",
+            location="Kano",
+            email="not-an-email",
+        )
+
+
 # ---------------------------------------------------------------------------
 # Flock creation
 # ---------------------------------------------------------------------------
