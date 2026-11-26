@@ -394,6 +394,8 @@ else:
             )
         else:
             for farm in farms:
+                farm_id = farm["id"]
+                success_key = f"farm_edit_success_{farm_id}"
                 with st.expander(
                     f"{farm['farm_name']} — {farm.get('location') or 'No location'}",
                     expanded=False,
@@ -410,6 +412,82 @@ else:
                         st.markdown(f"**Email:** {farm.get('email') or '—'}")
                         registered = farm.get("created_at", "")[:10]
                         st.markdown(f"**Registered:** {registered}")
+
+                    render_section_header("Edit farm profile")
+                    with st.form(
+                        f"edit_farm_form_{farm_id}", clear_on_submit=False
+                    ):
+                        col1, col2 = form_columns(2)
+                        with col1:
+                            edit_farm_name = st.text_input(
+                                "Farm name *",
+                                value=farm["farm_name"],
+                                key=f"edit_farm_name_{farm_id}",
+                            )
+                            edit_farmer_name = st.text_input(
+                                "Farmer name *",
+                                value=farm["farmer_name"],
+                                key=f"edit_farmer_name_{farm_id}",
+                            )
+                            edit_location = st.text_input(
+                                "Location *",
+                                value=farm.get("location") or "",
+                                key=f"edit_location_{farm_id}",
+                            )
+                        with col2:
+                            production_options = [
+                                "",
+                                "Broiler",
+                                "Layer",
+                                "Breeder",
+                                "Dual Purpose",
+                                "Other",
+                            ]
+                            current_production_type = farm.get("production_type") or ""
+                            if current_production_type not in production_options:
+                                production_options.append(current_production_type)
+                            edit_production_type = st.selectbox(
+                                "Production type",
+                                production_options,
+                                index=production_options.index(current_production_type),
+                                key=f"edit_production_type_{farm_id}",
+                            )
+                            edit_phone = st.text_input(
+                                "Phone number",
+                                value=farm.get("phone") or "",
+                                key=f"edit_phone_{farm_id}",
+                            )
+                            edit_email = st.text_input(
+                                "Email address",
+                                value=farm.get("email") or "",
+                                key=f"edit_email_{farm_id}",
+                            )
+
+                        if st.form_submit_button(
+                            "Save farm changes",
+                            type="primary",
+                            key=f"save_farm_changes_{farm_id}",
+                        ):
+                            try:
+                                get_farm_service().update_farm(
+                                    farm_id=farm_id,
+                                    farm_name=edit_farm_name,
+                                    farmer_name=edit_farmer_name,
+                                    location=edit_location,
+                                    production_type=edit_production_type,
+                                    phone=edit_phone or None,
+                                    email=edit_email or None,
+                                )
+                                st.session_state[success_key] = (
+                                    f"{edit_farm_name.strip()} updated successfully."
+                                )
+                                st.rerun()
+                            except ValueError as exc:
+                                render_feedback("error", str(exc))
+
+                    success_message = st.session_state.pop(success_key, None)
+                    if success_message:
+                        render_feedback("success", success_message)
 
     # -----------------------------------------------------------------------
     # TAB: Flock Management
