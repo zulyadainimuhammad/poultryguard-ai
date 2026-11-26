@@ -267,7 +267,7 @@ if section == "Knowledge Assistant":
     st.divider()
     st.markdown(
         (
-            "<div class=\"pg-footer\">"
+            '<div class="pg-footer">'
             "Local knowledge retrieval · Groq answer generation"
             "</div>"
         ),
@@ -1031,7 +1031,7 @@ else:
     st.divider()
     st.markdown(
         (
-            "<div class=\"pg-footer\">"
+            '<div class="pg-footer">'
             "Farm Intelligence · Local records are stored in SQLite · "
             f"{datetime.now().strftime('%Y-%m-%d')}</div>"
         ),
